@@ -1,67 +1,42 @@
 #pragma once
-// include common.hpp
+#include "common.hpp"
 #include <vector>
 #include <unordered_map>
-// include image.h
-#include <string>
+#include "../ext/stb_image/stb_image.h"
+
 // Player component
-struct player
+struct Player
 {
-    // Default HP assigned to player
-	float HP = 100;
-	// Remaining chances to player for each player
-	int32_t lives = 5;
+	int side; // side = 1 for blue, side = 2 for red
+	bool jumpable = false;
 };
 
-// anything that is deadly to the player
-struct radius_rect
-{
-    // This is for player character which is approximated by a rect on bullet hits
-    // Could also be potentially used to define bullets & blocks
-    // Randomly chosen value for now, can be changed later
-    float len;
-    float height;
-
-};
-// could potentially have another radius for grenades or trap damage.
-
-
-
-// Placeholder for weapons; for M1 this should just be guns?
-struct weapons
+// Weapon component
+struct Weapon
 {
     std::string type;
-
+	int damage;
 };
 
-// fallthrough component is designed for blocks
-struct fallthrough
-{
-    // True if the block is fallthroughable, false if otherwise.
-    bool fallthrough;
-
-};
-
-// The reason to define position seperately is for entities like blocks which have positions but not speed.
-struct position
-{
-    vect2 position = {0, 0};
-};
-
-// Designed for bullets for now but could also be used for other things like traps or grenades
-struct damage
-{
-    float damage = 100;
-};
-
-
-// for moveable entities like laser, player, bullets. 
-struct motion {
+// All data relevant to the shape and motion of entities
+struct Motion {
 	vec2 position = { 0, 0 };
 	vec2 velocity = { 0, 0 };
+	vec2 scale = { 1, 1 };
 };
 
-// Used A1 colllision for default. 
+struct Block {
+	int x;
+	int y;
+	int width;
+	int height;
+};
+
+struct Gravity {
+	float a = 10.0f;
+};
+
+// Stucture to store collision information
 struct Collision
 {
 	// Note, the first object is stored in the ECS container.entities
@@ -69,14 +44,30 @@ struct Collision
 	Collision(Entity& other) { this->other = other; };
 };
 
+// Data structure for toggling debug mode
+struct Debug {
+	bool in_debug_mode = 0;
+	bool in_freeze_mode = 0;
+};
+extern Debug debugging;
 
-// Kept A1 default.
+// Sets the brightness of the screen
 struct ScreenState
 {
 	float darken_screen_factor = -1;
 };
 
+// A struct to refer to debugging graphics in the ECS
+struct DebugComponent
+{
+	// Note, an empty struct has size 1
+};
 
+// A timer that will be associated to dying salmon
+struct DeathTimer
+{
+	float counter_ms = 3000;
+};
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
 struct ColoredVertex
@@ -146,7 +137,8 @@ enum class GEOMETRY_BUFFER_ID {
 	SALMON = 0,
 	SPRITE = SALMON + 1,
 	EGG = SPRITE + 1,
-	DEBUG_LINE = EGG + 1,
+	SQUARE = EGG + 1,
+	DEBUG_LINE = SQUARE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
