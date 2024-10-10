@@ -1,2 +1,8 @@
 out
 .vs
+CMakeFiles
+salmon
+ext/project_path.hpp
+CMakeCache.txt
+cmake_install.cmake
+Makefile
