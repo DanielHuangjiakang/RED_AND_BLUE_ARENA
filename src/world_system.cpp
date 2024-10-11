@@ -92,7 +92,7 @@ GLFWwindow* WorldSystem::create_window() {
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
+	background_music = Mix_LoadMUS(audio_path("music.mp3").c_str());
 	salmon_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
 
@@ -130,6 +130,28 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
 
+	// Update player1's position and enforce boundaries
+    Motion& motion1 = registry.motions.get(player1);
+    if (motion1.position.x <= motion1.scale[0]/2) {
+        motion1.position.x = motion1.scale[0]/2; // Stop at left boundary
+    } else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
+        motion1.position.x = window_width_px + motion1.scale[0]/2 - motion1.scale.x; // Stop at right boundary
+    }
+    if (motion1.position.y < motion1.scale[1]/2) {
+        motion1.position.y = motion1.scale[1]/2; // Stop at the top boundary
+    } 
+
+    // Update player2's position and enforce boundaries
+    Motion& motion2 = registry.motions.get(player2);
+    if (motion2.position.x <= motion2.scale[0]/2) {
+        motion2.position.x = motion2.scale[0]/2; // Stop at left boundary
+    } else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
+        motion2.position.x =  window_width_px + motion2.scale[0]/2 - motion2.scale.x; // Stop at right boundary
+    }
+    if (motion2.position.y < motion2.scale[1]/2) {
+        motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
+    }
+
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
@@ -140,28 +162,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
-
-	// // spawn new eels
-	// next_eel_spawn -= elapsed_ms_since_last_update * current_speed;
-	// if (registry.deadlys.components.size() <= MAX_NUM_EELS && next_eel_spawn < 0.f) {
-	// 	// reset timer
-	// 	next_eel_spawn = (EEL_SPAWN_DELAY_MS / 2) + uniform_dist(rng) * (EEL_SPAWN_DELAY_MS / 2);
-
-	// 	// create Eel with random initial position
-    //     createEel(renderer, vec2(50.f + uniform_dist(rng) * (window_width_px - 100.f), 100.f));
-	// }
-
-	// // spawn fish
-	// next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
-	// if (registry.eatables.components.size() <= MAX_NUM_FISH && next_fish_spawn < 0.f) {
-	// 	// !!!  TODO A1: create new fish with createFish({0,0}), see eels above
-	// }
-	
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE EGG SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
@@ -187,7 +187,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// reduce window brightness if the salmon is dying
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
-	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
+
+	
+
 
 	return true;
 }
@@ -210,10 +212,10 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
 	// create a new Salmon
-	player1 = createPlayer(renderer, 1, {window_width_px - 100, window_height_px - 100});
+	player1 = createPlayer(renderer, 1, {window_width_px - 100, window_height_px - 100}, 1);
 	registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
 
-	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 200});
+	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 200}, 0);
 	registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
@@ -278,19 +280,23 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	Player& player_1 = registry.players.get(player1);
 	Player& player_2 = registry.players.get(player2);
 	if (key == GLFW_KEY_A) {
-		if (action == GLFW_PRESS) {
-			motion1.velocity[0] += -200;
-		} else if (action == GLFW_RELEASE) {
-			motion1.velocity[0] -= -200;
-		}
+    	if (action == GLFW_PRESS) {
+        	motion1.velocity[0] += -200;
+        	player_1.direction = 0; // Facing left
+    	} else if (action == GLFW_RELEASE) {
+        	motion1.velocity[0] -= -200;
+    	}
 	}
+
 	if (key == GLFW_KEY_D) {
-		if (action == GLFW_PRESS) {
-			motion1.velocity[0] += 200;
-		} else if (action == GLFW_RELEASE) {
-			motion1.velocity[0] -= 200;
-		}
+    	if (action == GLFW_PRESS) {
+        	motion1.velocity[0] += 200;
+        	player_1.direction = 1; // Facing right
+    	} else if (action == GLFW_RELEASE) {
+        motion1.velocity[0] -= 200;
+    	}
 	}
+
 	if (key == GLFW_KEY_W) {
 		if (action == GLFW_PRESS && player_1.jumpable == true) {
 			motion1.velocity[1] += -500;
@@ -300,18 +306,20 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	if (key == GLFW_KEY_LEFT) {
-		if (action == GLFW_PRESS) {
-			motion2.velocity[0] += -200;
-		} else if (action == GLFW_RELEASE) {
-			motion2.velocity[0] -= -200;
-		}
+    	if (action == GLFW_PRESS) {
+        	motion2.velocity[0] += -200;
+        	player_2.direction = 0; // Facing left
+    	} else if (action == GLFW_RELEASE) {
+        	motion2.velocity[0] -= -200;
+    	}
 	}
 	if (key == GLFW_KEY_RIGHT) {
-		if (action == GLFW_PRESS) {
-			motion2.velocity[0] += 200;
-		} else if (action == GLFW_RELEASE) {
-			motion2.velocity[0] -= 200;
-		}
+    	if (action == GLFW_PRESS) {
+        	motion2.velocity[0] += 200;
+        	player_2.direction = 1; // Facing right
+    	} else if (action == GLFW_RELEASE) {
+       	motion2.velocity[0] -= 200;
+    	}
 	}
 	if (key == GLFW_KEY_UP) {
 		if (action == GLFW_PRESS && player_2.jumpable == true) {
@@ -321,7 +329,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// Debugging
-	if (key == GLFW_KEY_D) {
+	if (key == GLFW_KEY_G ) {
 		if (action == GLFW_RELEASE)
 			debugging.in_debug_mode = false;
 		else

@@ -32,18 +32,20 @@
 // 	return entity;
 // }
 
-Entity createPlayer(RenderSystem* renderer, int side, vec2 position) {
+
+Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction) {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	auto& player = registry.players.emplace(entity);
 	player.side = side;
+	player.direction = direction; // Default to facing right initially
 
 	auto& motion = registry.motions.emplace(entity);
- 	motion.velocity = { 0, 0 };
+ 	motion.velocity = { 0, 0 }; 
  	motion.position = position;
-	motion.scale = { 50, 50 };
+	motion.scale = { 50, 50 }; // width * height
 
 	auto& gravity = registry.gravities.emplace(entity);
 
