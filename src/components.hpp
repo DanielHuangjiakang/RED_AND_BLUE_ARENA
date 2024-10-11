@@ -9,6 +9,7 @@ struct Player
 {
 	int side; // side = 1 for blue, side = 2 for red
 	bool jumpable = false;
+	bool direction;  // 1 for right, 0 for left
 };
 
 // Weapon component

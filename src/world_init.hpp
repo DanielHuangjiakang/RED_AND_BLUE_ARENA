@@ -12,7 +12,7 @@ const float EEL_BB_WIDTH   = 0.6f * 300.f;	// 1001
 const float EEL_BB_HEIGHT  = 0.6f * 202.f;	// 870
 
 // the player
-Entity createPlayer(RenderSystem* renderer, int side, vec2 position);
+Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction);
 
 // stage blocks
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height);
