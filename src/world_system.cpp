@@ -213,10 +213,10 @@ void WorldSystem::restart_game() {
 
 
 	// starts on left (blue)
-	player1 = createPlayer(renderer, 1, {window_width_px/4 - 200, window_height_px - 200});
+	player1 = createPlayer(renderer, 1, {window_width_px/4 - 200, window_height_px - 200}, 1);
 	//registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
 
-	player2 = createPlayer(renderer, 2, {window_width_px - 100, window_height_px - 100});
+	player2 = createPlayer(renderer, 2, {window_width_px - 100, window_height_px - 100}, 2);
 	//registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
