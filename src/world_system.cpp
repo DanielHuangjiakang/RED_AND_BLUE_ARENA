@@ -213,21 +213,21 @@ void WorldSystem::restart_game() {
 
 
 	// starts on left (blue)
-	player1 = createPlayer(renderer, 1, {window_width_px/4 - 200, window_height_px - 200}, 1);
+	player1 = createPlayer(renderer, 1, {window_width_px/4 - 200, window_height_px - 200}, 0);
 	//registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
 
-	player2 = createPlayer(renderer, 2, {window_width_px - 100, window_height_px - 100}, 2);
+	player2 = createPlayer(renderer, 2, {window_width_px - 100, window_height_px - 100}, 1);
 	//registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
-	registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
+	//registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
 
 	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 250}, 200, 20);
-	registry.colors.insert(platform1, {0.0f, 0.0f, 0.0f});
+	//registry.colors.insert(platform1, {0.0f, 0.0f, 0.0f});
 	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 250}, 200, 20);
-	registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
+	//registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
 	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 450}, 200, 20);
-	registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
+	//registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
 
 }
 
@@ -353,7 +353,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		vec2 pos = registry.motions.get(player1).position;
 		pos.x = pos.x + (registry.motions.get(player1).scale.x / 2 + 5) * dir;
 		Entity bullet = createBullet(renderer, pos, player_1.direction);
-		registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
+		registry.colors.insert(bullet, {1.0f, 0.0f, 0.0f});
 	}
 
 	if (key == GLFW_KEY_COMMA) {
@@ -369,7 +369,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		vec2 pos = registry.motions.get(player2).position;
 		pos.x = pos.x + (registry.motions.get(player2).scale.x / 2 + 5) * dir;
 		Entity bullet = createBullet(renderer, pos, player_2.direction);
-		registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
+		registry.colors.insert(bullet, {1.0f, 0.0f, 0.0f});
 	}
 
 	// Debugging

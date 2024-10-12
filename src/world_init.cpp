@@ -126,9 +126,9 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
 
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 
  	return entity;
 }
@@ -151,9 +151,9 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::BLOCK, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 
  	return entity;
 }
