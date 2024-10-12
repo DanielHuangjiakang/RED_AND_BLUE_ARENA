@@ -92,7 +92,7 @@ GLFWwindow* WorldSystem::create_window() {
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("music.mp3").c_str());
+	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
 	salmon_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
 
@@ -204,7 +204,6 @@ void WorldSystem::restart_game() {
 	current_speed = 1.f;
 
 	// Remove all entities that we created
-	// All that have a motion, we could also iterate over all fish, eels, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
 	    registry.remove_all_components_of(registry.motions.entities.back());
 
@@ -221,13 +220,12 @@ void WorldSystem::restart_game() {
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
 	registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
 
-	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 250}, 200, 20);
+	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 220}, 250, 20);
 	registry.colors.insert(platform1, {0.0f, 0.0f, 0.0f});
-	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 250}, 200, 20);
+	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 220}, 250, 20);
 	registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
-	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 450}, 200, 20);
+	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
 	registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
-
 }
 
 // Compute collisions between entities
@@ -238,15 +236,34 @@ void WorldSystem::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
+		int direction = collisionsRegistry.components[i].direction;
 
 		if (registry.players.has(entity) && registry.blocks.has(entity_other)) {
 			// std::cout << "collision between " << entity << " and " << entity_other << std::endl;
-			Motion& motion = registry.motions.get(entity);
-			Block& block = registry.blocks.get(entity_other);
-			Player& player = registry.players.get(entity);
-			motion.velocity[1] = 0.0f;
-			motion.position[1] = block.y - (motion.scale[1] / 2);
-			player.jumpable = true;
+			if (direction == 1) { // top collision
+				Motion& motion = registry.motions.get(entity);
+				Block& block = registry.blocks.get(entity_other);
+				Player& player = registry.players.get(entity);
+				motion.velocity[1] = 0.0f;
+				motion.position[1] = block.y - (motion.scale[1] / 2);
+				player.jumpable = true;
+			} else if (direction == 2) { // bot collision
+				Motion& motion = registry.motions.get(entity);
+				Block& block = registry.blocks.get(entity_other);
+				motion.velocity[1] = 0.0f;
+				motion.position[1] = block.y + block.height + (motion.scale[1] / 2);
+			} else if (direction == 3) { // left collision
+				Motion& motion = registry.motions.get(entity);
+				Block& block = registry.blocks.get(entity_other);
+				motion.velocity[0] = 0.0f;
+				motion.position[0] = block.x - (motion.scale[1] / 2);
+			} else if (direction == 4) { // right collision
+				Motion& motion = registry.motions.get(entity);
+				Block& block = registry.blocks.get(entity_other);
+				Player& player = registry.players.get(entity);
+				motion.velocity[0] = 0.0f;
+				motion.position[0] = block.x + block.width + (motion.scale[1] / 2);
+			}
 		}
 	}
 
@@ -261,11 +278,6 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON MOVEMENT HERE
-	// key is of 'type' GLFW_KEY_
-	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -293,14 +305,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         	motion1.velocity[0] += 200;
         	player_1.direction = 1; // Facing right
     	} else if (action == GLFW_RELEASE) {
-        motion1.velocity[0] -= 200;
+        	motion1.velocity[0] -= 200;
     	}
 	}
 
 	if (key == GLFW_KEY_W) {
 		if (action == GLFW_PRESS && player_1.jumpable == true) {
 			motion1.velocity[1] += -500;
-			
 			player_1.jumpable = false;
 		}
 	}
@@ -318,7 +329,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         	motion2.velocity[0] += 200;
         	player_2.direction = 1; // Facing right
     	} else if (action == GLFW_RELEASE) {
-       	motion2.velocity[0] -= 200;
+       		motion2.velocity[0] -= 200;
     	}
 	}
 	if (key == GLFW_KEY_UP) {
