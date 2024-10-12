@@ -14,6 +14,9 @@ const float EEL_BB_HEIGHT  = 0.6f * 202.f;	// 870
 // the player
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction);
 
+// Bullet
+Entity  createBullet(RenderSystem* renderer, vec2 position, bool direction);
+
 // stage blocks
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height);
 Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height);

@@ -12,6 +12,12 @@ struct Player
 	bool direction;  // 1 for right, 0 for left
 };
 
+struct Bullet
+{
+	bool direction;  // 1 for right, 0 for left
+};
+
+
 // Weapon component
 struct Weapon
 {

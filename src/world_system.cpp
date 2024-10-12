@@ -92,7 +92,7 @@ GLFWwindow* WorldSystem::create_window() {
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("music.mp3").c_str());
+	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
 	salmon_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
 
@@ -248,6 +248,15 @@ void WorldSystem::handle_collisions() {
 			motion.position[1] = block.y - (motion.scale[1] / 2);
 			player.jumpable = true;
 		}
+
+		// For bullet collision
+
+		if (registry.bullet.has(entity_other) && registry.players.has(entity))
+		{
+			// No HP & other things set up bullets should just disappear on collision
+			registry.remove_all_components_of(entity_other);
+		}
+		
 	}
 
 	// Remove all collisions from this simulation step
@@ -261,11 +270,6 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON MOVEMENT HERE
-	// key is of 'type' GLFW_KEY_
-	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -326,6 +330,40 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			motion2.velocity[1] += -500;
 			player_2.jumpable = false;
 		}
+	}
+
+	// for Firing bullets:
+	if (key == GLFW_KEY_F) {
+		int dir = 0;
+		if (player_1.direction == 0)
+		{
+			dir = -1;
+		}
+		else 
+		{
+			dir = 1;
+		}
+
+		vec2 pos = registry.motions.get(player1).position;
+		pos.x = pos.x + (registry.motions.get(player1).scale.x / 2 + 5) * dir;
+		Entity bullet = createBullet(renderer, pos, player_1.direction);
+		registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
+	}
+
+	if (key == GLFW_KEY_COMMA) {
+		int dir = 0;
+		if (player_2.direction == 0)
+		{
+			dir = -1;
+		}
+		else 
+		{
+			dir = 1;
+		}
+		vec2 pos = registry.motions.get(player2).position;
+		pos.x = pos.x + (registry.motions.get(player2).scale.x / 2 + 5) * dir;
+		Entity bullet = createBullet(renderer, pos, player_2.direction);
+		registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
 	}
 
 	// Debugging
