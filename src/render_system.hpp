@@ -31,8 +31,10 @@ class RenderSystem {
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
-			textures_path("green_fish.png"),
-			textures_path("eel.png") };
+			textures_path("city.png"),
+			textures_path("blueRun1.png"),
+			textures_path("redRun1.png")
+		};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -79,7 +81,8 @@ private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
-
+	void renderFullScreenQuad();
+	
 	// Window handle
 	GLFWwindow* window;
 

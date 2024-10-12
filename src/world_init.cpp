@@ -43,15 +43,26 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position) {
 	auto& motion = registry.motions.emplace(entity);
  	motion.velocity = { 0, 0 };
  	motion.position = position;
-	motion.scale = { 50, 50 };
+	//motion.scale = { 50, 50 };
+	motion.scale = {PLAYER_WIDTH, PLAYER_HEIGHT};
 
 	auto& gravity = registry.gravities.emplace(entity);
 
-	registry.renderRequests.insert(
-		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+	//red player (right ride facting left)
+	if (side ==2) {
+		 motion.scale = vec2 ({-PLAYER_WIDTH, PLAYER_HEIGHT });
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_2, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	} else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_1, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	}
 
  	return entity;
 }

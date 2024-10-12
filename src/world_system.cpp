@@ -209,12 +209,12 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// create a new Salmon
-	player1 = createPlayer(renderer, 1, {window_width_px - 100, window_height_px - 100});
-	registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
+	// starts on left (blue)
+	player1 = createPlayer(renderer, 1, {window_width_px/4 - 200, window_height_px - 200});
+	//registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
 
-	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 200});
-	registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
+	player2 = createPlayer(renderer, 2, {window_width_px - 100, window_height_px - 100});
+	//registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
 	registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
@@ -280,6 +280,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (key == GLFW_KEY_A) {
 		if (action == GLFW_PRESS) {
 			motion1.velocity[0] += -200;
+			if (motion1.scale.x > 0) motion1.scale.x = -motion1.scale.x;
 		} else if (action == GLFW_RELEASE) {
 			motion1.velocity[0] -= -200;
 		}
@@ -287,6 +288,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (key == GLFW_KEY_D) {
 		if (action == GLFW_PRESS) {
 			motion1.velocity[0] += 200;
+			if (motion1.scale.x < 0) motion1.scale.x = -motion1.scale.x;
 		} else if (action == GLFW_RELEASE) {
 			motion1.velocity[0] -= 200;
 		}
@@ -302,6 +304,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (key == GLFW_KEY_LEFT) {
 		if (action == GLFW_PRESS) {
 			motion2.velocity[0] += -200;
+			if (motion2.scale.x > 0) motion2.scale.x = -motion2.scale.x;
 		} else if (action == GLFW_RELEASE) {
 			motion2.velocity[0] -= -200;
 		}
@@ -309,6 +312,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (key == GLFW_KEY_RIGHT) {
 		if (action == GLFW_PRESS) {
 			motion2.velocity[0] += 200;
+	     	if (motion2.scale.x < 0) motion2.scale.x = -motion2.scale.x;
 		} else if (action == GLFW_RELEASE) {
 			motion2.velocity[0] -= 200;
 		}
