@@ -32,19 +32,23 @@
 // 	return entity;
 // }
 
-Entity createPlayer(RenderSystem* renderer, int side, vec2 position) {
+
+Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction) {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	auto& player = registry.players.emplace(entity);
 	player.side = side;
+	player.direction = direction; // Default to facing right initially
 
 	auto& motion = registry.motions.emplace(entity);
- 	motion.velocity = { 0, 0 };
+ 	motion.velocity = { 0, 0 }; 
  	motion.position = position;
+
 	//motion.scale = { 50, 50 };
 	motion.scale = {PLAYER_WIDTH, PLAYER_HEIGHT};
+
 
 	auto& gravity = registry.gravities.emplace(entity);
 
@@ -65,6 +69,43 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position) {
 	}
 
  	return entity;
+}
+
+// Function to create bullets: bullets should contain component speed, position, size should be fixed;
+Entity createBullet(RenderSystem* renderer, vec2 position, bool direction) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& bullet = registry.bullet.emplace(entity);
+	bullet.direction = direction;
+
+	// For getting the right velocity
+	int dir = 0;
+
+	if (direction == 0)
+	{
+		// facing left
+		dir = -1;
+	}
+	else {
+		dir = 1;
+	}
+	
+
+	auto& motion = registry.motions.emplace(entity);
+ 	motion.velocity = { 100 * dir, 0 }; 
+ 	motion.position = position;
+	motion.scale = { 5, 5 }; // width * height
+
+	registry.renderRequests.insert(
+		entity,
+ 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::SALMON,
+ 			GEOMETRY_BUFFER_ID::SQUARE });
+	
+	return entity;
+
 }
 
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height) {

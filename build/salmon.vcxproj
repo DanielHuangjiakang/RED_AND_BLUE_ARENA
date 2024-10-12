@@ -1,0 +1,499 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|win32">
+      <Configuration>Debug</Configuration>
+      <Platform>win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|win32">
+      <Configuration>Release</Configuration>
+      <Platform>win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|win32">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4B32F905-494F-3ADB-B078-628AE9F40D8A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <Platform>win32</Platform>
+    <ProjectName>salmon</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">salmon.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">salmon</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|win32'">salmon.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|win32'">salmon</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">salmon.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">salmon</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">salmon.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">salmon</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/glm"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatSpecificWarningsAsErrors>4715;4239</TreatSpecificWarningsAsErrors>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>		</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/glfw/lib/glfw3-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Debug/glfw3.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/sdl/lib/SDL2-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Debug/SDL2.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/sdl/lib/SDL2_mixer-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Debug/SDL2_mixer.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\lib\glfw3dll-x86.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\lib\SDL2-x86.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\lib\SDL2_mixer-x86.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Debug/salmon.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Debug/salmon.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/glm"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatSpecificWarningsAsErrors>4715;4239</TreatSpecificWarningsAsErrors>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>		</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/glfw/lib/glfw3-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Release/glfw3.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/sdl/lib/SDL2-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Release/SDL2.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/sdl/lib/SDL2_mixer-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Release/SDL2_mixer.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\lib\glfw3dll-x86.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\lib\SDL2-x86.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\lib\SDL2_mixer-x86.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Release/salmon.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/Release/salmon.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/glm"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatSpecificWarningsAsErrors>4715;4239</TreatSpecificWarningsAsErrors>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>		</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/glfw/lib/glfw3-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/MinSizeRel/glfw3.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/sdl/lib/SDL2-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/MinSizeRel/SDL2.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/sdl/lib/SDL2_mixer-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/MinSizeRel/SDL2_mixer.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\lib\glfw3dll-x86.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\lib\SDL2-x86.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\lib\SDL2_mixer-x86.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/MinSizeRel/salmon.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/MinSizeRel/salmon.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/glm"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatSpecificWarningsAsErrors>4715;4239</TreatSpecificWarningsAsErrors>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\stb_image;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\gl3w;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\include;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\include\SDL;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>		</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/glfw/lib/glfw3-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/RelWithDebInfo/glfw3.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/sdl/lib/SDL2-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/RelWithDebInfo/SDL2.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/ext/sdl/lib/SDL2_mixer-x86.dll" "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/RelWithDebInfo/SDL2_mixer.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glfw\lib\glfw3dll-x86.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\lib\SDL2-x86.lib;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\sdl\lib\SDL2_mixer-x86.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/RelWithDebInfo/salmon.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/RelWithDebInfo/salmon.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">Building Custom Rule C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main" "-BC:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build" --check-stamp-file "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindOpenGL.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\WindowsPaths.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeCCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeCXXCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeRCCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeSystem.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm\cmake\glm\glmConfig-version.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm\cmake\glm\glmConfig.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\project_path.hpp.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|win32'">Building Custom Rule C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main" "-BC:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build" --check-stamp-file "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindOpenGL.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\WindowsPaths.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeCCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeCXXCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeRCCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeSystem.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm\cmake\glm\glmConfig-version.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm\cmake\glm\glmConfig.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\project_path.hpp.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|win32'">C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">Building Custom Rule C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main" "-BC:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build" --check-stamp-file "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindOpenGL.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\WindowsPaths.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeCCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeCXXCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeRCCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeSystem.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm\cmake\glm\glmConfig-version.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm\cmake\glm\glmConfig.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\project_path.hpp.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">Building Custom Rule C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main" "-BC:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build" --check-stamp-file "C:/Users/Edward/Desktop/2024 Winter/CPSC 425/Team22-main/build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindOpenGL.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\Platform\WindowsPaths.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeCCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeCXXCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeRCCompiler.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\3.30.3\CMakeSystem.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm\cmake\glm\glmConfig-version.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\glm\cmake\glm\glmConfig.cmake;C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\ext\project_path.hpp.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|win32'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\ai_system.cpp" />
+    <ClInclude Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\ai_system.hpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\common.cpp" />
+    <ClInclude Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\common.hpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\components.cpp" />
+    <ClInclude Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\components.hpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\main.cpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\physics_system.cpp" />
+    <ClInclude Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\physics_system.hpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\render_system.cpp" />
+    <ClInclude Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\render_system.hpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\render_system_init.cpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\tiny_ecs.cpp" />
+    <ClInclude Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\tiny_ecs.hpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\tiny_ecs_registry.cpp" />
+    <ClInclude Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\tiny_ecs_registry.hpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\world_init.cpp" />
+    <ClInclude Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\world_init.hpp" />
+    <ClCompile Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\world_system.cpp" />
+    <ClInclude Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\src\world_system.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\Edward\Desktop\2024 Winter\CPSC 425\Team22-main\build\ZERO_CHECK.vcxproj">
+      <Project>{D5FAAA7C-6B59-3AE6-95F1-FE1AAB8995D4}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
