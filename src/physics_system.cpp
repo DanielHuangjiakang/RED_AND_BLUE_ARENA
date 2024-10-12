@@ -25,10 +25,10 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	// if (dist_squared < r_squared)
 	// 	return true;
 	// return false;
-	float x1_left = motion1.position[0] - (motion2.scale[0] / 2);
-	float x1_right = motion1.position[0] + (motion2.scale[0] / 2);
-	float y1_up = motion1.position[1] - (motion2.scale[1] / 2);
-	float y1_down = motion1.position[1] + (motion2.scale[1] / 2);
+	float x1_left = motion1.position[0] - (motion1.scale[0] / 2);
+	float x1_right = motion1.position[0] + (motion1.scale[0] / 2);
+	float y1_up = motion1.position[1] - (motion1.scale[1] / 2);
+	float y1_down = motion1.position[1] + (motion1.scale[1] / 2);
 
 	float x2_left = motion2.position[0] - (motion2.scale[0] / 2);
 	float x2_right = motion2.position[0] + (motion2.scale[0] / 2);
