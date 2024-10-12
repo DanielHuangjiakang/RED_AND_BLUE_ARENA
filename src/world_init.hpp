@@ -14,7 +14,10 @@ const float PLAYER_HEIGHT  = 0.6f * 165.f;
 const float PLAYER_WIDTH   = 0.6f * 165.f;
 
 // the player
-Entity createPlayer(RenderSystem* renderer, int side, vec2 position);
+Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction);
+
+// Bullet
+Entity  createBullet(RenderSystem* renderer, vec2 position, bool direction);
 
 // stage blocks
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height);

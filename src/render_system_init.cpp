@@ -376,4 +376,3 @@ bool loadEffectFromFile(
 
 	return true;
 }
-

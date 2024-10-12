@@ -130,6 +130,28 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
 
+	// Update player1's position and enforce boundaries
+    Motion& motion1 = registry.motions.get(player1);
+    if (motion1.position.x <= motion1.scale[0]/2) {
+        motion1.position.x = motion1.scale[0]/2; // Stop at left boundary
+    } else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
+        motion1.position.x = window_width_px + motion1.scale[0]/2 - motion1.scale.x; // Stop at right boundary
+    }
+    if (motion1.position.y < motion1.scale[1]/2) {
+        motion1.position.y = motion1.scale[1]/2; // Stop at the top boundary
+    } 
+
+    // Update player2's position and enforce boundaries
+    Motion& motion2 = registry.motions.get(player2);
+    if (motion2.position.x <= motion2.scale[0]/2) {
+        motion2.position.x = motion2.scale[0]/2; // Stop at left boundary
+    } else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
+        motion2.position.x =  window_width_px + motion2.scale[0]/2 - motion2.scale.x; // Stop at right boundary
+    }
+    if (motion2.position.y < motion2.scale[1]/2) {
+        motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
+    }
+
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
@@ -140,28 +162,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
-
-	// // spawn new eels
-	// next_eel_spawn -= elapsed_ms_since_last_update * current_speed;
-	// if (registry.deadlys.components.size() <= MAX_NUM_EELS && next_eel_spawn < 0.f) {
-	// 	// reset timer
-	// 	next_eel_spawn = (EEL_SPAWN_DELAY_MS / 2) + uniform_dist(rng) * (EEL_SPAWN_DELAY_MS / 2);
-
-	// 	// create Eel with random initial position
-    //     createEel(renderer, vec2(50.f + uniform_dist(rng) * (window_width_px - 100.f), 100.f));
-	// }
-
-	// // spawn fish
-	// next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
-	// if (registry.eatables.components.size() <= MAX_NUM_FISH && next_fish_spawn < 0.f) {
-	// 	// !!!  TODO A1: create new fish with createFish({0,0}), see eels above
-	// }
-	
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE EGG SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
@@ -187,7 +187,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// reduce window brightness if the salmon is dying
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
-	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
+
+	
+
 
 	return true;
 }
@@ -208,6 +210,7 @@ void WorldSystem::restart_game() {
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
+
 
 	// starts on left (blue)
 	player1 = createPlayer(renderer, 1, {window_width_px/4 - 200, window_height_px - 200});
@@ -246,6 +249,15 @@ void WorldSystem::handle_collisions() {
 			motion.position[1] = block.y - (motion.scale[1] / 2);
 			player.jumpable = true;
 		}
+
+		// For bullet collision
+
+		if (registry.bullet.has(entity_other) && registry.players.has(entity))
+		{
+			// No HP & other things set up bullets should just disappear on collision
+			registry.remove_all_components_of(entity_other);
+		}
+		
 	}
 
 	// Remove all collisions from this simulation step
@@ -259,11 +271,6 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON MOVEMENT HERE
-	// key is of 'type' GLFW_KEY_
-	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -285,14 +292,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			motion1.velocity[0] -= -200;
 		}
 	}
+
 	if (key == GLFW_KEY_D) {
+
 		if (action == GLFW_PRESS) {
 			motion1.velocity[0] += 200;
 			if (motion1.scale.x < 0) motion1.scale.x = -motion1.scale.x;
 		} else if (action == GLFW_RELEASE) {
 			motion1.velocity[0] -= 200;
 		}
+
+
 	}
+
 	if (key == GLFW_KEY_W) {
 		if (action == GLFW_PRESS && player_1.jumpable == true) {
 			motion1.velocity[1] += -500;
@@ -302,6 +314,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	if (key == GLFW_KEY_LEFT) {
+
 		if (action == GLFW_PRESS) {
 			motion2.velocity[0] += -200;
 			if (motion2.scale.x > 0) motion2.scale.x = -motion2.scale.x;
@@ -316,6 +329,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		} else if (action == GLFW_RELEASE) {
 			motion2.velocity[0] -= 200;
 		}
+
 	}
 	if (key == GLFW_KEY_UP) {
 		if (action == GLFW_PRESS && player_2.jumpable == true) {
@@ -324,8 +338,42 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
+	// for Firing bullets:
+	if (key == GLFW_KEY_F) {
+		int dir = 0;
+		if (player_1.direction == 0)
+		{
+			dir = -1;
+		}
+		else 
+		{
+			dir = 1;
+		}
+
+		vec2 pos = registry.motions.get(player1).position;
+		pos.x = pos.x + (registry.motions.get(player1).scale.x / 2 + 5) * dir;
+		Entity bullet = createBullet(renderer, pos, player_1.direction);
+		registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
+	}
+
+	if (key == GLFW_KEY_COMMA) {
+		int dir = 0;
+		if (player_2.direction == 0)
+		{
+			dir = -1;
+		}
+		else 
+		{
+			dir = 1;
+		}
+		vec2 pos = registry.motions.get(player2).position;
+		pos.x = pos.x + (registry.motions.get(player2).scale.x / 2 + 5) * dir;
+		Entity bullet = createBullet(renderer, pos, player_2.direction);
+		registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
+	}
+
 	// Debugging
-	if (key == GLFW_KEY_D) {
+	if (key == GLFW_KEY_G ) {
 		if (action == GLFW_RELEASE)
 			debugging.in_debug_mode = false;
 		else
