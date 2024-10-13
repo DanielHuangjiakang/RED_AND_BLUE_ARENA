@@ -13,3 +13,4 @@ Entity  createBullet(RenderSystem* renderer, vec2 position, bool direction);
 // stage blocks
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height);
 Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height);
+Entity createLaser(RenderSystem* renderer, vec2 target);
