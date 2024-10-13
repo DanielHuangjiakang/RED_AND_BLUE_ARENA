@@ -10,58 +10,61 @@ vec2 get_bounding_box(const Motion& motion)
 	return { abs(motion.scale.x), abs(motion.scale.y) };
 }
 
-// This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
-// if the center point of either object is inside the other's bounding-box-circle. You can
-// surely implement a more accurate detection
-bool collides(const Motion& motion1, const Motion& motion2)
+
+int collides(const Motion& motion1, const Motion& motion2)
 {
-	// vec2 dp = motion1.position - motion2.position;
-	// float dist_squared = dot(dp,dp);
-	// const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
-	// const float other_r_squared = dot(other_bonding_box, other_bonding_box);
-	// const vec2 my_bonding_box = get_bounding_box(motion2) / 2.f;
-	// const float my_r_squared = dot(my_bonding_box, my_bonding_box);
-	// const float r_squared = max(other_r_squared, my_r_squared);
-	// if (dist_squared < r_squared)
-	// 	return true;
-	// return false;
 	float x1_left = motion1.position[0] - (motion1.scale[0] / 2);
-	float x1_right = motion1.position[0] + (motion1.scale[0] / 2);
-	float y1_up = motion1.position[1] - (motion1.scale[1] / 2);
-	float y1_down = motion1.position[1] + (motion1.scale[1] / 2);
+    float x1_right = motion1.position[0] + (motion1.scale[0] / 2);
+    float y1_top = motion1.position[1] - (motion1.scale[1] / 2);
+    float y1_bot = motion1.position[1] + (motion1.scale[1] / 2);
+    float x2_left = motion2.position[0] - (motion2.scale[0] / 2);
+    float x2_right = motion2.position[0] + (motion2.scale[0] / 2);
+    float y2_top = motion2.position[1] - (motion2.scale[1] / 2);
+    float y2_bot = motion2.position[1] + (motion2.scale[1] / 2);
 
-	float x2_left = motion2.position[0] - (motion2.scale[0] / 2);
-	float x2_right = motion2.position[0] + (motion2.scale[0] / 2);
-	float y2_up = motion2.position[1] - (motion2.scale[1] / 2);
-	float y2_down = motion2.position[1] + (motion2.scale[1] / 2);
+    if (x1_left >= x2_right || x2_left >= x1_right) return 0; // no collision
+    if (y1_top >= y2_bot || y2_top >= y1_bot) return 0; // no collision
+    float x_overlap = std::min(x1_right, x2_right) - std::max(x1_left, x2_left);
+    float y_overlap = std::min(y1_bot, y2_bot) - std::max(y1_top, y2_top);
 
-	if (x1_left >= x2_right || x2_left >= x1_right) return false;
-    if (y1_up >= y2_down || y2_up >= y1_down) return false;
+    if (x_overlap < y_overlap) {
+        if (motion1.position[0] < motion2.position[0]) return 3; // left collision
+        else return 4; // right collision
+    } else {
+        if (motion1.position[1] < motion2.position[1]) return 1; // top collision
+        else return 2; // bot collision
+    }
 
-    return true;
-	
+    return 0; // no collision
 }
 
 void PhysicsSystem::step(float elapsed_ms)
 {
+	float step_seconds = elapsed_ms / 1000.f;
 	auto& motion_registry = registry.motions;
 	for(uint i = 0; i< motion_registry.size(); i++)
 	{
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
-		float step_seconds = elapsed_ms / 1000.f;
 		motion.position += motion.velocity * step_seconds;
 	}
 
 	auto& gravity_registry = registry.gravities;
 	for(uint i = 0; i< gravity_registry.size(); i++) 
 	{
-		Gravity gravity = gravity_registry.components[i];
+		Gravity& gravity = gravity_registry.components[i];
 		Entity entity = gravity_registry.entities[i];
 		Motion& motion = registry.motions.get(entity);
+		Player player = registry.players.get(entity);
+		motion.velocity += gravity.g * step_seconds;
+		if (abs(motion.velocity[0]) > 1000) motion.velocity[0] = ((motion.velocity[0] > 0) - (motion.velocity[0] < 0)) * 1000;
+		if (abs(motion.velocity[1]) > 1000) motion.velocity[1] = ((motion.velocity[1] > 0) - (motion.velocity[1] < 0)) * 1000;
 
-		motion.velocity[1] += gravity.a;
-	}
+		// if ((!player.left_button && !player.right_button) || (player.left_button && player.right_button)) {
+			motion.velocity[0] = 0.95 * motion.velocity[0];			
+		// }
+	}	
+
 
 	// Check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;
@@ -74,13 +77,16 @@ void PhysicsSystem::step(float elapsed_ms)
 		for(uint j = i+1; j<motion_container.components.size(); j++)
 		{
 			Motion& motion_j = motion_container.components[j];
-			if (collides(motion_i, motion_j))
+			int collision = collides(motion_i, motion_j);
+			if (collision)
 			{
 				Entity entity_j = motion_container.entities[j];
 				// Create a collisions event
 				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				auto& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+				collision1.direction = collision;
+				auto& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				collision2.direction = collision;
 			}
 		}
 	}
