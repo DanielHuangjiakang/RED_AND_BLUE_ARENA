@@ -4,10 +4,11 @@
 #include "tiny_ecs.hpp"
 #include "render_system.hpp"
 
-// These are hardcoded to the dimensions of the entity texture
-
 // the player
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction);
+
+// Bullet
+Entity  createBullet(RenderSystem* renderer, vec2 position, bool direction);
 
 // stage blocks
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height);

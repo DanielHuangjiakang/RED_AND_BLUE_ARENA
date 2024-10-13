@@ -14,17 +14,67 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
 	auto& motion = registry.motions.emplace(entity);
  	motion.velocity = { 0, 0 }; 
  	motion.position = position;
-	motion.scale = { 50, 50 }; // width * height
+
+	//motion.scale = { 50, 50 };
+	motion.scale = {PLAYER_WIDTH, PLAYER_HEIGHT};
+
 
 	registry.gravities.emplace(entity);
+
+	//red player (right ride facting left)
+	if (side ==2) {
+		 motion.scale = vec2 ({-PLAYER_WIDTH, PLAYER_HEIGHT });
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_2, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	} else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_1, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE});
+	}
+
+ 	return entity;
+}
+
+// Function to create bullets: bullets should contain component speed, position, size should be fixed;
+Entity createBullet(RenderSystem* renderer, vec2 position, bool direction) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& bullet = registry.bullet.emplace(entity);
+	bullet.direction = direction;
+
+	// For getting the right velocity
+	int dir = 0;
+
+	if (direction == 0)
+	{
+		// facing left
+		dir = -1;
+	}
+	else {
+		dir = 1;
+	}
+	
+
+	auto& motion = registry.motions.emplace(entity);
+ 	motion.velocity = { 100 * dir, 0 }; 
+ 	motion.position = position;
+	motion.scale = { 5, 5 }; // width * height
 
 	registry.renderRequests.insert(
 		entity,
  		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
  			EFFECT_ASSET_ID::SALMON,
  			GEOMETRY_BUFFER_ID::SQUARE });
+	
+	return entity;
 
- 	return entity;
 }
 
 
@@ -47,9 +97,9 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
 
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 
  	return entity;
 }
@@ -74,9 +124,9 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::BLOCK, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 
  	return entity;
 }

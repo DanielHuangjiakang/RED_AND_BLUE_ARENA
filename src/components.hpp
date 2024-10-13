@@ -12,6 +12,12 @@ struct Player
 	bool direction;  // 0 for left, 1 for right, 
 };
 
+struct Bullet
+{
+	bool direction;  // 1 for right, 0 for left
+};
+
+
 // Weapon component
 struct Weapon
 {
@@ -119,9 +125,13 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	FISH = 0,
-	EEL = FISH + 1,
-	TEXTURE_COUNT = EEL + 1
+	CITY =  0,
+	PLAYER_1 = CITY +1,
+	PLAYER_2 = PLAYER_1 +1,
+	BULLET = PLAYER_2+1,
+	BLOCK = BULLET + 1,
+	PAD = BLOCK + 1,
+	TEXTURE_COUNT = PAD + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

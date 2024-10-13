@@ -210,22 +210,23 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// create a new Salmon
-	player1 = createPlayer(renderer, 1, {window_width_px - 100, window_height_px - 100}, 1);
-	registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
 
-	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 200}, 0);
-	registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
+	// starts on left (blue)
+	player1 = createPlayer(renderer, 1, {window_width_px/4 - 200, window_height_px - 200}, 0);
+	//registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
+
+	player2 = createPlayer(renderer, 2, {window_width_px - 100, window_height_px - 100}, 1);
+	//registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
-	registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
+	//registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
 
-	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 220}, 250, 20);
-	registry.colors.insert(platform1, {0.0f, 0.0f, 0.0f});
-	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 220}, 250, 20);
-	registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
-	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
-	registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
+	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 250}, 200, 20);
+	//registry.colors.insert(platform1, {0.0f, 0.0f, 0.0f});
+	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 250}, 200, 20);
+	//registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
+	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 450}, 200, 20);
+	//registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
 }
 
 // Compute collisions between entities
@@ -265,6 +266,15 @@ void WorldSystem::handle_collisions() {
 				motion.position[0] = block.x + block.width + (motion.scale[1] / 2);
 			}
 		}
+
+		// For bullet collision
+
+		if (registry.bullet.has(entity_other) && registry.players.has(entity))
+		{
+			// No HP & other things set up bullets should just disappear on collision
+			registry.remove_all_components_of(entity_other);
+		}
+		
 	}
 
 	// Remove all collisions from this simulation step
@@ -336,7 +346,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 				gravity2.g[0] = 0.f;
 			}
 			player2_left_button = false;
-        	// gravity2.g[0] -= -200.f;
     	}
 	}
 	if (key == GLFW_KEY_RIGHT) {
@@ -349,14 +358,48 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 				gravity2.g[0] = 0.f;
 			}
 			player2_right_button = false;
-       		// gravity2.g[0] -= +200.f;
     	}
+
 	}
 	if (key == GLFW_KEY_UP) {
 		if (action == GLFW_PRESS && p2.jumpable == true) {
 			motion2.velocity[1] += -600;
 			p2.jumpable = false;
 		}
+	}
+
+	// for Firing bullets:
+	if (key == GLFW_KEY_F) {
+		int dir = 0;
+		if (player_1.direction == 0)
+		{
+			dir = -1;
+		}
+		else 
+		{
+			dir = 1;
+		}
+
+		vec2 pos = registry.motions.get(player1).position;
+		pos.x = pos.x + (registry.motions.get(player1).scale.x / 2 + 5) * dir;
+		Entity bullet = createBullet(renderer, pos, player_1.direction);
+		registry.colors.insert(bullet, {1.0f, 0.0f, 0.0f});
+	}
+
+	if (key == GLFW_KEY_COMMA) {
+		int dir = 0;
+		if (player_2.direction == 0)
+		{
+			dir = -1;
+		}
+		else 
+		{
+			dir = 1;
+		}
+		vec2 pos = registry.motions.get(player2).position;
+		pos.x = pos.x + (registry.motions.get(player2).scale.x / 2 + 5) * dir;
+		Entity bullet = createBullet(renderer, pos, player_2.direction);
+		registry.colors.insert(bullet, {1.0f, 0.0f, 0.0f});
 	}
 
 	// Debugging
