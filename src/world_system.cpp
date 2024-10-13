@@ -1,5 +1,6 @@
 // Header
 #include "world_system.hpp"
+#include "common.hpp"
 #include "world_init.hpp"
 
 // stlib
@@ -132,24 +133,38 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Update player1's position and enforce boundaries
     Motion& motion1 = registry.motions.get(player1);
-    if (motion1.position.x <= motion1.scale[0]/2) {
-        motion1.position.x = motion1.scale[0]/2; // Stop at left boundary
-    } else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
-        motion1.position.x = window_width_px + motion1.scale[0]/2 - motion1.scale.x; // Stop at right boundary
-    }
-    if (motion1.position.y < motion1.scale[1]/2) {
-        motion1.position.y = motion1.scale[1]/2; // Stop at the top boundary
-    } 
+	// Enforce window boundaries (left, right, top, bottom)
+	if (motion1.position.x <= 0) {
+    	motion1.position.x =0; // Left boundary
+	} else if (motion1.position.x >= window_width_px) {
+    	motion1.position.x = window_width_px; // Right boundary
+	}
+	if (motion1.position.y <= 0) {
+    	motion1.position.y = 0; // Top boundary
+	} else if (motion1.position.y  >= window_height_px - 100) {
+    	motion1.position.y =  window_height_px - 100; // Bottom boundary
+	}
+
 
     // Update player2's position and enforce boundaries
     Motion& motion2 = registry.motions.get(player2);
-    if (motion2.position.x <= motion2.scale[0]/2) {
-        motion2.position.x = motion2.scale[0]/2; // Stop at left boundary
-    } else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
-        motion2.position.x =  window_width_px + motion2.scale[0]/2 - motion2.scale.x; // Stop at right boundary
-    }
-    if (motion2.position.y < motion2.scale[1]/2) {
-        motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
+    // Enforce window boundaries (left, right, top, bottom)
+	if (motion2.position.x <= 0) {
+    	motion2.position.x =0; // Left boundary
+	} else if (motion2.position.x >= window_width_px) {
+    	motion2.position.x = window_width_px; // Right boundary
+	}
+	if (motion2.position.y <= 0) {
+    	motion2.position.y = 0; // Top boundary
+	} else if (motion2.position.y >= window_height_px - 100) {
+    	motion2.position.y = window_height_px - 100; // Bottom boundary
+	}
+
+    for (Entity entity : registry.lasers.entities) {
+        Motion& laserMotion = registry.motions.get(entity);
+        vec2 playerPosition = registry.motions.get(player1).position; // 追踪玩家1
+        vec2 direction = normalize(playerPosition - laserMotion.position);
+        laserMotion.velocity = direction * 100.f; // 激光朝向玩家移动
     }
 
 	// Remove entities that leave the screen on the left side
@@ -204,28 +219,33 @@ void WorldSystem::restart_game() {
 	current_speed = 1.f;
 
 	// Remove all entities that we created
+	// All that have a motion, we could also iterate over all fish, eels, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
 	    registry.remove_all_components_of(registry.motions.entities.back());
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// create a new Salmon
-	player1 = createPlayer(renderer, 1, {window_width_px - 100, window_height_px - 100}, 1);
-	registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
 
-	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 200}, 0);
-	registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
+	// starts on left (blue)
+	player1 = createPlayer(renderer, 1, {window_width_px/4 - 200, window_height_px - 200}, 1);
+	//registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
+
+	player2 = createPlayer(renderer, 2, {window_width_px - 100, window_height_px - 100}, 0);
+	//registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
+
+    createLaser(renderer, registry.motions.get(player1).position);
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
-	registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
+	//registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
 
-	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 220}, 250, 20);
-	registry.colors.insert(platform1, {0.0f, 0.0f, 0.0f});
-	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 220}, 250, 20);
-	registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
-	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
-	registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
+	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 250}, 200, 20);
+	//registry.colors.insert(platform1, {0.0f, 0.0f, 0.0f});
+	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 250}, 200, 20);
+	//registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
+	platform3 = createBlock2(renderer, {window_width_px/2+25, window_height_px - 400}, 200, 20);
+	//registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
+
 }
 
 // Compute collisions between entities
@@ -236,35 +256,25 @@ void WorldSystem::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
-		int direction = collisionsRegistry.components[i].direction;
 
 		if (registry.players.has(entity) && registry.blocks.has(entity_other)) {
 			// std::cout << "collision between " << entity << " and " << entity_other << std::endl;
-			if (direction == 1) { // top collision
-				Motion& motion = registry.motions.get(entity);
-				Block& block = registry.blocks.get(entity_other);
-				Player& player = registry.players.get(entity);
-				motion.velocity[1] = 0.0f;
-				motion.position[1] = block.y - (motion.scale[1] / 2);
-				player.jumpable = true;
-			} else if (direction == 2) { // bot collision
-				Motion& motion = registry.motions.get(entity);
-				Block& block = registry.blocks.get(entity_other);
-				motion.velocity[1] = 0.0f;
-				motion.position[1] = block.y + block.height + (motion.scale[1] / 2);
-			} else if (direction == 3) { // left collision
-				Motion& motion = registry.motions.get(entity);
-				Block& block = registry.blocks.get(entity_other);
-				motion.velocity[0] = 0.0f;
-				motion.position[0] = block.x - (motion.scale[1] / 2);
-			} else if (direction == 4) { // right collision
-				Motion& motion = registry.motions.get(entity);
-				Block& block = registry.blocks.get(entity_other);
-				Player& player = registry.players.get(entity);
-				motion.velocity[0] = 0.0f;
-				motion.position[0] = block.x + block.width + (motion.scale[1] / 2);
-			}
+			Motion& motion = registry.motions.get(entity);
+			Block& block = registry.blocks.get(entity_other);
+			Player& player = registry.players.get(entity);
+			motion.velocity[1] = 0.0f;
+			motion.position[1] = block.y - (motion.scale[1] / 2);
+			player.jumpable = true;
 		}
+
+		// For bullet collision
+
+		if (registry.bullet.has(entity_other) && registry.players.has(entity))
+		{
+			// No HP & other things set up bullets should just disappear on collision
+			registry.remove_all_components_of(entity_other);
+		}
+		
 	}
 
 	// Remove all collisions from this simulation step
@@ -289,74 +299,98 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	Motion& motion1 = registry.motions.get(player1);
 	Motion& motion2 = registry.motions.get(player2);
-	Gravity& gravity1 = registry.gravities.get(player1);
-	Gravity& gravity2 = registry.gravities.get(player2);
-	Player& p1 = registry.players.get(player1);
-	Player& p2 = registry.players.get(player2);
+	Player& player_1 = registry.players.get(player1);
+	Player& player_2 = registry.players.get(player2);
 	if (key == GLFW_KEY_A) {
-    	if (action == GLFW_PRESS) {
-        	gravity1.g[0] = -700.f;
-        	p1.direction = 0; // Facing left
-			player1_left_button = true;
-    	} else if (action == GLFW_RELEASE) {
-        	if (!player2_right_button) {
-				gravity1.g[0] = 0.f;
-			}
-			player1_left_button = false;
-    	}
+		if (action == GLFW_PRESS) {
+			motion1.velocity[0] += -200;
+			if (motion1.scale.x > 0) motion1.scale.x = -motion1.scale.x;
+			player_1.direction = 0;
+		} else if (action == GLFW_RELEASE) {
+			motion1.velocity[0] -= -200;
+		}
 	}
 
 	if (key == GLFW_KEY_D) {
-    	if (action == GLFW_PRESS) {
-        	gravity1.g[0] = +700.f;
-        	p1.direction = 1; // Facing right
-			player1_right_button = true;
-    	} else if (action == GLFW_RELEASE) {
-        	if (!player2_right_button) {
-				gravity1.g[0] = 0.f;
-			}
-			player1_right_button = false;
-    	}
+
+		if (action == GLFW_PRESS) {
+			motion1.velocity[0] += 200;
+			if (motion1.scale.x < 0) motion1.scale.x = -motion1.scale.x;
+			player_1.direction = 1;
+		} else if (action == GLFW_RELEASE) {
+			motion1.velocity[0] -= 200;
+		}
+
+
 	}
 
 	if (key == GLFW_KEY_W) {
-		if (action == GLFW_PRESS && p1.jumpable == true) {
-			motion1.velocity[1] += -600;
-			p1.jumpable = false;
+		if (action == GLFW_PRESS && player_1.jumpable == true) {
+			motion1.velocity[1] += -500;
+			
+			player_1.jumpable = false;
 		}
 	}
 
 	if (key == GLFW_KEY_LEFT) {
-    	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = -700.f;
-        	p2.direction = 0; // Facing left
-			player2_left_button = true;
-    	} else if (action == GLFW_RELEASE) {
-			if (!player2_right_button) {
-				gravity2.g[0] = 0.f;
-			}
-			player2_left_button = false;
-        	// gravity2.g[0] -= -200.f;
-    	}
+
+		if (action == GLFW_PRESS) {
+			motion2.velocity[0] += -200;
+			if (motion2.scale.x > 0) motion2.scale.x = -motion2.scale.x;
+			player_2.direction = 0;
+		} else if (action == GLFW_RELEASE) {
+			motion2.velocity[0] -= -200;
+		}
 	}
 	if (key == GLFW_KEY_RIGHT) {
-    	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = +700.f;
-        	p2.direction = 1; // Facing right
-			player2_right_button = true;
-    	} else if (action == GLFW_RELEASE) {
-			if (!player2_left_button) {
-				gravity2.g[0] = 0.f;
-			}
-			player2_right_button = false;
-       		// gravity2.g[0] -= +200.f;
-    	}
+		if (action == GLFW_PRESS) {
+			motion2.velocity[0] += 200;
+	     	if (motion2.scale.x < 0) motion2.scale.x = -motion2.scale.x;
+			player_2.direction = 1;
+		} else if (action == GLFW_RELEASE) {
+			motion2.velocity[0] -= 200;
+		}
+
 	}
 	if (key == GLFW_KEY_UP) {
-		if (action == GLFW_PRESS && p2.jumpable == true) {
-			motion2.velocity[1] += -600;
-			p2.jumpable = false;
+		if (action == GLFW_PRESS && player_2.jumpable == true) {
+			motion2.velocity[1] += -500;
+			player_2.jumpable = false;
 		}
+	}
+
+	// for Firing bullets:
+	if (key == GLFW_KEY_F) {
+		int dir = 0;
+		if (player_1.direction == 0)
+		{
+			dir = -1;
+		}
+		else 
+		{
+			dir = 1;
+		}
+
+		vec2 pos = registry.motions.get(player1).position;
+		pos.x = pos.x + (registry.motions.get(player1).scale.x / 2 + 5) * dir;
+		Entity bullet = createBullet(renderer, pos, player_1.direction);
+		registry.colors.insert(bullet, {1.0f, 0.0f, 0.0f});
+	}
+
+	if (key == GLFW_KEY_COMMA) {
+		int dir = 0;
+		if (player_2.direction == 0)
+		{
+			dir = -1;
+		}
+		else 
+		{
+			dir = 1;
+		}
+		vec2 pos = registry.motions.get(player2).position;
+		pos.x = pos.x + (registry.motions.get(player2).scale.x / 2 + 5) * dir;
+		Entity bullet = createBullet(renderer, pos, player_2.direction);
+		registry.colors.insert(bullet, {1.0f, 0.0f, 0.0f});
 	}
 
 	// Debugging

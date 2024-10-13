@@ -134,4 +134,5 @@ public:
 		for (unsigned int i = 0; i < entities.size(); i++)
 			map_entity_componentID[entities[i]] = i;
 	}
+
 };

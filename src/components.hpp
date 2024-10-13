@@ -9,8 +9,14 @@ struct Player
 {
 	int side; // side = 1 for blue, side = 2 for red
 	bool jumpable = false;
-	bool direction;  // 0 for left, 1 for right, 
+	bool direction;  // 1 for right, 0 for left
 };
+
+struct Bullet
+{
+	bool direction;  // 1 for right, 0 for left
+};
+
 
 // Weapon component
 struct Weapon
@@ -21,8 +27,8 @@ struct Weapon
 
 // All data relevant to the shape and motion of entities
 struct Motion {
-	vec2 position = { 0.f, 0.f };
-	vec2 velocity = { 0.f, 0.f };
+	vec2 position = { 0, 0 };
+	vec2 velocity = { 0, 0 };
 	vec2 scale = { 1, 1 };
 };
 
@@ -34,7 +40,7 @@ struct Block {
 };
 
 struct Gravity {
-	vec2 g = {0.f, 750.f};
+	float a = 10.0f;
 };
 
 // Stucture to store collision information
@@ -43,7 +49,6 @@ struct Collision
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	Collision(Entity& other) { this->other = other; };
-	int direction = 0; // 1 for top, 2 for bottom, 3 for left, 4 for right
 };
 
 // Data structure for toggling debug mode
@@ -119,9 +124,13 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	FISH = 0,
-	EEL = FISH + 1,
-	TEXTURE_COUNT = EEL + 1
+	CITY =  0,
+	PLAYER_1 = CITY +1,
+	PLAYER_2 = PLAYER_1 +1,
+	BULLET = PLAYER_2+1,
+	BLOCK = BULLET + 1,
+	PAD = BLOCK + 1,
+	TEXTURE_COUNT = PAD + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -151,3 +160,5 @@ struct RenderRequest {
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
+
+struct Laser {};

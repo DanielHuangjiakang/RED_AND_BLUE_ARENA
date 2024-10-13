@@ -53,10 +53,6 @@ private:
 	float current_speed;
 	Entity player1;
 	Entity player2;
-	bool player1_right_button = false;
-	bool player1_left_button = false;
-	bool player2_right_button = false;
-	bool player2_left_button = false;
 
 	// Stage atrributes
 	Entity ground;
