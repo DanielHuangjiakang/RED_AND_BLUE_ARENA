@@ -60,9 +60,7 @@ void PhysicsSystem::step(float elapsed_ms)
 		if (abs(motion.velocity[0]) > 1000) motion.velocity[0] = ((motion.velocity[0] > 0) - (motion.velocity[0] < 0)) * 1000;
 		if (abs(motion.velocity[1]) > 1000) motion.velocity[1] = ((motion.velocity[1] > 0) - (motion.velocity[1] < 0)) * 1000;
 
-		// if ((!player.left_button && !player.right_button) || (player.left_button && player.right_button)) {
-			motion.velocity[0] = 0.95 * motion.velocity[0];			
-		// }
+		motion.velocity[0] = 0.95 * motion.velocity[0];			
 	}	
 
 
