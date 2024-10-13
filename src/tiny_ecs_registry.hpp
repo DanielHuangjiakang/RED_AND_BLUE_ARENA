@@ -23,6 +23,8 @@ public:
 	ComponentContainer<vec3> colors;
 	ComponentContainer<Block> blocks;
 	ComponentContainer<Gravity> gravities;
+	ComponentContainer<Bullet> bullet;
+    ComponentContainer<Laser> lasers;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -39,6 +41,8 @@ public:
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
 		registry_list.push_back(&blocks);
+		registry_list.push_back(&bullet);
+        registry_list.push_back(&lasers);
 	}
 
 	void clear_all_components() {
