@@ -14,30 +14,28 @@ vec2 get_bounding_box(const Motion& motion)
 int collides(const Motion& motion1, const Motion& motion2)
 {
 	float x1_left = motion1.position[0] - (motion1.scale[0] / 2);
-	float x1_right = motion1.position[0] + (motion1.scale[0] / 2);
-	float y1_top = motion1.position[1] - (motion1.scale[1] / 2);
-	float y1_bot = motion1.position[1] + (motion1.scale[1] / 2);
+    float x1_right = motion1.position[0] + (motion1.scale[0] / 2);
+    float y1_top = motion1.position[1] - (motion1.scale[1] / 2);
+    float y1_bot = motion1.position[1] + (motion1.scale[1] / 2);
+    float x2_left = motion2.position[0] - (motion2.scale[0] / 2);
+    float x2_right = motion2.position[0] + (motion2.scale[0] / 2);
+    float y2_top = motion2.position[1] - (motion2.scale[1] / 2);
+    float y2_bot = motion2.position[1] + (motion2.scale[1] / 2);
 
-	float x2_left = motion2.position[0] - (motion2.scale[0] / 2);
-	float x2_right = motion2.position[0] + (motion2.scale[0] / 2);
-	float y2_top = motion2.position[1] - (motion2.scale[1] / 2);
-	float y2_bot = motion2.position[1] + (motion2.scale[1] / 2);
+    if (x1_left >= x2_right || x2_left >= x1_right) return 0; // no collision
+    if (y1_top >= y2_bot || y2_top >= y1_bot) return 0; // no collision
+    float x_overlap = std::min(x1_right, x2_right) - std::max(x1_left, x2_left);
+    float y_overlap = std::min(y1_bot, y2_bot) - std::max(y1_top, y2_top);
 
-	if (x1_left >= x2_right || x2_left >= x1_right) return 0; // no collision
-    if (y1_top >= y2_bot || y2_top >= y1_bot) return 0; // no collision;
+    if (x_overlap < y_overlap) {
+        if (motion1.position[0] < motion2.position[0]) return 3; // left collision
+        else return 4; // right collision
+    } else {
+        if (motion1.position[1] < motion2.position[1]) return 1; // top collision
+        else return 2; // bot collision
+    }
 
-	if (y1_bot > y2_top && y1_bot < y2_bot) {
-		return 1; // top collision
-	} else if (y1_top > y2_top && y1_top < y2_bot) {
-		return 2; // bot collision
-	} else if (x1_right > x2_left && x1_right < x2_right) {
-		return 3; // left collision
-	} else if (x1_left > x2_left && x1_left < x2_right) {
-		return 4; // right collision
-	}
-
-    return 0;
-	
+    return 0; // no collision
 }
 
 void PhysicsSystem::step(float elapsed_ms)
