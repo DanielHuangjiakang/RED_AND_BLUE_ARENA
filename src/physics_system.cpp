@@ -59,9 +59,13 @@ void PhysicsSystem::step(float elapsed_ms)
 		Gravity gravity = gravity_registry.components[i];
 		Entity entity = gravity_registry.entities[i];
 		Motion& motion = registry.motions.get(entity);
+		Player player = registry.players.get(entity);
+		motion.velocity += gravity.g * step_seconds;
+		if (abs(motion.velocity[0]) > 1000) motion.velocity[0] = ((motion.velocity[0] > 0) - (motion.velocity[0] < 0)) * 1000;
+		if (abs(motion.velocity[1]) > 1000) motion.velocity[1] = ((motion.velocity[1] > 0) - (motion.velocity[1] < 0)) * 1000;
 
-		motion.velocity[1] += gravity.a;
-	}
+		motion.velocity[0] = 0.95 * motion.velocity[0];			
+	}	
 
 	// Check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;
