@@ -2,6 +2,37 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
+// Entity createFish(RenderSystem* renderer, vec2 position)
+// {
+// 	// Reserve en entity
+// 	auto entity = Entity();
+
+// 	// Store a reference to the potentially re-used mesh object
+// 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+// 	registry.meshPtrs.emplace(entity, &mesh);
+
+// 	// Initialize the position, scale, and physics components
+// 	auto& motion = registry.motions.emplace(entity);
+// 	motion.angle = 0.f;
+// 	motion.velocity = { 0, 50 };
+// 	motion.position = position;
+
+// 	// Setting initial values, scale is negative to make it face the opposite way
+// 	motion.scale = vec2({ -FISH_BB_WIDTH, FISH_BB_HEIGHT });
+
+// 	// Create an (empty) Bug component to be able to refer to all bug
+// 	registry.eatables.emplace(entity);
+// 	registry.renderRequests.insert(
+// 		entity,
+// 		{
+// 			TEXTURE_ASSET_ID::FISH,
+// 			EFFECT_ASSET_ID::TEXTURED,
+// 			GEOMETRY_BUFFER_ID::SPRITE
+// 		});
+
+// 	return entity;
+// }
+
 Entity createLaser(RenderSystem* renderer, vec2 target) {
     auto entity = Entity();
     Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
@@ -49,7 +80,7 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
 	motion.scale = {PLAYER_WIDTH, PLAYER_HEIGHT};
 
 
-	registry.gravities.emplace(entity);
+	auto& gravity = registry.gravities.emplace(entity);
 
 	//red player (right ride facting left)
 	if (side ==2) {
@@ -107,9 +138,7 @@ Entity createBullet(RenderSystem* renderer, vec2 position, bool direction) {
 
 }
 
-
-// create a block based on its top left corner (x, y), and its width and height
-Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height) { 
+Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height) {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -121,7 +150,7 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
 	block.height = height;
 
 	auto& motion = registry.motions.emplace(entity);
- 	motion.velocity = { 0.f, 0.f };
+ 	motion.velocity = { 0, 0 };
  	motion.position = {x + (width / 2), y + (height / 2)};
 	motion.scale = {width, height};
 
@@ -134,8 +163,6 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
  	return entity;
 }
 
-
-// create a block based on its center (position), and its width and height
 Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height) {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
@@ -147,8 +174,8 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 	motion.scale = {width, height};
 
 	auto& block = registry.blocks.emplace(entity);
-	block.x = int(position[0] - (width / 2));
-	block.y = int(position[1] - (height / 2));
+	block.x = position[0] - (width / 2);
+	block.y = position[1] - (height / 2);
 	block.width = width;
 	block.height = height;
 
