@@ -16,7 +16,7 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
  	motion.position = position;
 	motion.scale = { 50, 50 }; // width * height
 
-	auto& gravity = registry.gravities.emplace(entity);
+	registry.gravities.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity,
@@ -41,7 +41,7 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
 	block.height = height;
 
 	auto& motion = registry.motions.emplace(entity);
- 	motion.velocity = { 0, 0 };
+ 	motion.velocity = { 0.f, 0.f };
  	motion.position = {x + (width / 2), y + (height / 2)};
 	motion.scale = {width, height};
 
@@ -67,8 +67,8 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 	motion.scale = {width, height};
 
 	auto& block = registry.blocks.emplace(entity);
-	block.x = position[0] - (width / 2);
-	block.y = position[1] - (height / 2);
+	block.x = int(position[0] - (width / 2));
+	block.y = int(position[1] - (height / 2));
 	block.width = width;
 	block.height = height;
 

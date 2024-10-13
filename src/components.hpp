@@ -10,6 +10,8 @@ struct Player
 	int side; // side = 1 for blue, side = 2 for red
 	bool jumpable = false;
 	bool direction;  // 0 for left, 1 for right, 
+	bool right_button = false;
+	bool left_button = false;
 };
 
 // Weapon component
@@ -21,8 +23,8 @@ struct Weapon
 
 // All data relevant to the shape and motion of entities
 struct Motion {
-	vec2 position = { 0, 0 };
-	vec2 velocity = { 0, 0 };
+	vec2 position = { 0.f, 0.f };
+	vec2 velocity = { 0.f, 0.f };
 	vec2 scale = { 1, 1 };
 };
 
@@ -34,7 +36,7 @@ struct Block {
 };
 
 struct Gravity {
-	float a = 750.0f;
+	vec2 g = {0.f, 750.f};
 };
 
 // Stucture to store collision information

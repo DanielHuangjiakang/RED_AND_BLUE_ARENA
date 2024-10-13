@@ -277,6 +277,10 @@ bool WorldSystem::is_over() const {
 }
 
 // On key callback
+bool player1_left_button = false;
+bool player1_right_button = false;
+bool player2_left_button = false;
+bool player2_right_button = false;
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	// Resetting game
@@ -289,53 +293,69 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	Motion& motion1 = registry.motions.get(player1);
 	Motion& motion2 = registry.motions.get(player2);
-	Player& player_1 = registry.players.get(player1);
-	Player& player_2 = registry.players.get(player2);
+	Gravity& gravity1 = registry.gravities.get(player1);
+	Gravity& gravity2 = registry.gravities.get(player2);
+	Player& p1 = registry.players.get(player1);
+	Player& p2 = registry.players.get(player2);
 	if (key == GLFW_KEY_A) {
     	if (action == GLFW_PRESS) {
-        	motion1.velocity[0] += -200;
-        	player_1.direction = 0; // Facing left
+        	gravity1.g[0] += -600.f;
+        	p1.direction = 0; // Facing left
+			p1.left_button = true;
     	} else if (action == GLFW_RELEASE) {
-        	motion1.velocity[0] -= -200;
+        	gravity1.g[0] -= -600.f;
+			p1.left_button = false;
     	}
 	}
 
 	if (key == GLFW_KEY_D) {
     	if (action == GLFW_PRESS) {
-        	motion1.velocity[0] += 200;
-        	player_1.direction = 1; // Facing right
+        	gravity1.g[0] += +600.f;
+        	p1.direction = 1; // Facing right
+			p1.right_button = true;
     	} else if (action == GLFW_RELEASE) {
-        	motion1.velocity[0] -= 200;
+        	gravity1.g[0] -= +600.f;
+			p1.right_button = false;
     	}
 	}
 
 	if (key == GLFW_KEY_W) {
-		if (action == GLFW_PRESS && player_1.jumpable == true) {
-			motion1.velocity[1] += -500;
-			player_1.jumpable = false;
+		if (action == GLFW_PRESS && p1.jumpable == true) {
+			motion1.velocity[1] += -600;
+			p1.jumpable = false;
 		}
 	}
 
 	if (key == GLFW_KEY_LEFT) {
     	if (action == GLFW_PRESS) {
-        	motion2.velocity[0] += -200;
-        	player_2.direction = 0; // Facing left
+        	gravity2.g[0] = -600.f;
+        	p2.direction = 0; // Facing left
+			p2.left_button = true;
     	} else if (action == GLFW_RELEASE) {
-        	motion2.velocity[0] -= -200;
+			if (!p2.right_button) {
+				gravity2.g[0] = 0.f;
+			}
+			p2.left_button = false;
+        	// gravity2.g[0] -= -200.f;
     	}
 	}
 	if (key == GLFW_KEY_RIGHT) {
     	if (action == GLFW_PRESS) {
-        	motion2.velocity[0] += 200;
-        	player_2.direction = 1; // Facing right
+        	gravity2.g[0] = +600.f;
+        	p2.direction = 1; // Facing right
+			p2.right_button = true;
     	} else if (action == GLFW_RELEASE) {
-       		motion2.velocity[0] -= 200;
+			if (!p2.left_button) {
+				gravity2.g[0] = 0.f;
+			}
+			p2.right_button = false;
+       		// gravity2.g[0] -= +200.f;
     	}
 	}
 	if (key == GLFW_KEY_UP) {
-		if (action == GLFW_PRESS && player_2.jumpable == true) {
-			motion2.velocity[1] += -500;
-			player_2.jumpable = false;
+		if (action == GLFW_PRESS && p2.jumpable == true) {
+			motion2.velocity[1] += -600;
+			p2.jumpable = false;
 		}
 	}
 

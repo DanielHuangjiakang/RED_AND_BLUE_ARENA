@@ -42,25 +42,31 @@ int collides(const Motion& motion1, const Motion& motion2)
 
 void PhysicsSystem::step(float elapsed_ms)
 {
+	float step_seconds = elapsed_ms / 1000.f;
 	auto& motion_registry = registry.motions;
 	for(uint i = 0; i< motion_registry.size(); i++)
 	{
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
-		float step_seconds = elapsed_ms / 1000.f;
 		motion.position += motion.velocity * step_seconds;
 	}
 
 	auto& gravity_registry = registry.gravities;
 	for(uint i = 0; i< gravity_registry.size(); i++) 
 	{
-		Gravity gravity = gravity_registry.components[i];
+		Gravity& gravity = gravity_registry.components[i];
 		Entity entity = gravity_registry.entities[i];
 		Motion& motion = registry.motions.get(entity);
-		float step_seconds = elapsed_ms / 1000.f;
-		motion.velocity[1] += gravity.a * step_seconds;
-		// motion.velocity[1] += gravity.a;
-	}
+		Player player = registry.players.get(entity);
+		motion.velocity += gravity.g * step_seconds;
+		if (abs(motion.velocity[0]) > 1000) motion.velocity[0] = ((motion.velocity[0] > 0) - (motion.velocity[0] < 0)) * 1000;
+		if (abs(motion.velocity[1]) > 1000) motion.velocity[1] = ((motion.velocity[1] > 0) - (motion.velocity[1] < 0)) * 1000;
+
+		// if ((!player.left_button && !player.right_button) || (player.left_button && player.right_button)) {
+			motion.velocity[0] = 0.95 * motion.velocity[0];			
+		// }
+	}	
+
 
 	// Check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;
