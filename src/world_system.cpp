@@ -152,6 +152,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
     }
 
+    for (Entity entity : registry.lasers.entities) {
+        Motion& laserMotion = registry.motions.get(entity);
+        vec2 playerPosition = registry.motions.get(player1).position; // 追踪玩家1
+        vec2 direction = normalize(playerPosition - laserMotion.position);
+        laserMotion.velocity = direction * 100.f; // 激光朝向玩家移动
+    }
+
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
@@ -218,6 +225,8 @@ void WorldSystem::restart_game() {
 
 	player2 = createPlayer(renderer, 2, {window_width_px - 100, window_height_px - 100}, 1);
 	//registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
+
+    createLaser(renderer, registry.motions.get(player1).position);
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
 	//registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
