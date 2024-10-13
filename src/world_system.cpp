@@ -297,10 +297,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     	if (action == GLFW_PRESS) {
         	gravity1.g[0] = -700.f;
         	p1.direction = 0; // Facing left
-			p1.left_button = true;
+			player1_left_button = true;
     	} else if (action == GLFW_RELEASE) {
-        	gravity1.g[0] = 0.f;
-			p1.left_button = false;
+        	if (!player2_right_button) {
+				gravity1.g[0] = 0.f;
+			}
+			player1_left_button = false;
     	}
 	}
 
@@ -308,10 +310,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     	if (action == GLFW_PRESS) {
         	gravity1.g[0] = +700.f;
         	p1.direction = 1; // Facing right
-			p1.right_button = true;
+			player1_right_button = true;
     	} else if (action == GLFW_RELEASE) {
-        	gravity1.g[0] = 0.f;
-			p1.right_button = false;
+        	if (!player2_right_button) {
+				gravity1.g[0] = 0.f;
+			}
+			player1_right_button = false;
     	}
 	}
 
@@ -326,12 +330,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     	if (action == GLFW_PRESS) {
         	gravity2.g[0] = -700.f;
         	p2.direction = 0; // Facing left
-			p2.left_button = true;
+			player2_left_button = true;
     	} else if (action == GLFW_RELEASE) {
-			if (!p2.right_button) {
+			if (!player2_right_button) {
 				gravity2.g[0] = 0.f;
 			}
-			p2.left_button = false;
+			player2_left_button = false;
         	// gravity2.g[0] -= -200.f;
     	}
 	}
@@ -339,12 +343,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
     	if (action == GLFW_PRESS) {
         	gravity2.g[0] = +700.f;
         	p2.direction = 1; // Facing right
-			p2.right_button = true;
+			player2_right_button = true;
     	} else if (action == GLFW_RELEASE) {
-			if (!p2.left_button) {
+			if (!player2_left_button) {
 				gravity2.g[0] = 0.f;
 			}
-			p2.right_button = false;
+			player2_right_button = false;
        		// gravity2.g[0] -= +200.f;
     	}
 	}

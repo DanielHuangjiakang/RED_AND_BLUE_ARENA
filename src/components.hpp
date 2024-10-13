@@ -10,8 +10,6 @@ struct Player
 	int side; // side = 1 for blue, side = 2 for red
 	bool jumpable = false;
 	bool direction;  // 0 for left, 1 for right, 
-	bool right_button = false;
-	bool left_button = false;
 };
 
 // Weapon component
