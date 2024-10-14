@@ -25,7 +25,6 @@ public:
 	ComponentContainer<Gravity> gravities;
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<GunTimer> gunTimers;
-    ComponentContainer<Laser> lasers;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -45,7 +44,6 @@ public:
 		registry_list.push_back(&gravities);
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&gunTimers);
-        registry_list.push_back(&lasers);
 	}
 
 	void clear_all_components() {

@@ -113,6 +113,13 @@ GLFWwindow* WorldSystem::create_window() {
 		return nullptr;
 	}
 
+	// Adjust the volume for the background music
+	Mix_VolumeMusic(2);
+
+	// Adjust the volume for the sound effects
+	Mix_VolumeChunk(hit_sound, 6);  
+	Mix_VolumeChunk(shoot_sound, 6);  
+	Mix_VolumeChunk(end_music, 10);  
 	return window;
 }
 
@@ -141,34 +148,33 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Update player1's position and enforce boundaries
     Motion& motion1 = registry.motions.get(player1);
-    if (motion1.position.x <= motion1.scale[0]/2) {
+    if (motion1.position.x < motion1.scale[0]/2) {
         motion1.position.x = motion1.scale[0]/2; // Stop at left boundary
+		motion1.velocity[0] = 0;
     } else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
         motion1.position.x = window_width_px + motion1.scale[0]/2 - motion1.scale.x; // Stop at right boundary
+		motion1.velocity[0] = 0;
     }
     if (motion1.position.y < motion1.scale[1]/2) {
         motion1.position.y = motion1.scale[1]/2; // Stop at the top boundary
+		motion1.velocity[1] = 0;
     } 
 
     // Update player2's position and enforce boundaries
     Motion& motion2 = registry.motions.get(player2);
-    if (motion2.position.x <= motion2.scale[0]/2) {
+    if (motion2.position.x < motion2.scale[0]/2) {
         motion2.position.x = motion2.scale[0]/2; // Stop at left boundary
+		motion2.velocity[0] = 0;
     } else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
         motion2.position.x =  window_width_px + motion2.scale[0]/2 - motion2.scale.x; // Stop at right boundary
+		motion2.velocity[0] = 0;
     }
     if (motion2.position.y < motion2.scale[1]/2) {
         motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
+		motion2.velocity[1] = 0;
     }
 
-    for (Entity entity : registry.lasers.entities) {
-        Motion& laserMotion = registry.motions.get(entity);
-        vec2 playerPosition = registry.motions.get(player1).position;
-        vec2 direction = normalize(playerPosition - laserMotion.position);
-        laserMotion.velocity = direction * 100.f;
-    }
-
-    // Remove entities that leave the screen on the left side
+	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
 	for (int i = (int)motions_registry.components.size()-1; i>=0; --i) {
@@ -254,8 +260,6 @@ void WorldSystem::restart_game() {
 	registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
 	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
 	registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
-
-    createLaser(renderer, registry.motions.get(player1).position);
 }
 
 // Compute collisions between entities
@@ -295,22 +299,22 @@ void WorldSystem::handle_collisions() {
 		}
 
 		if (registry.players.has(entity) && registry.bullets.has(entity_other)) {
-			Player& player = registry.players.get(entity);
-			if (player.side != registry.bullets.get(entity_other).side) {
-				player.health -= 1;
+            Player& player = registry.players.get(entity);
+            if (player.side != registry.bullets.get(entity_other).side) {
+                player.health -= 1;
 
 				// hit sound
 				Mix_PlayChannel(-1, hit_sound, 0);
-
-				if (player.health <= 0) {
-					if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
-
+                if (player.health <= 0) {
+                    if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
 					// end music
 					Mix_PlayChannel(-1, end_music, 0);
-				}
-				registry.remove_all_components_of(entity_other);
-			}
-		}
+                    Motion& motion = registry.motions.get(entity);
+                    motion.angle = M_PI / 4;
+                }
+                registry.remove_all_components_of(entity_other);
+            }
+        }
 
 		if (registry.bullets.has(entity) && registry.bullets.has(entity_other)) {
 			registry.remove_all_components_of(entity);
@@ -377,6 +381,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			p1.jumpable = false;
 		}
 	}
+
 	if (key == GLFW_KEY_Q) {
 		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player1)) {
 			int dir;
