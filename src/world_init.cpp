@@ -1,6 +1,6 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
-#include <random>
+
 
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction) {
 	auto entity = Entity();
@@ -105,33 +105,4 @@ Entity createBullet(RenderSystem* renderer, int side, vec2 position, int directi
 	
 	return entity;
 
-}
-
-Entity createLaser(RenderSystem* renderer, vec2 target) {
-    auto entity = Entity();
-    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-    registry.meshPtrs.emplace(entity, &mesh);
-    registry.lasers.emplace(entity);
-
-    std::random_device rd;
-    std::default_random_engine rng(rd());
-    std::uniform_real_distribution<float> distX(0.f, static_cast<float>(window_width_px));
-    std::uniform_real_distribution<float> distY(0.f, static_cast<float>(window_height_px));
-    vec2 position = {distX(rng), distY(rng)};
-
-    auto& motion = registry.motions.emplace(entity);
-    motion.position = position;
-    motion.scale = { 10, 10 };
-
-    vec2 direction = normalize(target - position);
-    motion.velocity = direction * 100.f;
-
-    registry.renderRequests.insert(
-            entity,
-            { TEXTURE_ASSET_ID::TEXTURE_COUNT,
-              EFFECT_ASSET_ID::SALMON,
-              GEOMETRY_BUFFER_ID::SQUARE });
-    registry.colors.insert(entity, {0.0f, 1.0f, 0.0f});
-
-    return entity;
 }

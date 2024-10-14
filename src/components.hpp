@@ -10,7 +10,7 @@ struct Player
 	int side; // side = 1 for blue, side = 2 for red
 	bool jumpable = false;
 	bool direction;  // 0 for left, 1 for right, 
-	int health = 10;
+	int health = 3;
 };
 
 struct GunTimer {
@@ -33,6 +33,7 @@ struct Motion {
 	vec2 position = { 0.f, 0.f };
 	vec2 velocity = { 0.f, 0.f };
 	vec2 scale = { 1, 1 };
+	float angle = 0.f;
 };
 
 struct Block {
@@ -160,5 +161,3 @@ struct RenderRequest {
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
-
-struct Laser {};
