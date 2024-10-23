@@ -11,6 +11,8 @@ struct Player
 	bool jumpable = false;
 	bool direction;  // 0 for left, 1 for right, 
 	int health = 3;
+	float jump_accel = -600.f;
+	float lr_accel = 1000.f;
 };
 
 struct GunTimer {
@@ -45,6 +47,7 @@ struct Block {
 
 struct Gravity {
 	vec2 g = {0.f, 750.f};
+	bool drag = false;
 };
 
 // Stucture to store collision information

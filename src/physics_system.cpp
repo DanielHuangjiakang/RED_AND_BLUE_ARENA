@@ -57,9 +57,18 @@ void PhysicsSystem::step(float elapsed_ms)
 		Motion& motion = registry.motions.get(entity);
 		Player player = registry.players.get(entity);
 		motion.velocity += gravity.g * step_seconds;
-		if (abs(motion.velocity[0]) > 700) motion.velocity[0] = ((motion.velocity[0] > 0) - (motion.velocity[0] < 0)) * 700;
+
+		int sign = (motion.velocity[0] > 0) - (motion.velocity[0] < 0);
+		if (gravity.drag) {
+			motion.velocity[0] += -1 * sign * step_seconds * 500.f;
+			if ((motion.velocity[0] > 0) - (motion.velocity[0] < 0) != sign) {
+				motion.velocity[0] = 0.f;
+			}
+		}
+
+		if (abs(motion.velocity[0]) > 350) motion.velocity[0] = ((motion.velocity[0] > 0) - (motion.velocity[0] < 0)) * 350;
 		if (abs(motion.velocity[1]) > 700) motion.velocity[1] = ((motion.velocity[1] > 0) - (motion.velocity[1] < 0)) * 700;
-		motion.velocity[0] = 0.95 * motion.velocity[0];	
+
 	}	
 
 

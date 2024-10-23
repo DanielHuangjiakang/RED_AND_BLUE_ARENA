@@ -351,7 +351,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	Player& p2 = registry.players.get(player2);
 	if (key == GLFW_KEY_A) {
     	if (action == GLFW_PRESS) {
-        	gravity1.g[0] = -700.f;
+        	gravity1.g[0] = -p1.lr_accel;
         	p1.direction = 0; // Facing left
 			player1_left_button = true;
     	} else if (action == GLFW_RELEASE) {
@@ -364,7 +364,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (key == GLFW_KEY_D) {
     	if (action == GLFW_PRESS) {
-        	gravity1.g[0] = +700.f;
+        	gravity1.g[0] = +p1.lr_accel;
         	p1.direction = 1; // Facing right
 			player1_right_button = true;
     	} else if (action == GLFW_RELEASE) {
@@ -377,7 +377,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (key == GLFW_KEY_W) {
 		if (action == GLFW_PRESS && p1.jumpable == true) {
-			motion1.velocity[1] += -600;
+			motion1.velocity[1] += p1.jump_accel;
 			p1.jumpable = false;
 		}
 	}
@@ -399,7 +399,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	if (key == GLFW_KEY_LEFT) {
     	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = -700.f;
+        	gravity2.g[0] = -p2.lr_accel;
         	p2.direction = 0; // Facing left
 			player2_left_button = true;
     	} else if (action == GLFW_RELEASE) {
@@ -411,7 +411,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 	if (key == GLFW_KEY_RIGHT) {
     	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = +700.f;
+        	gravity2.g[0] = +p2.lr_accel;
         	p2.direction = 1; // Facing right
 			player2_right_button = true;
     	} else if (action == GLFW_RELEASE) {
@@ -423,7 +423,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 	if (key == GLFW_KEY_UP) {
 		if (action == GLFW_PRESS && p2.jumpable == true) {
-			motion2.velocity[1] += -600;
+			motion2.velocity[1] += p2.jump_accel;
 			p2.jumpable = false;
 		}
 	}
