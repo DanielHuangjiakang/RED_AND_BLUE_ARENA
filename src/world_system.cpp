@@ -2,6 +2,8 @@
 #include "world_system.hpp"
 #include "common.hpp"
 #include "world_init.hpp"
+#include "tiny_ecs_registry.hpp"
+#include "decisionTree.hpp"
 
 // stlib
 #include <cassert>
@@ -135,6 +137,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
+
+	
     //fps calculation
     static float total_time = 0.0f;
     static int frame_count = 0;
@@ -153,6 +157,24 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	std::stringstream title_ss;
 	title_ss << "Game Screen";
 	glfwSetWindowTitle(window, title_ss.str().c_str());
+
+    // Decrease cooldown timer each frame
+    if (laserCooldownTimer > 0) {
+        laserCooldownTimer -= elapsed_ms_since_last_update;
+    }
+	if (rootNode) {
+        rootNode->execute();
+    }
+
+    // Laser updates and other game mechanics (e.g., enforcing boundaries, handling collisions)
+    for (Entity entity : registry.lasers.entities) {
+        updateLaserVelocity(entity, registry.motions.get(player1), registry.motions.get(player2));
+
+        // Reset cooldown timer after an attack
+        if (laserCooldownTimer <= 0 && isPlayerInRange()) {  // Assuming `isPlayerInRange` returns true if any player is in range
+            laserCooldownTimer = 3000;  // 3-second cooldown after attacking
+        }
+    }
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
@@ -188,6 +210,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
         motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
 		motion2.velocity[1] = 0;
     }
+
 
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
@@ -225,6 +248,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			return true;
 		}
 	}
+
+	
 	// reduce window brightness if the salmon is dying
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
@@ -275,6 +300,8 @@ void WorldSystem::restart_game() {
 	registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
 	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
 	registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
+
+	createLaser(renderer);
 }
 
 // Compute collisions between entities
@@ -485,4 +512,72 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
+}
+
+void WorldSystem::updateLaserVelocity(Entity laserEntity, Motion& player1Motion, Motion& player2Motion) {
+    Motion& laserMotion = registry.motions.get(laserEntity);
+    vec2 player1Pos = player1Motion.position;
+    vec2 player2Pos = player2Motion.position;
+    float distToPlayer1 = calculateDistance(laserMotion.position, player1Pos);
+    float distToPlayer2 = calculateDistance(laserMotion.position, player2Pos);
+    // Choose target based on the nearest player
+
+    vec2 targetPosition = (distToPlayer1 < distToPlayer2) ? player1Pos : player2Pos;
+    vec2 direction = normalize(targetPosition - laserMotion.position);
+    laserMotion.velocity = direction * 100.f;
+}
+
+float WorldSystem::calculateDistance(vec2 pos1, vec2 pos2) {
+	return length(pos2 - pos1);
+}
+
+void WorldSystem::initializeLaserAI() {
+    // Define the range within which a player is considered "in range"
+    const float laserRange = 100.0f; // Example range, adjust as needed
+
+    // Define the action lambdas
+    auto idleAction = []() { std::cout << "Laser is idling.\n"; };
+    auto trackPlayerAction = []() { std::cout << "Laser is tracking the player.\n"; };
+    auto attackPlayerAction = []() { std::cout << "Laser is attacking the player!\n"; };
+
+    // Create action nodes using lambdas
+    auto idleNode = new ActionNode(idleAction);
+    auto trackNode = new ActionNode(trackPlayerAction);
+    auto attackNode = new ActionNode(attackPlayerAction);
+
+    // Condition lambda to check if any player is in range
+    auto isPlayerInRange = [this, laserRange]() -> bool {
+        if (registry.lasers.entities.empty()) return false;
+        Entity laserEntity = registry.lasers.entities.front();
+        Motion& laserMotion = registry.motions.get(laserEntity);
+        Motion& playerMotion1 = registry.motions.get(player1);
+        Motion& playerMotion2 = registry.motions.get(player2);
+
+        float distanceToPlayer1 = calculateDistance(laserMotion.position, playerMotion1.position);
+        float distanceToPlayer2 = calculateDistance(laserMotion.position, playerMotion2.position);
+
+        return distanceToPlayer1 <= laserRange || distanceToPlayer2 <= laserRange;
+    };
+
+    // Condition lambda to check if cooldown has completed
+    auto isCooldownComplete = [this]() -> bool {
+        return laserCooldownTimer <= 0;
+    };
+
+    // Create condition nodes
+    auto inRangeNode = new ConditionNode(isPlayerInRange, attackNode, trackNode);
+    rootNode = new ConditionNode(isCooldownComplete, inRangeNode, idleNode);
+}
+
+bool WorldSystem::isPlayerInRange() {
+	if (registry.lasers.entities.empty()) return false;
+	Entity laserEntity = registry.lasers.entities.front();
+	Motion& laserMotion = registry.motions.get(laserEntity);
+	Motion& playerMotion1 = registry.motions.get(player1);
+	Motion& playerMotion2 = registry.motions.get(player2);
+
+	float distanceToPlayer1 = calculateDistance(laserMotion.position, playerMotion1.position);
+	float distanceToPlayer2 = calculateDistance(laserMotion.position, playerMotion2.position);
+
+	return distanceToPlayer1 <= laserRange || distanceToPlayer2 <= laserRange;
 }

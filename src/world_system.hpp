@@ -12,6 +12,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "decisionTree.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -77,4 +78,15 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+	//laserSupportFucntions
+	float calculateDistance(vec2 pos1, vec2 pos2);
+	void updateLaserVelocity(Entity laserEntity, Motion& player1Motion, Motion& player2Motion);
+	DecisionTreeNode* rootNode;
+    float laserRange = 500.0f;
+    float laserCooldownTime = 2000.0f;  // Cooldown time in milliseconds
+    float laserCooldownTimer = 0.0f;
+	void initializeLaserAI();
+	bool isPlayerInRange();
 };
+	
