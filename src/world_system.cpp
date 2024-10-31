@@ -159,8 +159,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
     // Decrease cooldown timer each frame
-    if (laserCooldownTimer > 0) {
-        laserCooldownTimer -= elapsed_ms_since_last_update;
+    if (laserCoolDownTimer > 0) {
+        laserCoolDownTimer -= elapsed_ms_since_last_update;
     }
 	if (rootNode) {
         rootNode->execute();
@@ -168,11 +168,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
     // Laser updates and other game mechanics (e.g., enforcing boundaries, handling collisions)
     for (Entity entity : registry.lasers.entities) {
-        updateLaserVelocity(entity, registry.motions.get(player1), registry.motions.get(player2));
 
-        // Reset cooldown timer after an attack
-        if (laserCooldownTimer <= 0 && isPlayerInRange()) {  // Assuming `isPlayerInRange` returns true if any player is in range
-            laserCooldownTimer = 3000;  // 3-second cooldown after attacking
+        // Reset coolDown timer after an attack
+        if (laserCoolDownTimer <= 0 && isPlayerInRange()) {  // Assuming `isPlayerInRange` returns true if any player is in range
+            laserCoolDownTimer = 3000;  // 3-second coolDown after attacking
         }
     }
 
@@ -302,6 +301,8 @@ void WorldSystem::restart_game() {
 	registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
 
 	createLaser(renderer);
+
+    initializeLaserAI();
 }
 
 // Compute collisions between entities
@@ -532,13 +533,32 @@ float WorldSystem::calculateDistance(vec2 pos1, vec2 pos2) {
 }
 
 void WorldSystem::initializeLaserAI() {
-    // Define the range within which a player is considered "in range"
-    const float laserRange = 100.0f; // Example range, adjust as needed
-
     // Define the action lambdas
-    auto idleAction = []() { std::cout << "Laser is idling.\n"; };
-    auto trackPlayerAction = []() { std::cout << "Laser is tracking the player.\n"; };
-    auto attackPlayerAction = []() { std::cout << "Laser is attacking the player!\n"; };
+    auto idleAction = []() { if (!registry.lasers.entities.empty()) {
+        Entity laserEntity = registry.lasers.entities.front();
+        Motion& laserMotion = registry.motions.get(laserEntity);
+        laserMotion.velocity = {0.0f, 0.0f};  // Stop laser
+        std::cout << "Laser is idling.\n";
+    }};
+    auto trackPlayerAction = [this]() {if (!registry.lasers.entities.empty()) {
+        Entity laserEntity = registry.lasers.entities.front();
+        Motion& laserMotion = registry.motions.get(laserEntity);
+        Motion& player1Motion = registry.motions.get(player1);
+        Motion& player2Motion = registry.motions.get(player2);
+
+        vec2 targetPosition = (calculateDistance(laserMotion.position, player1Motion.position) <
+                               calculateDistance(laserMotion.position, player2Motion.position)) ?
+                              player1Motion.position : player2Motion.position;
+
+        vec2 direction = normalize(targetPosition - laserMotion.position);
+        laserMotion.velocity = direction * 100.0f;
+        std::cout << "Laser is tracking the player.\n";
+    } };
+    auto attackPlayerAction = []() {
+        if (!registry.lasers.entities.empty()) {
+        Entity laserEntity = registry.lasers.entities.front();
+        std::cout << "Laser is attacking the player!\n";
+    } };
 
     // Create action nodes using lambdas
     auto idleNode = new ActionNode(idleAction);
@@ -546,7 +566,7 @@ void WorldSystem::initializeLaserAI() {
     auto attackNode = new ActionNode(attackPlayerAction);
 
     // Condition lambda to check if any player is in range
-    auto isPlayerInRange = [this, laserRange]() -> bool {
+    auto isPlayerInRange = [this]() -> bool {
         if (registry.lasers.entities.empty()) return false;
         Entity laserEntity = registry.lasers.entities.front();
         Motion& laserMotion = registry.motions.get(laserEntity);
@@ -559,14 +579,14 @@ void WorldSystem::initializeLaserAI() {
         return distanceToPlayer1 <= laserRange || distanceToPlayer2 <= laserRange;
     };
 
-    // Condition lambda to check if cooldown has completed
-    auto isCooldownComplete = [this]() -> bool {
-        return laserCooldownTimer <= 0;
+    // Condition lambda to check if coolDown has completed
+    auto isCoolDownComplete = [this]() -> bool {
+        return laserCoolDownTimer <= 0;
     };
 
     // Create condition nodes
     auto inRangeNode = new ConditionNode(isPlayerInRange, attackNode, trackNode);
-    rootNode = new ConditionNode(isCooldownComplete, inRangeNode, idleNode);
+    rootNode = new ConditionNode(isCoolDownComplete, inRangeNode, idleNode);
 }
 
 bool WorldSystem::isPlayerInRange() {

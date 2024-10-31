@@ -38,6 +38,7 @@ public:
 
 	// Should the game be over ?
 	bool is_over()const;
+
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -83,10 +84,15 @@ private:
 	float calculateDistance(vec2 pos1, vec2 pos2);
 	void updateLaserVelocity(Entity laserEntity, Motion& player1Motion, Motion& player2Motion);
 	DecisionTreeNode* rootNode;
-    float laserRange = 500.0f;
-    float laserCooldownTime = 2000.0f;  // Cooldown time in milliseconds
-    float laserCooldownTimer = 0.0f;
+    float laserRange = 10.0f;
+    float laserCoolDownTime = 2000.0f;  // CoolDown time in milliseconds
+    float laserCoolDownTimer = 0.0f;
 	void initializeLaserAI();
 	bool isPlayerInRange();
+    void idleAction();
+    void trackPlayerAction();
+    void attackPlayerAction();
+
+
 };
 	
