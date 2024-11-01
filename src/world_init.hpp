@@ -16,3 +16,4 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 // the bullet
 Entity createBullet(RenderSystem* renderer, int side, vec2 position, int direction);
 Entity createLaser(RenderSystem* renderer);
+Entity createLaserBeam(vec2 start, vec2 end);

@@ -132,3 +132,28 @@ Entity createLaser(RenderSystem* renderer) {
     return entity;
 }
 
+Entity createLaserBeam(vec2 start, vec2 target) {
+    auto beam = Entity();
+
+    // Calculate the midpoint and angle between start and target
+    vec2 midpoint = (start + target) * 0.5f;
+    vec2 direction = normalize(target - start);
+    float beamLength = length(target - start);
+
+    // Set up the beam's motion properties
+    Motion& motion = registry.motions.emplace(beam);
+    motion.position = midpoint;       // Position at the midpoint
+    motion.scale = {50.f, beamLength}; // Set width and length of the beam
+    motion.angle = atan2(direction.y, direction.x);  // Rotate to align with target
+
+    // Set the color of the beam (yellow in this case)
+    registry.colors.insert(beam, {1.0f, 1.0f, 0.0f});
+
+    // Add the render request for the beam
+    registry.renderRequests.insert(
+        beam,
+        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE}
+    );
+
+    return beam;
+}

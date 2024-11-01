@@ -538,7 +538,6 @@ void WorldSystem::initializeLaserAI() {
         Entity laserEntity = registry.lasers.entities.front();
         Motion& laserMotion = registry.motions.get(laserEntity);
         laserMotion.velocity = {0.0f, 0.0f};  // Stop laser
-        std::cout << "Laser is idling.\n";
     }};
     auto trackPlayerAction = [this]() {if (!registry.lasers.entities.empty()) {
         Entity laserEntity = registry.lasers.entities.front();
@@ -552,13 +551,30 @@ void WorldSystem::initializeLaserAI() {
 
         vec2 direction = normalize(targetPosition - laserMotion.position);
         laserMotion.velocity = direction * 100.0f;
-        std::cout << "Laser is tracking the player.\n";
     } };
-    auto attackPlayerAction = []() {
-        if (!registry.lasers.entities.empty()) {
-        Entity laserEntity = registry.lasers.entities.front();
-        std::cout << "Laser is attacking the player!\n";
-    } };
+    auto attackPlayerAction = [this]() {
+    if (registry.lasers.entities.empty()) return;
+
+    Entity laserEntity = registry.lasers.entities.front();
+    Motion& laserMotion = registry.motions.get(laserEntity);
+
+    // Determine the nearest player’s position as the laser target
+    Motion& player1Motion = registry.motions.get(player1);
+    Motion& player2Motion = registry.motions.get(player2);
+    vec2 targetPosition = (calculateDistance(laserMotion.position, player1Motion.position) <
+                           calculateDistance(laserMotion.position, player2Motion.position)) ?
+                          player1Motion.position : player2Motion.position;
+
+    // Spawn a new laser beam entity from the top-center toward target position
+    Entity laserBeam = createLaserBeam({window_width_px / 2, 0}, targetPosition);
+
+    // Check for any players in the path and handle them
+    handleLaserCollisions();
+
+    // Reset cooldown timer after the attack
+    laserCoolDownTimer = 3000;  // 3 seconds cooldown
+};
+
 
     // Create action nodes using lambdas
     auto idleNode = new ActionNode(idleAction);
@@ -600,4 +616,47 @@ bool WorldSystem::isPlayerInRange() {
 	float distanceToPlayer2 = calculateDistance(laserMotion.position, playerMotion2.position);
 
 	return distanceToPlayer1 <= laserRange || distanceToPlayer2 <= laserRange;
+}
+
+// Laser collision handling function
+void WorldSystem::handleLaserCollisions() {
+    for (Entity laserEntity : registry.lasers.entities) {
+        Motion& laserMotion = registry.motions.get(laserEntity);
+
+        // Check collision with each player
+        for (Entity playerEntity : registry.players.entities) {
+            Player& player = registry.players.get(playerEntity);
+            Motion& playerMotion = registry.motions.get(playerEntity);
+
+            // Check if player is in laser path using a helper function
+            if (isLaserInRange(laserMotion.position, playerMotion.position)) {
+                
+                // Reduce player health by 1 on laser hit
+                player.health -= 1;
+
+                // Play laser hit sound effect
+                Mix_PlayChannel(-1, hit_sound, 0);
+
+                // Check if player's health is now zero
+                if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
+                    
+                    // Set a death timer for the player
+                    registry.deathTimers.emplace(playerEntity);
+
+                    // Play end music sound for player "death"
+                    Mix_PlayChannel(-1, end_music, 0);
+
+                    // Apply rotation or other effects on "death" (optional)
+                    playerMotion.angle = M_PI / 4;  // Example: Rotate player slightly
+                }
+            }
+        }
+    }
+}
+
+// Helper function to check if the player is within the laser's range
+bool WorldSystem::isLaserInRange(vec2 laserPosition, vec2 playerPosition) {
+    // Replace this with your logic to determine if player is in laser path
+    float distance = calculateDistance(laserPosition, playerPosition);
+    return distance <= laserRange;  // Assuming laserRange is defined elsewhere
 }

@@ -89,10 +89,7 @@ private:
     float laserCoolDownTimer = 0.0f;
 	void initializeLaserAI();
 	bool isPlayerInRange();
-    void idleAction();
-    void trackPlayerAction();
-    void attackPlayerAction();
-
-
+	void handleLaserCollisions();
+	bool isLaserInRange(vec2 laserPosition, vec2 playerPosition);
 };
 	
