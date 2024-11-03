@@ -163,3 +163,7 @@ struct RenderRequest {
 };
 
 struct Laser {};
+
+struct Lifetime {
+    float counter_ms;
+};

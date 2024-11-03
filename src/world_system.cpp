@@ -170,9 +170,18 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     for (Entity entity : registry.lasers.entities) {
 
         // Reset coolDown timer after an attack
-        if (laserCoolDownTimer <= 0 && isPlayerInRange()) {  // Assuming `isPlayerInRange` returns true if any player is in range
+        if (laserCoolDownTimer <= 0 && isPlayerInRange()) {
             laserCoolDownTimer = 3000;  // 3-second coolDown after attacking
         }
+		for (Entity entity : registry.lifetimes.entities) {
+        Lifetime& lifetime = registry.lifetimes.get(entity);
+        lifetime.counter_ms -= elapsed_ms_since_last_update;
+
+        // Remove the entity when its lifetime expires
+        if (lifetime.counter_ms <= 0) {
+            registry.remove_all_components_of(entity);
+        }
+    }
     }
 
 	// Remove debug info from the last step
@@ -633,30 +642,19 @@ void WorldSystem::handleLaserCollisions() {
                 
                 // Reduce player health by 1 on laser hit
                 player.health -= 1;
-
-                // Play laser hit sound effect
                 Mix_PlayChannel(-1, hit_sound, 0);
-
-                // Check if player's health is now zero
                 if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
-                    
-                    // Set a death timer for the player
                     registry.deathTimers.emplace(playerEntity);
-
-                    // Play end music sound for player "death"
                     Mix_PlayChannel(-1, end_music, 0);
-
-                    // Apply rotation or other effects on "death" (optional)
-                    playerMotion.angle = M_PI / 4;  // Example: Rotate player slightly
+                    playerMotion.angle = M_PI / 4;
                 }
             }
         }
     }
 }
 
-// Helper function to check if the player is within the laser's range
+// Check if the player is within the laser's range
 bool WorldSystem::isLaserInRange(vec2 laserPosition, vec2 playerPosition) {
-    // Replace this with your logic to determine if player is in laser path
     float distance = calculateDistance(laserPosition, playerPosition);
-    return distance <= laserRange;  // Assuming laserRange is defined elsewhere
+    return distance <= laserRange;
 }
