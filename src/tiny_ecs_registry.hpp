@@ -25,12 +25,12 @@ public:
 	ComponentContainer<Gravity> gravities;
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<GunTimer> gunTimers;
+	ComponentContainer<Portal> portals;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
-		// TODO: A1 add a LightUp component
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
@@ -44,6 +44,7 @@ public:
 		registry_list.push_back(&gravities);
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&gunTimers);
+		registry_list.push_back(&portals);
 	}
 
 	void clear_all_components() {
@@ -70,5 +71,6 @@ public:
 			reg->remove(e);
 	}
 };
+
 
 extern ECSRegistry registry;

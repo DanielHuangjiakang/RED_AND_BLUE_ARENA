@@ -64,6 +64,10 @@ private:
 	Entity platform2;
 	Entity platform3;
 
+	//Portals
+	Entity portal1;
+	Entity portal2;
+
 	// music references
 	Mix_Music* background_music;
 

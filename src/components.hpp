@@ -21,6 +21,10 @@ struct Bullet {
 	int side; // side = 1 for blue, side = 2 for red
 };
 
+struct Bullet {
+	int side; // side = 1 for blue, side = 2 for red
+};
+
 // Weapon component
 struct Weapon
 {
@@ -37,6 +41,14 @@ struct Motion {
 };
 
 struct Block {
+	int x;
+	int y;
+	int width;
+	int height;
+};
+
+// A sturct for portals, similar to how blocks work but with different collision.
+struct Portal {
 	int x;
 	int y;
 	int width;
