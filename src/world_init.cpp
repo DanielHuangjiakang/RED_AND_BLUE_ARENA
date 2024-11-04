@@ -1,5 +1,7 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <random>
+#include "decisionTree.hpp"
 
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction) {
 	auto entity = Entity();
@@ -223,7 +225,7 @@ Entity createLaser(RenderSystem* renderer) {
 
     auto& motion = registry.motions.emplace(entity);
     motion.position = position;
-    motion.scale = {10, 10};
+    motion.scale = {8,8};
 
     registry.renderRequests.insert(
         entity,
@@ -244,7 +246,7 @@ Entity createLaserBeam(vec2 start, vec2 target) {
     // Set up the beam's motion properties
     Motion& motion = registry.motions.emplace(beam);
     motion.position = midpoint;
-    motion.scale = {50.f, beamLength};
+    motion.scale = {25.f, beamLength};
     motion.angle = -atan2(direction.x, direction.y);
     registry.colors.insert(beam, {1.0f, 1.0f, 0.0f});
     registry.renderRequests.insert(
