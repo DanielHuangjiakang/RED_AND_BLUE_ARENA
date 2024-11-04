@@ -20,11 +20,6 @@ struct GunTimer {
 struct Bullet {
 	int side; // side = 1 for blue, side = 2 for red
 };
-
-struct Bullet {
-	int side; // side = 1 for blue, side = 2 for red
-};
-
 // Weapon component
 struct Weapon
 {
