@@ -243,10 +243,10 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
 	// create a new Salmon
-	player1 = createPlayer(renderer, 1, {window_width_px - 100, window_height_px - 100}, 1);
+	player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
 	registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
 
-	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 200}, 0);
+	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 50}, 0);
 	registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
