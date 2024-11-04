@@ -71,23 +71,23 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	return true;
 }
 
-// std::string readShaderFile(const std::string& filename)
-// {
-// 	std::cout << "Loading shader filename: " << filename << std::endl;
+std::string readShaderFile(const std::string& filename)
+{
+	std::cout << "Loading shader filename: " << filename << std::endl;
 
-// 	std::ifstream ifs(filename);
+	std::ifstream ifs(filename);
 
-// 	if (!ifs.good())
-// 	{
-// 		std::cerr << "ERROR: invalid filename loading shader from file: " << filename << std::endl;
-// 		return "";
-// 	}
+	if (!ifs.good())
+	{
+		std::cerr << "ERROR: invalid filename loading shader from file: " << filename << std::endl;
+		return "";
+	}
 
-// 	std::ostringstream oss;
-// 	oss << ifs.rdbuf();
-// 	std::cout << oss.str() << std::endl;
-// 	return oss.str();
-// }
+	std::ostringstream oss;
+	oss << ifs.rdbuf();
+	std::cout << oss.str() << std::endl;
+	return oss.str();
+}
 
 // // init fonts
 // bool RenderSystem::fontInit(GLFWwindow& window_arg, const std::string& font_filename, unsigned int font_default_size) {
@@ -536,11 +536,11 @@ bool loadEffectFromFile(
 	return true;
 }
 
-// std::string RenderSystem::readShaderFile(const std::string& filepath) {
-//     std::ifstream file(filepath);
-//     if (!file.is_open()) {
-//         fprintf(stderr, "Failed to open shader file: %s\n", filepath.c_str());
-//         return "";
-//     }
-//     return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-// }
+std::string RenderSystem::readShaderFile(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        fprintf(stderr, "Failed to open shader file: %s\n", filepath.c_str());
+        return "";
+    }
+    return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+}

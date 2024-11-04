@@ -56,11 +56,19 @@ Entity createGun(RenderSystem* renderer, int side, vec2 position) {
 	motion.position = position;
 	motion.scale = { 0.2, 20 };
 
-	registry.renderRequests.insert(
+	if (side == 2) {
+		registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::RED_GUN,
 		  EFFECT_ASSET_ID::TEXTURED,
 		  GEOMETRY_BUFFER_ID::SPRITE });
+	} else {
+		registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::BLUE_GUN,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	return entity;
 }

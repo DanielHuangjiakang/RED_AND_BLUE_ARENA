@@ -150,7 +150,8 @@ enum class TEXTURE_ASSET_ID {
 	BLOCK = BULLET + 1,
 	PAD = BLOCK + 1,
 	RED_GUN = PAD + 1,
-	HELP = RED_GUN + 1,
+	BLUE_GUN = RED_GUN + 1,
+	HELP = BLUE_GUN + 1,
 	TEXTURE_COUNT = HELP + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

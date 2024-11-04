@@ -166,44 +166,44 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
     Motion& motion1 = registry.motions.get(player1);
 	Motion& gunMotion1 = registry.motions.get(gun1);
     // Make gun follow player1
-	int dir1 = motion1.scale.x > 0 ? 1 : -1;		
+	int dir1 = motion1.scale.x > 0 ? 1 : -1;
     gunMotion1.position = motion1.position + vec2(35 * dir1, 0);
     gunMotion1.scale.x = motion1.scale.x; // Match player direction
-    if (motion1.position.x < motion1.scale[0]/2) {
-        motion1.position.x = motion1.scale[0]/2; // Stop at left boundary
-		motion1.velocity[0] = 0;
-		gunMotion1.velocity[0] = 0;
+    if (motion1.position.x < abs(motion1.scale[0]/2)) {
+        motion1.position.x = abs(motion1.scale.x/2); // Stop at left boundary
+        motion1.velocity.x = 0;
+        gunMotion1.velocity[0] = 0;
     } else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
-        motion1.position.x = window_width_px + motion1.scale[0]/2 - motion1.scale.x; // Stop at right boundary
-		motion1.velocity[0] = 0;
-		gunMotion1.velocity[0] = 0;
+        motion1.position.x = window_width_px - motion1.scale[0]/2; // Stop at right boundary
+        motion1.velocity[0] = 0;
+        gunMotion1.velocity[0] = 0;
     }
     if (motion1.position.y < motion1.scale[1]/2) {
         motion1.position.y = motion1.scale[1]/2; // Stop at the top boundary
-		motion1.velocity[1] = 0;
-		gunMotion1.velocity[1] = 0;
+        motion1.velocity[1] = 0;
+        gunMotion1.velocity[1] = 0;
     }
 
     // Update player2's position and enforce boundaries
     Motion& motion2 = registry.motions.get(player2);
-	Motion& gunMotion2 = registry.motions.get(gun2);
+    Motion& gunMotion2 = registry.motions.get(gun2);
     // Make gun follow player2
-	int dir2 = motion2.scale.x > 0 ? 1 : -1;		
+    int dir2 = motion2.scale.x > 0 ? 1 : -1;
     gunMotion2.position = motion2.position + vec2(35 * dir2, 0);
     gunMotion2.scale.x = motion2.scale.x; // Match player direction
-    if (motion2.position.x < motion2.scale[0]/2) {
-        motion2.position.x = motion2.scale[0]/2; // Stop at left boundary
-		motion2.velocity[0] = 0;
-		gunMotion2.velocity[0] = 0;
+    if (motion2.position.x < abs(motion2.scale[0]/2)) {
+        motion2.position.x = abs(motion2.scale[0]/2); // Stop at left boundary
+        motion2.velocity.x = 0;
+        gunMotion2.velocity[0] = 0;
     } else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
-        motion2.position.x =  window_width_px + motion2.scale[0]/2 - motion2.scale.x; // Stop at right boundary
-		motion2.velocity[0] = 0;
-		gunMotion2.velocity[0] = 0;
+        motion2.position.x =  window_width_px - motion2.scale[0]/2; // Stop at right boundary
+        motion2.velocity[0] = 0;
+        gunMotion2.velocity[0] = 0;
     }
     if (motion2.position.y < motion2.scale[1]/2) {
         motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
-		motion2.velocity[1] = 0;
-		gunMotion2.velocity[1] = 0;
+        motion2.velocity[1] = 0;
+        gunMotion2.velocity[1] = 0;
     }
 
 	// Remove entities that leave the screen on the left side
@@ -383,8 +383,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	Motion& motion1 = registry.motions.get(player1);
 	Motion& motion2 = registry.motions.get(player2);
-	// Motion& gunMotion1 = registry.motions.get(gun1);
-	// Motion& gunMotion2 = registry.motions.get(gun2);
+
 	Gravity& gravity1 = registry.gravities.get(player1);
 	Gravity& gravity2 = registry.gravities.get(player2);
 	Player& p1 = registry.players.get(player1);
@@ -406,10 +405,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 				"/ - Shoot\n\n"
 				"R - Restart Game";
 
-			//Entity helpText = createText(renderer, instructions, vec2(window_width_px/2, window_height_px/2), true);
+		//	helpText = createText(renderer, instructions, vec2(window_width_px/2, window_height_px/2-100), true);
 			
 		} else if (action == GLFW_RELEASE) {
 			registry.remove_all_components_of(helpPanel);
+			registry.remove_all_components_of(helpText);
 		}
 	}
 
