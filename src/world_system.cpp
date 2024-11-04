@@ -221,9 +221,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
-	// if (registry.deathTimers.size() > 0) {
-	// 	restart_game();
-	// }
+	on_shoot();
 
 	return true;
 }
@@ -319,7 +317,6 @@ void WorldSystem::handle_collisions() {
 		if (registry.bullets.has(entity) && registry.bullets.has(entity_other)) {
 			registry.remove_all_components_of(entity);
 			registry.remove_all_components_of(entity_other);
-			
 		}
 	}
 
@@ -383,18 +380,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	if (key == GLFW_KEY_Q) {
-		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player1)) {
-			int dir;
-			if (p1.direction == 0) dir = -1; // left
-			else dir = 1;
-			vec2 bullet_position = registry.motions.get(player1).position + vec2({(registry.motions.get(player1).scale.x / 2) * dir, 0.f});
-			Entity bullet = createBullet(renderer, 1, bullet_position, p1.direction);
-			registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
-			registry.gunTimers.emplace(player1);
-
-			// shoot sound
-			Mix_PlayChannel(-1, shoot_sound, 0);
-		}
+		if (action == GLFW_PRESS) {
+			player1_shooting = true;
+    	} else if (action == GLFW_RELEASE) {
+			player1_shooting = false;
+    	}
 	}
 
 	if (key == GLFW_KEY_LEFT) {
@@ -428,18 +418,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 	if (key == GLFW_KEY_SLASH) {
-		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player2)) {
-			int dir;
-			if (p2.direction == 0) dir = -1;
-			else dir = 1;
-			vec2 bullet_position = registry.motions.get(player2).position + vec2({(registry.motions.get(player2).scale.x / 2) * dir, 0.f});
-			Entity bullet = createBullet(renderer, 2, bullet_position, p2.direction);
-			registry.colors.insert(bullet, {0.6f, 1.0f, 0.6f});
-			registry.gunTimers.emplace(player2);
-
-			// shoot sound
-			Mix_PlayChannel(-1, shoot_sound, 0);
-		} 
+		if (action == GLFW_PRESS) {
+			player2_shooting = true;
+    	} else if (action == GLFW_RELEASE) {
+			player2_shooting = false;
+    	} 
 	}
 
 	// Debugging
@@ -470,4 +453,31 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
+}
+
+void WorldSystem::on_shoot() {
+	if (!registry.gunTimers.has(player1) && player1_shooting) {
+		Player& p1 = registry.players.get(player1);
+		Motion& motion1 = registry.motions.get(player1);
+		int dir;
+		if (p1.direction == 0) dir = -1;
+		else dir = 1;
+		vec2 bullet_position = motion1.position + vec2({(motion1.scale.x / 2) * dir, 0.f});
+		Entity bullet = createBullet(renderer, 1, bullet_position, p1.direction);
+		registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
+		registry.gunTimers.emplace(player1);
+		Mix_PlayChannel(-1, shoot_sound, 0);
+	}
+	if (!registry.gunTimers.has(player2) && player2_shooting) {
+		Player& p2 = registry.players.get(player2);
+		Motion& motion2 = registry.motions.get(player2);
+		int dir;
+		if (p2.direction == 0) dir = -1;
+		else dir = 1;
+		vec2 bullet_position = motion2.position + vec2({(motion2.scale.x / 2) * dir, 0.f});
+		Entity bullet = createBullet(renderer, 2, bullet_position, p2.direction);
+		registry.colors.insert(bullet, {0.6f, 1.0f, 0.6f});
+		registry.gunTimers.emplace(player2);
+		Mix_PlayChannel(-1, shoot_sound, 0);
+	}
 }
