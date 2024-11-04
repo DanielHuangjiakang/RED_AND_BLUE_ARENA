@@ -22,7 +22,6 @@ struct GunTimer {
 struct Bullet {
 	int side; // side = 1 for blue, side = 2 for red
 };
-
 // Weapon component
 struct Weapon
 {
@@ -39,6 +38,14 @@ struct Motion {
 };
 
 struct Block {
+	int x;
+	int y;
+	int width;
+	int height;
+};
+
+// A sturct for portals, similar to how blocks work but with different collision.
+struct Portal {
 	int x;
 	int y;
 	int width;
@@ -163,4 +170,10 @@ struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+};
+
+struct Laser {};
+
+struct Lifetime {
+    float counter_ms;
 };

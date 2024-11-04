@@ -1,6 +1,7 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
-
+#include <random>
+#include "decisionTree.hpp"
 
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction) {
 	auto entity = Entity();
@@ -29,6 +30,35 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
 }
 
 
+// Create a portal at given pos
+// create a block based on its center (position), and its width and height
+Entity createPortal(RenderSystem* renderer, vec2 position, int width, int height) { 
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& portal = registry.portals.emplace(entity);
+	portal.x = int(position[0] - (width / 2));
+	portal.y = int(position[1] - (height / 2));
+	portal.width = width;
+	portal.height = height;
+
+	auto& motion = registry.motions.emplace(entity);
+ 	motion.velocity = { 0, 0 };
+ 	motion.position = {position[0] - (width / 2), position[1] - (height / 2)};
+	motion.scale = {width, height};
+
+
+	registry.renderRequests.insert(
+		entity,
+ 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::SALMON,
+ 			GEOMETRY_BUFFER_ID::SQUARE });
+
+ 	return entity;
+}
+
+
 // create a block based on its top left corner (x, y), and its width and height
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height) { 
 	auto entity = Entity();
@@ -40,6 +70,7 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
 	block.y = y;
 	block.width = width;
 	block.height = height;
+
 
 	auto& motion = registry.motions.emplace(entity);
  	motion.velocity = { 0.f, 0.f };
@@ -106,4 +137,125 @@ Entity createBullet(RenderSystem* renderer, int side, vec2 position, int directi
 	
 	return entity;
 
+}
+
+std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 position, int direction) {
+	auto entity = Entity();
+	auto entity2 = Entity();
+	auto entity3 = Entity();
+	auto entity4 = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+	registry.meshPtrs.emplace(entity2, &mesh);
+	registry.meshPtrs.emplace(entity3, &mesh);
+	registry.meshPtrs.emplace(entity4, &mesh);
+
+	auto& bullet1 = registry.bullets.emplace(entity);
+	bullet1.side = side;
+
+	auto& bullet2 = registry.bullets.emplace(entity2);
+	bullet2.side = side;
+
+	auto& bullet3 = registry.bullets.emplace(entity3);
+	bullet3.side = side;
+
+	auto& bullet4 = registry.bullets.emplace(entity4);
+	bullet4.side = side;
+
+
+	auto& motion = registry.motions.emplace(entity);
+	int dir = 0;
+	if (direction == 0) dir = -1;
+	else dir = 1;
+ 	motion.velocity = { 500 * dir, -30 }; 
+ 	motion.position = {position.x, position.y - 30.0f};;;
+	motion.scale = { 8, 8 }; // width * height
+
+	auto& motion2 = registry.motions.emplace(entity2);
+ 	motion2.velocity = { 500 * dir, -20 }; 
+ 	motion2.position = {position.x, position.y - 20.0f};;
+	motion2.scale = { 8, 8 }; // width * height
+
+	auto& motion3 = registry.motions.emplace(entity3);
+ 	motion3.velocity = { 500 * dir, 20 }; 
+ 	motion3.position = {position.x, position.y + 20.0f};;
+	motion3.scale = { 8, 8 }; // width * height
+
+	auto& motion4 = registry.motions.emplace(entity4);
+ 	motion4.velocity = { 500 * dir, 30 }; 
+ 	motion4.position = {position.x, position.y + 30.0f};;
+	motion4.scale = { 8, 8 }; // width * height
+
+	registry.renderRequests.insert(
+		entity,
+ 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::SALMON,
+ 			GEOMETRY_BUFFER_ID::SQUARE });
+	
+	registry.renderRequests.insert(
+		entity2,
+ 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::SALMON,
+ 			GEOMETRY_BUFFER_ID::SQUARE });
+	
+	registry.renderRequests.insert(
+		entity3,
+ 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::SALMON,
+ 			GEOMETRY_BUFFER_ID::SQUARE });
+	
+	registry.renderRequests.insert(
+		entity4,
+ 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::SALMON,
+ 			GEOMETRY_BUFFER_ID::SQUARE });
+	
+	return {entity, entity2, entity3, entity4};
+}
+Entity createLaser(RenderSystem* renderer) {
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+    registry.meshPtrs.emplace(entity, &mesh);
+    registry.lasers.emplace(entity);
+
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::uniform_real_distribution<float> distX(0.f, static_cast<float>(window_width_px));
+    std::uniform_real_distribution<float> distY(0.f, static_cast<float>(window_height_px));
+    vec2 position = {distX(rng), distY(rng)};
+
+    auto& motion = registry.motions.emplace(entity);
+    motion.position = position;
+    motion.scale = {8,8};
+
+    registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE});
+    registry.colors.insert(entity, {0.0f, 1.0f, 0.0f});
+
+    return entity;
+}
+
+Entity createLaserBeam(vec2 start, vec2 target) {
+    auto beam = Entity();
+
+    // Calculate the midpoint and angle between start and target
+    vec2 midpoint = (start + target) * 0.5f;
+    vec2 direction = normalize(target - start);
+    float beamLength = length(target - start);
+
+    // Set up the beam's motion properties
+    Motion& motion = registry.motions.emplace(beam);
+    motion.position = midpoint;
+    motion.scale = {25.f, beamLength};
+    motion.angle = -atan2(direction.x, direction.y);
+    registry.colors.insert(beam, {1.0f, 1.0f, 0.0f});
+    registry.renderRequests.insert(
+        beam,
+        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE}
+    );
+	
+	auto& lifetime = registry.lifetimes.emplace(beam);
+    lifetime.counter_ms = 1000; // Laser beam lasts for 1000 milliseconds (1 second)
+    return beam;
 }
