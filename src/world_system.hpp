@@ -42,6 +42,7 @@ private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
+	void on_shoot();
 
 	// restart level
 	void restart_game();
@@ -56,8 +57,10 @@ private:
 	Entity player2;
 	bool player1_right_button = false;
 	bool player1_left_button = false;
+	bool player1_shooting = false;
 	bool player2_right_button = false;
 	bool player2_left_button = false;
+	bool player2_shooting = false;
 
 	// Stage atrributes
 	Entity ground;

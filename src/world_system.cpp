@@ -294,9 +294,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
-	// if (registry.deathTimers.size() > 0) {
-	// 	restart_game();
-	// }
+	on_shoot();
 
 	return true;
 }
@@ -319,10 +317,10 @@ void WorldSystem::restart_game()
 	registry.list_all_components();
 
 	// create a new Salmon
-	player1 = createPlayer(renderer, 1, {window_width_px - 100, window_height_px - 100}, 1);
+	player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
 	registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
 
-	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 200}, 0);
+	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 50}, 0);
 	registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
@@ -490,18 +488,16 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		restart_game();
 	}
 
-	Motion &motion1 = registry.motions.get(player1);
-	Motion &motion2 = registry.motions.get(player2);
-	Gravity &gravity1 = registry.gravities.get(player1);
-	Gravity &gravity2 = registry.gravities.get(player2);
-	Player &p1 = registry.players.get(player1);
-	Player &p2 = registry.players.get(player2);
-	if (key == GLFW_KEY_A)
-	{
-		if (action == GLFW_PRESS)
-		{
-			gravity1.g[0] = -700.f;
-			p1.direction = 0; // Facing left
+	Motion& motion1 = registry.motions.get(player1);
+	Motion& motion2 = registry.motions.get(player2);
+	Gravity& gravity1 = registry.gravities.get(player1);
+	Gravity& gravity2 = registry.gravities.get(player2);
+	Player& p1 = registry.players.get(player1);
+	Player& p2 = registry.players.get(player2);
+	if (key == GLFW_KEY_A) {
+    	if (action == GLFW_PRESS) {
+        	gravity1.g[0] = -p1.lr_accel;
+        	p1.direction = 0; // Facing left
 			player1_left_button = true;
 		}
 		else if (action == GLFW_RELEASE)
@@ -514,12 +510,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	if (key == GLFW_KEY_D)
-	{
-		if (action == GLFW_PRESS)
-		{
-			gravity1.g[0] = +700.f;
-			p1.direction = 1; // Facing right
+	if (key == GLFW_KEY_D) {
+    	if (action == GLFW_PRESS) {
+        	gravity1.g[0] = +p1.lr_accel;
+        	p1.direction = 1; // Facing right
+
 			player1_right_button = true;
 		}
 		else if (action == GLFW_RELEASE)
@@ -532,33 +527,21 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	if (key == GLFW_KEY_W)
-	{
-		if (action == GLFW_PRESS && p1.jumpable == true)
-		{
-			motion1.velocity[1] += -600;
+	if (key == GLFW_KEY_W) {
+		if (action == GLFW_PRESS && p1.jumpable == true) {
+			motion1.velocity[1] += p1.jump_accel;
 			p1.jumpable = false;
 		}
 	}
 
-	if (key == GLFW_KEY_Q)
-	{
-		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player1))
-		{
-			int dir;
-			if (p1.direction == 0)
-				dir = -1; // left
-			else
-				dir = 1;
-			vec2 arrow_position = registry.motions.get(player1).position + vec2({(registry.motions.get(player1).scale.x / 2) * dir, 0.f});
-			Entity bullet = createBullet(renderer, 1, arrow_position, p1.direction);
-			registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
-			registry.gunTimers.emplace(player1);
-
-			// shoot sound
-			Mix_PlayChannel(-1, shoot_sound, 0);
-		}
+	if (key == GLFW_KEY_Q) {
+		if (action == GLFW_PRESS) {
+			player1_shooting = true;
+    	} else if (action == GLFW_RELEASE) {
+			player1_shooting = false;
+    	}
 	}
+
 
 	// shoot arrow for player 1
 	if (key == GLFW_KEY_E)
@@ -607,16 +590,14 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	if (key == GLFW_KEY_LEFT)
-	{
-		if (action == GLFW_PRESS)
-		{
-			gravity2.g[0] = -700.f;
-			p2.direction = 0; // Facing left
-			player2_left_button = true;
-		}
-		else if (action == GLFW_RELEASE)
-		{
+	if (key == GLFW_KEY_LEFT) {
+    	if (action == GLFW_PRESS) {
+        	gravity2.g[0] = -p2.lr_accel;
+        	p2.direction = 0; // Facing left
+			    player2_left_button = true;
+		  }
+		  else if (action == GLFW_RELEASE)
+		  {
 			if (!player2_right_button)
 			{
 				gravity2.g[0] = 0.f;
@@ -624,12 +605,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			player2_left_button = false;
 		}
 	}
-	if (key == GLFW_KEY_RIGHT)
-	{
-		if (action == GLFW_PRESS)
-		{
-			gravity2.g[0] = +700.f;
-			p2.direction = 1; // Facing right
+	if (key == GLFW_KEY_RIGHT) {
+    	if (action == GLFW_PRESS) {
+        	gravity2.g[0] = +p2.lr_accel;
+        	p2.direction = 1; // Facing right
+
 			player2_right_button = true;
 		}
 		else if (action == GLFW_RELEASE)
@@ -641,31 +621,18 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			player2_right_button = false;
 		}
 	}
-	if (key == GLFW_KEY_UP)
-	{
-		if (action == GLFW_PRESS && p2.jumpable == true)
-		{
-			motion2.velocity[1] += -600;
+	if (key == GLFW_KEY_UP) {
+		if (action == GLFW_PRESS && p2.jumpable == true) {
+			motion2.velocity[1] += p2.jump_accel;
 			p2.jumpable = false;
 		}
 	}
-	if (key == GLFW_KEY_SLASH)
-	{
-		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player2))
-		{
-			int dir;
-			if (p2.direction == 0)
-				dir = -1;
-			else
-				dir = 1;
-			vec2 bullet_position = registry.motions.get(player2).position + vec2({(registry.motions.get(player2).scale.x / 2) * dir, 0.f});
-			Entity bullet = createBullet(renderer, 2, bullet_position, p2.direction);
-			registry.colors.insert(bullet, {0.6f, 1.0f, 0.6f});
-			registry.gunTimers.emplace(player2);
-
-			// shoot sound
-			Mix_PlayChannel(-1, shoot_sound, 0);
-		}
+	if (key == GLFW_KEY_SLASH) {
+		if (action == GLFW_PRESS) {
+			player2_shooting = true;
+    	} else if (action == GLFW_RELEASE) {
+			player2_shooting = false;
+    	} 
 	}
 
 	// Debugging
@@ -835,4 +802,31 @@ void WorldSystem::handleLaserCollisions() {
 bool WorldSystem::isLaserInRange(vec2 laserPosition, vec2 playerPosition) {
     float distance = calculateDistance(laserPosition, playerPosition);
     return distance <= laserRange;
+}
+
+void WorldSystem::on_shoot() {
+	if (!registry.gunTimers.has(player1) && player1_shooting) {
+		Player& p1 = registry.players.get(player1);
+		Motion& motion1 = registry.motions.get(player1);
+		int dir;
+		if (p1.direction == 0) dir = -1;
+		else dir = 1;
+		vec2 bullet_position = motion1.position + vec2({(motion1.scale.x / 2) * dir, 0.f});
+		Entity bullet = createBullet(renderer, 1, bullet_position, p1.direction);
+		registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
+		registry.gunTimers.emplace(player1);
+		Mix_PlayChannel(-1, shoot_sound, 0);
+	}
+	if (!registry.gunTimers.has(player2) && player2_shooting) {
+		Player& p2 = registry.players.get(player2);
+		Motion& motion2 = registry.motions.get(player2);
+		int dir;
+		if (p2.direction == 0) dir = -1;
+		else dir = 1;
+		vec2 bullet_position = motion2.position + vec2({(motion2.scale.x / 2) * dir, 0.f});
+		Entity bullet = createBullet(renderer, 2, bullet_position, p2.direction);
+		registry.colors.insert(bullet, {0.6f, 1.0f, 0.6f});
+		registry.gunTimers.emplace(player2);
+		Mix_PlayChannel(-1, shoot_sound, 0);
+	}
 }

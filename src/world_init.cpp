@@ -17,7 +17,8 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
  	motion.position = position;
 	motion.scale = { 50, 50 }; // width * height
 
-	registry.gravities.emplace(entity);
+	auto& gravity = registry.gravities.emplace(entity);
+	gravity.drag = true;
 
 	registry.renderRequests.insert(
 		entity,
