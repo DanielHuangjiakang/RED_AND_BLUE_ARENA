@@ -12,7 +12,6 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
-#include "decisionTree.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -38,7 +37,6 @@ public:
 
 	// Should the game be over ?
 	bool is_over()const;
-
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -66,6 +64,10 @@ private:
 	Entity platform2;
 	Entity platform3;
 
+	//Portals
+	Entity portal1;
+	Entity portal2;
+
 	// music references
 	Mix_Music* background_music;
 
@@ -79,17 +81,14 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
-
-	//laserSupportFucntions
-	float calculateDistance(vec2 pos1, vec2 pos2);
+  	float calculateDistance(vec2 pos1, vec2 pos2);
 	void updateLaserVelocity(Entity laserEntity, Motion& player1Motion, Motion& player2Motion);
 	DecisionTreeNode* rootNode;
-    float laserRange = 10.0f;
-    float laserCoolDownTime = 2000.0f;  // CoolDown time in milliseconds
-    float laserCoolDownTimer = 0.0f;
+   float laserRange = 10.0f;
+   float laserCoolDownTime = 2000.0f;  // CoolDown time in milliseconds
+   float laserCoolDownTimer = 0.0f;
 	void initializeLaserAI();
 	bool isPlayerInRange();
 	void handleLaserCollisions();
 	bool isLaserInRange(vec2 laserPosition, vec2 playerPosition);
 };
-	
