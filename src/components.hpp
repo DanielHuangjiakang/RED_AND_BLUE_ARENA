@@ -9,12 +9,16 @@ struct Player
 {
 	int side; // side = 1 for blue, side = 2 for red
 	bool jumpable = false;
-	bool direction;  // 1 for right, 0 for left
+	bool direction;  // 0 for left, 1 for right, 
+	int health = 3;
 };
 
-struct Bullet
-{
-	bool direction;  // 1 for right, 0 for left
+struct GunTimer {
+	float counter_ms = 300;
+};
+
+struct Bullet {
+	int side; // side = 1 for blue, side = 2 for red
 };
 
 
@@ -27,9 +31,10 @@ struct Weapon
 
 // All data relevant to the shape and motion of entities
 struct Motion {
-	vec2 position = { 0, 0 };
-	vec2 velocity = { 0, 0 };
+	vec2 position = { 0.f, 0.f };
+	vec2 velocity = { 0.f, 0.f };
 	vec2 scale = { 1, 1 };
+	float angle = 0.f;
 };
 
 struct Block {
@@ -39,8 +44,16 @@ struct Block {
 	int height;
 };
 
+// A sturct for portals, similar to how blocks work but with different collision.
+struct Portal {
+	int x;
+	int y;
+	int width;
+	int height;
+};
+
 struct Gravity {
-	float a = 10.0f;
+	vec2 g = {0.f, 750.f};
 };
 
 // Stucture to store collision information
@@ -49,6 +62,7 @@ struct Collision
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	Collision(Entity& other) { this->other = other; };
+	int direction = 0; // 1 for top, 2 for bottom, 3 for left, 4 for right
 };
 
 // Data structure for toggling debug mode

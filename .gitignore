@@ -6,3 +6,7 @@ ext/project_path.hpp
 CMakeCache.txt
 cmake_install.cmake
 Makefile
+.idea
+cmake-build-debug
+CMakeLists.txt
+ext/project_path.hpp

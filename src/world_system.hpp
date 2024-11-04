@@ -53,6 +53,10 @@ private:
 	float current_speed;
 	Entity player1;
 	Entity player2;
+	bool player1_right_button = false;
+	bool player1_left_button = false;
+	bool player2_right_button = false;
+	bool player2_left_button = false;
 
 	// Stage atrributes
 	Entity ground;
@@ -60,8 +64,17 @@ private:
 	Entity platform2;
 	Entity platform3;
 
+	//Portals
+	Entity portal1;
+	Entity portal2;
+
 	// music references
 	Mix_Music* background_music;
+
+	Mix_Chunk* end_music;
+	Mix_Chunk* hit_sound;
+	Mix_Chunk* shoot_sound;
+
 	Mix_Chunk* salmon_dead_sound;
 	Mix_Chunk* salmon_eat_sound;
 
