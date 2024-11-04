@@ -111,6 +111,7 @@ GLFWwindow *WorldSystem::create_window()
 	end_music = Mix_LoadWAV(audio_path("end_music.wav").c_str());
 	hit_sound = Mix_LoadWAV(audio_path("hit_sound.wav").c_str());
 	shoot_sound = Mix_LoadWAV(audio_path("shoot.wav").c_str());
+	laser_sound = Mix_LoadWAV(audio_path("laser.wav").c_str());
 
 	salmon_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
@@ -123,7 +124,8 @@ GLFWwindow *WorldSystem::create_window()
 				audio_path("eat_sound.wav").c_str(),
 				audio_path("shoot.wav").c_str(),
 				audio_path("hit_sound.wav").c_str(),
-				audio_path("end_music.wav").c_str());
+				audio_path("end_music.wav").c_str(),
+				audio_path("laser.wav").c_str());
 		return nullptr;
 	}
 
@@ -787,7 +789,7 @@ void WorldSystem::handleLaserCollisions() {
 
                 // Reduce player health by 1 on laser hit
                 player.health -= 1;
-                Mix_PlayChannel(-1, hit_sound, 0);
+                Mix_PlayChannel(-1, laser_sound, 0);
                 if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
                     registry.deathTimers.emplace(playerEntity);
                     Mix_PlayChannel(-1, end_music, 0);
