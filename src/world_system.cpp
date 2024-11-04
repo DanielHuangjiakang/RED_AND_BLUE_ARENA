@@ -9,6 +9,9 @@
 #include <iostream>
 
 #include "physics_system.hpp"
+#include "tiny_ecs_registry.hpp"
+#include "decisionTree.hpp"
+
 
 // create the underwater world
 WorldSystem::WorldSystem()
@@ -158,6 +161,32 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// Removing out of screen entities
 	auto &motions_registry = registry.motions;
+  
+   // Decrease cooldown timer each frame
+    if (laserCoolDownTimer > 0) {
+        laserCoolDownTimer -= elapsed_ms_since_last_update;
+    }
+	if (rootNode) {
+        rootNode->execute();
+    }
+
+    // Laser updates and other game mechanics (e.g., enforcing boundaries, handling collisions)
+    for (Entity entity : registry.lasers.entities) {
+
+        // Reset coolDown timer after an attack
+        if (laserCoolDownTimer <= 0 && isPlayerInRange()) {
+            laserCoolDownTimer = 3000;  // 3-second coolDown after attacking
+        }
+		for (Entity entity : registry.lifetimes.entities) {
+        Lifetime& lifetime = registry.lifetimes.get(entity);
+        lifetime.counter_ms -= elapsed_ms_since_last_update;
+
+        // Remove the entity when its lifetime expires
+        if (lifetime.counter_ms <= 0) {
+            registry.remove_all_components_of(entity);
+        }
+    }
+    }
 
 	// Update player1's position and enforce boundaries
 	Motion &motion1 = registry.motions.get(player1);
@@ -297,6 +326,9 @@ void WorldSystem::restart_game()
 
 	portal2 = createPortal(renderer, {3 * window_width_px / 4, window_height_px - 220 - 10}, 50, 100);
 	registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+  
+  	createLaser(renderer);
+    initializeLaserAI();
 }
 
 // Compute collisions between entities
@@ -654,4 +686,139 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	(vec2) mouse_position; // dummy to avoid compiler warning
+}
+
+void WorldSystem::updateLaserVelocity(Entity laserEntity, Motion& player1Motion, Motion& player2Motion) {
+    Motion& laserMotion = registry.motions.get(laserEntity);
+    vec2 player1Pos = player1Motion.position;
+    vec2 player2Pos = player2Motion.position;
+    float distToPlayer1 = calculateDistance(laserMotion.position, player1Pos);
+    float distToPlayer2 = calculateDistance(laserMotion.position, player2Pos);
+    // Choose target based on the nearest player
+
+    vec2 targetPosition = (distToPlayer1 < distToPlayer2) ? player1Pos : player2Pos;
+    vec2 direction = normalize(targetPosition - laserMotion.position);
+    laserMotion.velocity = direction * 100.f;
+}
+
+float WorldSystem::calculateDistance(vec2 pos1, vec2 pos2) {
+	return length(pos2 - pos1);
+}
+
+void WorldSystem::initializeLaserAI() {
+    // Define the action lambdas
+    auto idleAction = []() { if (!registry.lasers.entities.empty()) {
+        Entity laserEntity = registry.lasers.entities.front();
+        Motion& laserMotion = registry.motions.get(laserEntity);
+        laserMotion.velocity = {0.0f, 0.0f};  // Stop laser
+    }};
+    auto trackPlayerAction = [this]() {if (!registry.lasers.entities.empty()) {
+        Entity laserEntity = registry.lasers.entities.front();
+        Motion& laserMotion = registry.motions.get(laserEntity);
+        Motion& player1Motion = registry.motions.get(player1);
+        Motion& player2Motion = registry.motions.get(player2);
+
+        vec2 targetPosition = (calculateDistance(laserMotion.position, player1Motion.position) <
+                               calculateDistance(laserMotion.position, player2Motion.position)) ?
+                              player1Motion.position : player2Motion.position;
+
+        vec2 direction = normalize(targetPosition - laserMotion.position);
+        laserMotion.velocity = direction * 100.0f;
+    } };
+    auto attackPlayerAction = [this]() {
+    if (registry.lasers.entities.empty()) return;
+
+    Entity laserEntity = registry.lasers.entities.front();
+    Motion& laserMotion = registry.motions.get(laserEntity);
+
+    // Determine the nearest player’s position as the laser target
+    Motion& player1Motion = registry.motions.get(player1);
+    Motion& player2Motion = registry.motions.get(player2);
+    vec2 targetPosition = (calculateDistance(laserMotion.position, player1Motion.position) <
+                           calculateDistance(laserMotion.position, player2Motion.position)) ?
+                          player1Motion.position : player2Motion.position;
+
+    // Spawn a new laser beam entity from the top-center toward target position
+    Entity laserBeam = createLaserBeam({window_width_px / 2, 0}, targetPosition);
+
+    // Check for any players in the path and handle them
+    handleLaserCollisions();
+
+    // Reset cooldown timer after the attack
+    laserCoolDownTimer = 3000;  // 3 seconds cooldown
+};
+
+
+    // Create action nodes using lambdas
+    auto idleNode = new ActionNode(idleAction);
+    auto trackNode = new ActionNode(trackPlayerAction);
+    auto attackNode = new ActionNode(attackPlayerAction);
+
+    // Condition lambda to check if any player is in range
+    auto isPlayerInRange = [this]() -> bool {
+        if (registry.lasers.entities.empty()) return false;
+        Entity laserEntity = registry.lasers.entities.front();
+        Motion& laserMotion = registry.motions.get(laserEntity);
+        Motion& playerMotion1 = registry.motions.get(player1);
+        Motion& playerMotion2 = registry.motions.get(player2);
+
+        float distanceToPlayer1 = calculateDistance(laserMotion.position, playerMotion1.position);
+        float distanceToPlayer2 = calculateDistance(laserMotion.position, playerMotion2.position);
+
+        return distanceToPlayer1 <= laserRange || distanceToPlayer2 <= laserRange;
+    };
+
+    // Condition lambda to check if coolDown has completed
+    auto isCoolDownComplete = [this]() -> bool {
+        return laserCoolDownTimer <= 0;
+    };
+
+    // Create condition nodes
+    auto inRangeNode = new ConditionNode(isPlayerInRange, attackNode, trackNode);
+    rootNode = new ConditionNode(isCoolDownComplete, inRangeNode, idleNode);
+}
+
+bool WorldSystem::isPlayerInRange() {
+	if (registry.lasers.entities.empty()) return false;
+	Entity laserEntity = registry.lasers.entities.front();
+	Motion& laserMotion = registry.motions.get(laserEntity);
+	Motion& playerMotion1 = registry.motions.get(player1);
+	Motion& playerMotion2 = registry.motions.get(player2);
+
+	float distanceToPlayer1 = calculateDistance(laserMotion.position, playerMotion1.position);
+	float distanceToPlayer2 = calculateDistance(laserMotion.position, playerMotion2.position);
+
+	return distanceToPlayer1 <= laserRange || distanceToPlayer2 <= laserRange;
+}
+
+// Laser collision handling function
+void WorldSystem::handleLaserCollisions() {
+    for (Entity laserEntity : registry.lasers.entities) {
+        Motion& laserMotion = registry.motions.get(laserEntity);
+
+        // Check collision with each player
+        for (Entity playerEntity : registry.players.entities) {
+            Player& player = registry.players.get(playerEntity);
+            Motion& playerMotion = registry.motions.get(playerEntity);
+
+            // Check if player is in laser path using a helper function
+            if (isLaserInRange(laserMotion.position, playerMotion.position)) {
+
+                // Reduce player health by 1 on laser hit
+                player.health -= 1;
+                Mix_PlayChannel(-1, hit_sound, 0);
+                if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
+                    registry.deathTimers.emplace(playerEntity);
+                    Mix_PlayChannel(-1, end_music, 0);
+                    playerMotion.angle = M_PI / 4;
+                }
+            }
+        }
+    }
+}
+
+// Check if the player is within the laser's range
+bool WorldSystem::isLaserInRange(vec2 laserPosition, vec2 playerPosition) {
+    float distance = calculateDistance(laserPosition, playerPosition);
+    return distance <= laserRange;
 }

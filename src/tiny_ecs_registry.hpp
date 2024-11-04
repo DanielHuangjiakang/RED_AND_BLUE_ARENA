@@ -1,3 +1,4 @@
+
 #pragma once
 #include <vector>
 
@@ -26,6 +27,8 @@ public:
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<GunTimer> gunTimers;
 	ComponentContainer<Portal> portals;
+  ComponentContainer<Laser> lasers;
+	ComponentContainer<Lifetime> lifetimes;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -45,6 +48,8 @@ public:
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&gunTimers);
 		registry_list.push_back(&portals);
+    registry_list.push_back(&lasers);
+		registry_list.push_back(&lifetimes);
 	}
 
 	void clear_all_components() {
@@ -71,6 +76,5 @@ public:
 			reg->remove(e);
 	}
 };
-
 
 extern ECSRegistry registry;

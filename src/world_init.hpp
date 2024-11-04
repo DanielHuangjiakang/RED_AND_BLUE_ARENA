@@ -22,3 +22,6 @@ Entity createBullet(RenderSystem* renderer, int side, vec2 position, int directi
 
 // the arrow
 std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 position, int direction);
+Entity createLaser(RenderSystem* renderer);
+Entity createLaserBeam(vec2 start, vec2 end);
+

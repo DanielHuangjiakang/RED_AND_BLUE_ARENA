@@ -168,3 +168,9 @@ struct RenderRequest {
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
+
+struct Laser {};
+
+struct Lifetime {
+    float counter_ms;
+};

@@ -1,7 +1,5 @@
-
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
-
 
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction) {
 	auto entity = Entity();
@@ -210,4 +208,51 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
  			GEOMETRY_BUFFER_ID::SQUARE });
 	
 	return {entity, entity2, entity3, entity4};
+}
+Entity createLaser(RenderSystem* renderer) {
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+    registry.meshPtrs.emplace(entity, &mesh);
+    registry.lasers.emplace(entity);
+
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::uniform_real_distribution<float> distX(0.f, static_cast<float>(window_width_px));
+    std::uniform_real_distribution<float> distY(0.f, static_cast<float>(window_height_px));
+    vec2 position = {distX(rng), distY(rng)};
+
+    auto& motion = registry.motions.emplace(entity);
+    motion.position = position;
+    motion.scale = {10, 10};
+
+    registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE});
+    registry.colors.insert(entity, {0.0f, 1.0f, 0.0f});
+
+    return entity;
+}
+
+Entity createLaserBeam(vec2 start, vec2 target) {
+    auto beam = Entity();
+
+    // Calculate the midpoint and angle between start and target
+    vec2 midpoint = (start + target) * 0.5f;
+    vec2 direction = normalize(target - start);
+    float beamLength = length(target - start);
+
+    // Set up the beam's motion properties
+    Motion& motion = registry.motions.emplace(beam);
+    motion.position = midpoint;
+    motion.scale = {50.f, beamLength};
+    motion.angle = -atan2(direction.x, direction.y);
+    registry.colors.insert(beam, {1.0f, 1.0f, 0.0f});
+    registry.renderRequests.insert(
+        beam,
+        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE}
+    );
+	
+	auto& lifetime = registry.lifetimes.emplace(beam);
+    lifetime.counter_ms = 1000; // Laser beam lasts for 1000 milliseconds (1 second)
+    return beam;
 }
