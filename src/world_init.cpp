@@ -1,3 +1,4 @@
+
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
@@ -209,5 +210,4 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
  			GEOMETRY_BUFFER_ID::SQUARE });
 	
 	return {entity, entity2, entity3, entity4};
-
 }
