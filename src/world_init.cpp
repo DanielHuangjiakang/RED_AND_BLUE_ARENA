@@ -14,17 +14,74 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
 	auto& motion = registry.motions.emplace(entity);
  	motion.velocity = { 0, 0 }; 
  	motion.position = position;
-	motion.scale = { 50, 50 }; // width * height
 
 	registry.gravities.emplace(entity);
 
+	
+	auto& animation = registry.animations.emplace(entity);
+	if (side == 2) { // red player
+		animation.frames = {
+			TEXTURE_ASSET_ID::RED_RUN_1,
+			TEXTURE_ASSET_ID::RED_RUN_2,
+			TEXTURE_ASSET_ID::RED_RUN_3,
+		};
+		motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
+		motion.scale.x *= -1;
+	} else { // blue player
+		animation.frames = {
+			TEXTURE_ASSET_ID::BLUE_RUN_1,
+			TEXTURE_ASSET_ID::BLUE_RUN_2,
+			TEXTURE_ASSET_ID::BLUE_RUN_3,
+		};
+		motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
+	}
+
+	// Initial render request uses first frame
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+		{ animation.frames[0], 
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
 
- 	return entity;
+	return entity;
+}
+
+Entity createGun(RenderSystem* renderer, int side, vec2 position) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& motion = registry.motions.emplace(entity);
+	motion.velocity = { 0, 0 };
+	motion.position = position;
+	motion.scale = { 30, 15 };
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::RED_GUN,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createBackground(RenderSystem* renderer, int width, int height) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& motion = registry.motions.emplace(entity);
+ 	motion.velocity = { 0, 0 };
+ 	motion.position = {width / 2, height / 2};
+	motion.scale = {width, height};
+	
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::CITY,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
 }
 
 
@@ -47,9 +104,9 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
 
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 
  	return entity;
 }
@@ -74,12 +131,43 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::BLOCK, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 
  	return entity;
 }
+
+Entity createHelpPanel(RenderSystem* renderer, int width, int height) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& motion = registry.motions.emplace(entity);
+	motion.velocity = { 0, 0 };
+	motion.position = {width / 2, height / 2};
+	motion.scale = {width, height};
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::HELP,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+	return entity;
+}
+
+Entity createText(RenderSystem* renderer, std::string text_content, vec2 position, bool is_visible) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& text = registry.texts.emplace(entity);
+	text.text = text_content;
+	text.position = position;
+	text.is_visible = is_visible;
+
+	return entity;
+}	
 
 Entity createBullet(RenderSystem* renderer, int side, vec2 position, int direction) {
 	auto entity = Entity();
@@ -95,13 +183,13 @@ Entity createBullet(RenderSystem* renderer, int side, vec2 position, int directi
 	else dir = 1;
  	motion.velocity = { 500 * dir, 0 }; 
  	motion.position = position;
-	motion.scale = { 8, 8 }; // width * height
+	motion.scale = { 15, 8 }; // width * height
 
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::BULLET, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 	
 	return entity;
 

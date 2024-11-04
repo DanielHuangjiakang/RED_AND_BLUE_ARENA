@@ -13,14 +13,14 @@ vec2 get_bounding_box(const Motion& motion)
 
 int collides(const Motion& motion1, const Motion& motion2)
 {
-	float x1_left = motion1.position[0] - (motion1.scale[0] / 2);
-    float x1_right = motion1.position[0] + (motion1.scale[0] / 2);
-    float y1_top = motion1.position[1] - (motion1.scale[1] / 2);
-    float y1_bot = motion1.position[1] + (motion1.scale[1] / 2);
-    float x2_left = motion2.position[0] - (motion2.scale[0] / 2);
-    float x2_right = motion2.position[0] + (motion2.scale[0] / 2);
-    float y2_top = motion2.position[1] - (motion2.scale[1] / 2);
-    float y2_bot = motion2.position[1] + (motion2.scale[1] / 2);
+	float x1_left = motion1.position[0] - (abs(motion1.scale[0]) / 2);
+    float x1_right = motion1.position[0] + (abs(motion1.scale[0]) / 2);
+    float y1_top = motion1.position[1] - (abs(motion1.scale[1]) / 2);
+    float y1_bot = motion1.position[1] + (abs(motion1.scale[1]) / 2);
+    float x2_left = motion2.position[0] - (abs(motion2.scale[0]) / 2);
+    float x2_right = motion2.position[0] + (abs(motion2.scale[0]) / 2);
+    float y2_top = motion2.position[1] - (abs(motion2.scale[1]) / 2);
+    float y2_bot = motion2.position[1] + (abs(motion2.scale[1]) / 2);
 
     if (x1_left >= x2_right || x2_left >= x1_right) return 0; // no collision
     if (y1_top >= y2_bot || y2_top >= y1_bot) return 0; // no collision

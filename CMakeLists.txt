@@ -9,6 +9,8 @@ endif()
 
 set(CMAKE_CXX_STANDARD 14)
 
+set(CMAKE_GENERATOR_PLATFORM x64)
+
 # nice hierarchichal structure in MSVC
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -108,6 +110,11 @@ elseif(IS_OS_WINDOWS)
     set(SDL2MIXER_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x86.dll")
   endif()
 
+  
+    # FreeType - Windows-specific (x64 only)
+    set (FREETYPE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/include")
+    set (FREETYPE_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/release static/vs2015-2022/win64/freetype.lib")
+
   # Copy and rename dlls
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -154,6 +161,28 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} glm::glm)
+
+# FreeType configuration
+if(IS_OS_WINDOWS)
+    set(FREETYPE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype")
+    target_include_directories(${PROJECT_NAME} PRIVATE 
+        "${FREETYPE_DIR}/include"
+        "${FREETYPE_DIR}/include/freetype"
+    )
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        "${FREETYPE_DIR}/release dll/win64/freetype.lib"
+    )
+    
+    # Copy DLL to output directory
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FREETYPE_DIR}/release dll/win64/freetype.dll"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/freetype.dll"
+    )
+else()
+    find_package(Freetype REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Freetype::Freetype)
+endif()
 
 # Needed to add this
 if(IS_OS_LINUX)

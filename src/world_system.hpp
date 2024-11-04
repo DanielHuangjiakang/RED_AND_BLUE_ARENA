@@ -12,6 +12,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "animation_system.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -50,15 +51,22 @@ private:
 
 	// Game state
 	RenderSystem* renderer;
+	AnimationSystem animation_system;
 	float current_speed;
 	Entity player1;
 	Entity player2;
+	Entity gun1;
+	Entity gun2;
+
 	bool player1_right_button = false;
 	bool player1_left_button = false;
 	bool player2_right_button = false;
 	bool player2_left_button = false;
 
 	// Stage atrributes
+	Entity helpPanel;
+	Entity helpText;
+	Entity background;
 	Entity ground;
 	Entity platform1;
 	Entity platform2;
@@ -77,4 +85,6 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+
 };
