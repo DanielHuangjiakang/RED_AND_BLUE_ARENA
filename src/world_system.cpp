@@ -151,9 +151,23 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update)
 {
+	static float total_time = 0.0f;
+    static int frame_count = 0;
+
+    total_time += elapsed_ms_since_last_update;
+    frame_count++;
+
+    if (total_time > 1000.0f) {
+        float fps = frame_count / (total_time / 1000.0f);
+        std::cout << "FPS: " << fps << std::endl;
+        total_time = 0.0f;
+        frame_count = 0;
+    }
+	
 	std::stringstream title_ss;
 	title_ss << "Game Screen";
 	glfwSetWindowTitle(window, title_ss.str().c_str());
+	
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
