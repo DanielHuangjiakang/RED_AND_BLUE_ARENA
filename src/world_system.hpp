@@ -78,7 +78,7 @@ private:
 	Mix_Chunk* end_music;
 	Mix_Chunk* hit_sound;
 	Mix_Chunk* shoot_sound;
-
+	Mix_Chunk* laser_sound;
 	Mix_Chunk* salmon_dead_sound;
 	Mix_Chunk* salmon_eat_sound;
 
