@@ -164,30 +164,46 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Update player1's position and enforce boundaries
     Motion& motion1 = registry.motions.get(player1);
+	Motion& gunMotion1 = registry.motions.get(gun1);
+    // Make gun follow player1
+	int dir1 = motion1.scale.x > 0 ? 1 : -1;		
+    gunMotion1.position = motion1.position + vec2(35 * dir1, 0);
+    gunMotion1.scale.x = motion1.scale.x; // Match player direction
     if (motion1.position.x < motion1.scale[0]/2) {
         motion1.position.x = motion1.scale[0]/2; // Stop at left boundary
 		motion1.velocity[0] = 0;
+		gunMotion1.velocity[0] = 0;
     } else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
         motion1.position.x = window_width_px + motion1.scale[0]/2 - motion1.scale.x; // Stop at right boundary
 		motion1.velocity[0] = 0;
+		gunMotion1.velocity[0] = 0;
     }
     if (motion1.position.y < motion1.scale[1]/2) {
         motion1.position.y = motion1.scale[1]/2; // Stop at the top boundary
 		motion1.velocity[1] = 0;
-    } 
+		gunMotion1.velocity[1] = 0;
+    }
 
     // Update player2's position and enforce boundaries
     Motion& motion2 = registry.motions.get(player2);
+	Motion& gunMotion2 = registry.motions.get(gun2);
+    // Make gun follow player2
+	int dir2 = motion2.scale.x > 0 ? 1 : -1;		
+    gunMotion2.position = motion2.position + vec2(35 * dir2, 0);
+    gunMotion2.scale.x = motion2.scale.x; // Match player direction
     if (motion2.position.x < motion2.scale[0]/2) {
         motion2.position.x = motion2.scale[0]/2; // Stop at left boundary
 		motion2.velocity[0] = 0;
+		gunMotion2.velocity[0] = 0;
     } else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
         motion2.position.x =  window_width_px + motion2.scale[0]/2 - motion2.scale.x; // Stop at right boundary
 		motion2.velocity[0] = 0;
+		gunMotion2.velocity[0] = 0;
     }
     if (motion2.position.y < motion2.scale[1]/2) {
         motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
 		motion2.velocity[1] = 0;
+		gunMotion2.velocity[1] = 0;
     }
 
 	// Remove entities that leave the screen on the left side
@@ -267,10 +283,13 @@ void WorldSystem::restart_game() {
 	background = createBackground(renderer, window_width_px, window_height_px);
 
 	player1 = createPlayer(renderer, 1, {window_width_px - 100, window_height_px - 100}, 1);
-	gun1 = createGun(renderer, 1, {window_width_px - 100, window_height_px - 100});
+	Motion& player1Motion = registry.motions.get(player1);
+	gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, window_height_px - 100});
+	
 	//red player
-	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 200}, 0);
-	gun2 = createGun(renderer, 2, {window_width_px - 215, window_height_px - 200});
+	player2 = createPlayer(renderer, 2, {window_width_px - 20, window_height_px - 200}, 0);
+	Motion& player2Motion = registry.motions.get(player2);
+	gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, window_height_px - 200});
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
 	
@@ -298,6 +317,7 @@ void WorldSystem::handle_collisions() {
 			if (direction == 1) { // top collision
 				
 				motion.velocity[1] = 0.0f;
+				
 				motion.position[1] = block.y - (motion.scale[1] / 2);
 				player.jumpable = true;
 			} else if (direction == 2) { // bot collision
@@ -363,11 +383,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	Motion& motion1 = registry.motions.get(player1);
 	Motion& motion2 = registry.motions.get(player2);
+	// Motion& gunMotion1 = registry.motions.get(gun1);
+	// Motion& gunMotion2 = registry.motions.get(gun2);
 	Gravity& gravity1 = registry.gravities.get(player1);
 	Gravity& gravity2 = registry.gravities.get(player2);
 	Player& p1 = registry.players.get(player1);
 	Player& p2 = registry.players.get(player2);
-
+	
 	
 	if (key == GLFW_KEY_H) {
 		if (action == GLFW_PRESS) {	
@@ -484,6 +506,7 @@ if (key == GLFW_KEY_RIGHT) {
 if (key == GLFW_KEY_UP) {
     if (action == GLFW_PRESS && p2.jumpable == true) {
         motion2.velocity[1] += -600;
+		
         p2.jumpable = false;
     }
 }

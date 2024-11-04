@@ -54,7 +54,7 @@ Entity createGun(RenderSystem* renderer, int side, vec2 position) {
 	auto& motion = registry.motions.emplace(entity);
 	motion.velocity = { 0, 0 };
 	motion.position = position;
-	motion.scale = { 30, 15 };
+	motion.scale = { 0.2, 20 };
 
 	registry.renderRequests.insert(
 		entity,
@@ -183,7 +183,7 @@ Entity createBullet(RenderSystem* renderer, int side, vec2 position, int directi
 	else dir = 1;
  	motion.velocity = { 500 * dir, 0 }; 
  	motion.position = position;
-	motion.scale = { 15, 8 }; // width * height
+	motion.scale = { 15, 6 }; // width * height
 
 	registry.renderRequests.insert(
 		entity,
