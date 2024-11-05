@@ -52,7 +52,7 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
 // create a block based on its center (position), and its width and height
 Entity createPortal(RenderSystem* renderer, vec2 position, int width, int height) { 
     auto entity = Entity();
-    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PORTAL);
     registry.meshPtrs.emplace(entity, &mesh);
 
     auto& portal = registry.portals.emplace(entity);
@@ -71,10 +71,11 @@ Entity createPortal(RenderSystem* renderer, vec2 position, int width, int height
         entity,
          { TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
              EFFECT_ASSET_ID::SALMON,
-             GEOMETRY_BUFFER_ID::SQUARE });
+             GEOMETRY_BUFFER_ID::PORTAL });
 
      return entity;
 }
+
 
 Entity createGun(RenderSystem* renderer, int side, vec2 position) {
 	auto entity = Entity();
