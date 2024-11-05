@@ -202,6 +202,7 @@ struct AnimationFrame {
     std::vector<TEXTURE_ASSET_ID> frames;
     int current_frame = 0;
     float frame_time = 0.f;
+};
   
 struct Laser {};
 

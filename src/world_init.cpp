@@ -4,77 +4,76 @@
 #include "decisionTree.hpp"
 
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction) {
-	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-	registry.meshPtrs.emplace(entity, &mesh);
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+    registry.meshPtrs.emplace(entity, &mesh);
 
-	auto& player = registry.players.emplace(entity);
-	player.side = side;
-	player.direction = direction; // Default to facing right initially
+    auto& player = registry.players.emplace(entity);
+    player.side = side;
+    player.direction = direction; // Default to facing right initially
 
-	auto& motion = registry.motions.emplace(entity);
- 	motion.velocity = { 0, 0 }; 
- 	motion.position = position;
+    auto& motion = registry.motions.emplace(entity);
+     motion.velocity = { 0, 0 }; 
+     motion.position = position;
 
-	auto& gravity = registry.gravities.emplace(entity);
-	gravity.drag = true;
+   	auto& gravity = registry.gravities.emplace(entity);
+    gravity.drag = true;
 
-	registry.renderRequests.insert(
-		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+    auto& animation = registry.animations.emplace(entity);
+    if (side == 2) { // red player
+        animation.frames = {
+            TEXTURE_ASSET_ID::RED_RUN_1,
+            TEXTURE_ASSET_ID::RED_RUN_2,
+            TEXTURE_ASSET_ID::RED_RUN_3,
+        };
+        motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
+        motion.scale.x *= -1;
+    } else { // blue player
+        animation.frames = {
+            TEXTURE_ASSET_ID::BLUE_RUN_1,
+            TEXTURE_ASSET_ID::BLUE_RUN_2,
+            TEXTURE_ASSET_ID::BLUE_RUN_3,
+        };
+        motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
+    }
 
- 	return entity;
+    // Initial render request uses first frame
+    registry.renderRequests.insert(
+        entity,
+        { animation.frames[0], 
+          EFFECT_ASSET_ID::TEXTURED,
+          GEOMETRY_BUFFER_ID::SPRITE });
+
+    return entity;
 }
 
 
 // Create a portal at given pos
 // create a block based on its center (position), and its width and height
 Entity createPortal(RenderSystem* renderer, vec2 position, int width, int height) { 
-	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-	registry.meshPtrs.emplace(entity, &mesh);
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+    registry.meshPtrs.emplace(entity, &mesh);
 
-	auto& portal = registry.portals.emplace(entity);
-	portal.x = int(position[0] - (width / 2));
-	portal.y = int(position[1] - (height / 2));
-	portal.width = width;
-	portal.height = height;
+    auto& portal = registry.portals.emplace(entity);
+    portal.x = int(position[0] - (width / 2));
+    portal.y = int(position[1] - (height / 2));
+    portal.width = width;
+    portal.height = height;
 
-	auto& motion = registry.motions.emplace(entity);
- 	motion.velocity = { 0, 0 };
- 	motion.position = {position[0] - (width / 2), position[1] - (height / 2)};
-	motion.scale = {width, height};
+    auto& motion = registry.motions.emplace(entity);
+     motion.velocity = { 0, 0 };
+     motion.position = {position[0] - (width / 2), position[1] - (height / 2)};
+    motion.scale = {width, height};
 
 
-	
-	auto& animation = registry.animations.emplace(entity);
-	if (side == 2) { // red player
-		animation.frames = {
-			TEXTURE_ASSET_ID::RED_RUN_1,
-			TEXTURE_ASSET_ID::RED_RUN_2,
-			TEXTURE_ASSET_ID::RED_RUN_3,
-		};
-		motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
-		motion.scale.x *= -1;
-	} else { // blue player
-		animation.frames = {
-			TEXTURE_ASSET_ID::BLUE_RUN_1,
-			TEXTURE_ASSET_ID::BLUE_RUN_2,
-			TEXTURE_ASSET_ID::BLUE_RUN_3,
-		};
-		motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
-	}
+    registry.renderRequests.insert(
+        entity,
+         { TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
+             EFFECT_ASSET_ID::SALMON,
+             GEOMETRY_BUFFER_ID::SQUARE });
 
-	// Initial render request uses first frame
-	registry.renderRequests.insert(
-		entity,
-		{ animation.frames[0], 
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
-
-	return entity;
+     return entity;
 }
 
 Entity createGun(RenderSystem* renderer, int side, vec2 position) {
@@ -308,6 +307,8 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
 	
 	return {entity, entity2, entity3, entity4};
 }
+
+
 Entity createLaser(RenderSystem* renderer) {
     auto entity = Entity();
     Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);

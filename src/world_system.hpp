@@ -71,8 +71,6 @@ private:
 	bool player2_left_button = false;
 	bool player2_shooting = false;
 
-	bool movable = true;
-
 	// Stage atrributes
 	Entity helpPanel;
 	Entity helpText;
@@ -95,6 +93,7 @@ private:
 	Mix_Chunk* laser_sound;
 	Mix_Chunk* salmon_dead_sound;
 	Mix_Chunk* salmon_eat_sound;
+	Mix_Chunk* portal_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
