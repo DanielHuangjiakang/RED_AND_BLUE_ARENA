@@ -65,7 +65,6 @@ bool RenderSystem::init(GLFWwindow* window_arg)
     initializeGlTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
-
 	//fontInit(*(this->window), "data/fonts/Kenney_Pixel_Square.ttf", 24);
 
 	return true;
@@ -88,6 +87,7 @@ std::string readShaderFile(const std::string& filename)
 	std::cout << oss.str() << std::endl;
 	return oss.str();
 }
+
 
 // // init fonts
 // bool RenderSystem::fontInit(GLFWwindow& window_arg, const std::string& font_filename, unsigned int font_default_size) {

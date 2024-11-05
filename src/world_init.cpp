@@ -154,7 +154,7 @@ Entity createHelpPanel(RenderSystem* renderer, int width, int height) {
 	auto& motion = registry.motions.emplace(entity);
 	motion.velocity = { 0, 0 };
 	motion.position = {width / 2, height / 2};
-	motion.scale = {width, height};
+	motion.scale = {500, 300};
 
 	registry.renderRequests.insert(
 		entity,

@@ -94,7 +94,7 @@ public:
 	// The draw loop first renders to this texture, then it is used for the wind
 	// shader
 	bool initScreenTexture();
-	bool fontInit(GLFWwindow& window, const std::string& font_filename, unsigned int font_default_size);
+	void fontInit();
 
 	// Destroy resources associated to one or all entities created by the system
 	~RenderSystem();
@@ -107,6 +107,7 @@ public:
 		void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
 
 	// Add these member variables for font rendering
+	FT_Library ft;
 	GLuint m_font_shaderProgram;
 	GLuint m_font_VAO;
 	GLuint m_font_VBO;
@@ -123,6 +124,7 @@ private:
 	GLFWwindow* window;
 
 	// Screen texture handles
+
 	GLuint frame_buffer;
 	GLuint off_screen_render_buffer_color;
 	GLuint off_screen_render_buffer_depth;

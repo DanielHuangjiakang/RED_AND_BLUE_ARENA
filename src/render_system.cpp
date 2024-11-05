@@ -280,12 +280,12 @@ void RenderSystem::draw()
 		drawTexturedMesh(entity, projection_2D);
 	}
 	
-	// for (Entity entity : registry.texts.entities) {
-	// 	const Text& text = registry.texts.get(entity);
-	// 	if (text.is_visible) {
-	// 		renderText(text.text, text.position.x, text.position.y, 1.0f, {1.0f, 1.0f, 1.0f}, mat4(1.0f));
-	// 	}
-	// }
+	for (Entity entity : registry.texts.entities) {
+		const Text& text = registry.texts.get(entity);
+		if (text.is_visible) {
+			renderText(text.text, text.position.x, text.position.y, 1.0f, {1.0f, 1.0f, 1.0f}, mat4(1.0f));
+		}
+	}
 
 
 	// Truely render to the screen

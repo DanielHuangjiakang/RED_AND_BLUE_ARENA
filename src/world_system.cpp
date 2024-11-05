@@ -394,16 +394,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		if (action == GLFW_PRESS) {	
 			helpPanel = createHelpPanel(renderer, window_width_px, window_height_px);
 			
-			// Add help text
-			std::string instructions = 
-				"Controls:\n"
-				"Player 1 (Blue):\n"
-				"WASD - Movement\n"
-				"Q - Shoot\n\n"
-				"Player 2 (Red):\n"
-				"Arrow Keys - Movement\n"
-				"/ - Shoot\n\n"
-				"R - Restart Game";
+			// // Add help text
+			// std::string instructions = 
+			// 	"Controls:\n"
+			// 	"Player 1 (Blue):\n"
+			// 	"WASD - Movement\n"
+			// 	"Q - Shoot\n\n"
+			// 	"Player 2 (Red):\n"
+			// 	"Arrow Keys - Movement\n"
+			// 	"/ - Shoot\n\n"
+			// 	"R - Restart Game";
 
 		//	helpText = createText(renderer, instructions, vec2(window_width_px/2, window_height_px/2-100), true);
 			
