@@ -66,10 +66,10 @@ private:
 
 	bool player1_right_button = false;
 	bool player1_left_button = false;
-	bool player1_shooting = false;
+	int player1_shooting = 0;
 	bool player2_right_button = false;
 	bool player2_left_button = false;
-	bool player2_shooting = false;
+	int player2_shooting = 0;
 
 	// Stage atrributes
 	Entity helpPanel;
