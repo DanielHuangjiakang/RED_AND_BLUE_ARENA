@@ -302,6 +302,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 // Reset the world state to its initial state
 void WorldSystem::restart_game()
 {
+	movable = true;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
@@ -406,6 +407,8 @@ void WorldSystem::handle_collisions()
 					Mix_PlayChannel(-1, end_music, 0);
 					Motion &motion = registry.motions.get(entity);
 					motion.angle = M_PI / 4;
+					movable = false;
+
 				}
 				registry.remove_all_components_of(entity_other);
 			}
@@ -488,6 +491,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		restart_game();
 	}
 
+	if (!movable) {
+		player1_shooting = false;
+		player2_shooting = false;
+		return;
+	}
+
 	Motion& motion1 = registry.motions.get(player1);
 	Motion& motion2 = registry.motions.get(player2);
 	Gravity& gravity1 = registry.gravities.get(player1);
@@ -502,10 +511,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 		else if (action == GLFW_RELEASE)
 		{
-			if (!player1_right_button)
-			{
-				gravity1.g[0] = 0.f;
-			}
+			if (!player1_right_button) gravity1.g[0] = 0.f;
 			player1_left_button = false;
 		}
 	}
@@ -514,15 +520,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
     	if (action == GLFW_PRESS) {
         	gravity1.g[0] = +p1.lr_accel;
         	p1.direction = 1; // Facing right
-
 			player1_right_button = true;
 		}
 		else if (action == GLFW_RELEASE)
 		{
-			if (!player1_left_button)
-			{
-				gravity1.g[0] = 0.f;
-			}
+			if (!player1_left_button) gravity1.g[0] = 0.f;
 			player1_right_button = false;
 		}
 	}
@@ -535,11 +537,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 
 	if (key == GLFW_KEY_Q) {
-		if (action == GLFW_PRESS) {
-			player1_shooting = true;
-    	} else if (action == GLFW_RELEASE) {
-			player1_shooting = false;
-    	}
+		if (action == GLFW_PRESS) player1_shooting = true;
+    	else if (action == GLFW_RELEASE) player1_shooting = false;
 	}
 
 
@@ -549,10 +548,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player1))
 		{
 			int dir;
-			if (p1.direction == 0)
-				dir = -1; // left
-			else
-				dir = 1;
+			if (p1.direction == 0) dir = -1; // left
+			else dir = 1;
+
 			vec2 bullet_position = registry.motions.get(player1).position + vec2({(registry.motions.get(player1).scale.x / 2) * dir, 0.f});
 			auto bullets = createBuckshot(renderer, 1, bullet_position, p1.direction);
 			for (size_t i = 0; i < bullets.size(); i++)
@@ -573,10 +571,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player2))
 		{
 			int dir;
-			if (p2.direction == 0)
-				dir = -1; // left
-			else
-				dir = 1;
+			if (p2.direction == 0) dir = -1; // left
+			else dir = 1;
 			vec2 bullet_position = registry.motions.get(player2).position + vec2({(registry.motions.get(player2).scale.x / 2) * dir, 0.f});
 			auto bullets = createBuckshot(renderer, 2, bullet_position, p2.direction);
 			for (size_t i = 0; i < bullets.size(); i++)
@@ -594,14 +590,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
     	if (action == GLFW_PRESS) {
         	gravity2.g[0] = -p2.lr_accel;
         	p2.direction = 0; // Facing left
-			    player2_left_button = true;
-		  }
-		  else if (action == GLFW_RELEASE)
-		  {
-			if (!player2_right_button)
-			{
-				gravity2.g[0] = 0.f;
-			}
+			player2_left_button = true;
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			if (!player2_right_button) gravity2.g[0] = 0.f;
 			player2_left_button = false;
 		}
 	}
@@ -609,15 +602,11 @@ void WorldSystem::on_key(int key, int, int action, int mod)
     	if (action == GLFW_PRESS) {
         	gravity2.g[0] = +p2.lr_accel;
         	p2.direction = 1; // Facing right
-
 			player2_right_button = true;
 		}
 		else if (action == GLFW_RELEASE)
 		{
-			if (!player2_left_button)
-			{
-				gravity2.g[0] = 0.f;
-			}
+			if (!player2_left_button) gravity2.g[0] = 0.f;
 			player2_right_button = false;
 		}
 	}
@@ -628,20 +617,15 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 	if (key == GLFW_KEY_SLASH) {
-		if (action == GLFW_PRESS) {
-			player2_shooting = true;
-    	} else if (action == GLFW_RELEASE) {
-			player2_shooting = false;
-    	} 
+		if (action == GLFW_PRESS) player2_shooting = true;
+    	else if (action == GLFW_RELEASE) player2_shooting = false;
 	}
 
 	// Debugging
 	if (key == GLFW_KEY_G)
 	{
-		if (action == GLFW_RELEASE)
-			debugging.in_debug_mode = false;
-		else
-			debugging.in_debug_mode = true;
+		if (action == GLFW_RELEASE) debugging.in_debug_mode = false;
+		else debugging.in_debug_mode = true;
 	}
 
 	// Control the current speed with `<` `>`
