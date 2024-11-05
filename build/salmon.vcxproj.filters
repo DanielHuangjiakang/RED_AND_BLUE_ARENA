@@ -10,6 +10,9 @@
     <ClCompile Include="C:\Users\baoba\CPSC 427\Team22\src\components.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\baoba\CPSC 427\Team22\src\decisionTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\baoba\CPSC 427\Team22\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -20,6 +23,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\baoba\CPSC 427\Team22\src\render_system_init.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\baoba\CPSC 427\Team22\src\test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\baoba\CPSC 427\Team22\src\tiny_ecs.cpp">
@@ -36,6 +42,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="C:\Users\baoba\CPSC 427\Team22\src\DecisionTree.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="C:\Users\baoba\CPSC 427\Team22\src\ai_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

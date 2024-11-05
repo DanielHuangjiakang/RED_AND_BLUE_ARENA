@@ -62,6 +62,8 @@ private:
 	bool player2_left_button = false;
 	bool player2_shooting = false;
 
+	bool movable = true;
+
 	// Stage atrributes
 	Entity ground;
 	Entity platform1;
