@@ -161,15 +161,15 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
     if (total_time > 1000.0f) {
         float fps = frame_count / (total_time / 1000.0f);
-        std::cout << "FPS: " << fps << std::endl;
+		std::stringstream title_ss;
+        title_ss << "Game Screen - FPS: " << static_cast<int>(fps);
+        glfwSetWindowTitle(window, title_ss.str().c_str());
+
         total_time = 0.0f;
         frame_count = 0;
     }
 	
-	std::stringstream title_ss;
-	title_ss << "Game Screen";
-	glfwSetWindowTitle(window, title_ss.str().c_str());
-	
+
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
