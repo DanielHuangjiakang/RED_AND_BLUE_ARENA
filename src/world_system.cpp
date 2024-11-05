@@ -9,6 +9,9 @@
 #include <iostream>
 
 #include "physics_system.hpp"
+
+#include "animation_system.hpp"
+
 #include "tiny_ecs_registry.hpp"
 #include "decisionTree.hpp"
 
@@ -205,40 +208,49 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     }
 
 	// Update player1's position and enforce boundaries
-	Motion &motion1 = registry.motions.get(player1);
-	if (motion1.position.x < motion1.scale[0] / 2)
-	{
-		motion1.position.x = motion1.scale[0] / 2; // Stop at left boundary
+    Motion& motion1 = registry.motions.get(player1);
+	Motion& gunMotion1 = registry.motions.get(gun1);
+    // Make gun follow player1
+	int dir1 = motion1.scale.x > 0 ? 1 : -1;		
+    gunMotion1.position = motion1.position + vec2(35 * dir1, 0);
+    gunMotion1.scale.x = motion1.scale.x; // Match player direction
+    if (motion1.position.x < abs(motion1.scale[0]/2)) {
+        motion1.position.x = abs(motion1.scale.x/2); // Stop at left boundary
+		motion1.velocity.x = 0;
+		gunMotion1.velocity[0] = 0;
+    } else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
+        motion1.position.x = window_width_px - motion1.scale[0]/2; // Stop at right boundary
 		motion1.velocity[0] = 0;
-	}
-	else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0] / 2)
-	{
-		motion1.position.x = window_width_px + motion1.scale[0] / 2 - motion1.scale.x; // Stop at right boundary
-		motion1.velocity[0] = 0;
-	}
-	if (motion1.position.y < motion1.scale[1] / 2)
-	{
-		motion1.position.y = motion1.scale[1] / 2; // Stop at the top boundary
+		gunMotion1.velocity[0] = 0;
+    }
+    if (motion1.position.y < motion1.scale[1]/2) {
+        motion1.position.y = motion1.scale[1]/2; // Stop at the top boundary
 		motion1.velocity[1] = 0;
-	}
+		gunMotion1.velocity[1] = 0;
+    }
 
-	// Update player2's position and enforce boundaries
-	Motion &motion2 = registry.motions.get(player2);
-	if (motion2.position.x < motion2.scale[0] / 2)
-	{
-		motion2.position.x = motion2.scale[0] / 2; // Stop at left boundary
+    // Update player2's position and enforce boundaries
+    Motion& motion2 = registry.motions.get(player2);
+	Motion& gunMotion2 = registry.motions.get(gun2);
+    // Make gun follow player2
+	int dir2 = motion2.scale.x > 0 ? 1 : -1;		
+    gunMotion2.position = motion2.position + vec2(35 * dir2, 0);
+    gunMotion2.scale.x = motion2.scale.x; // Match player direction
+    if (motion2.position.x < abs(motion2.scale[0]/2)) {
+        motion2.position.x = abs(motion2.scale[0]/2); // Stop at left boundary
+		motion2.velocity.x = 0;
+		gunMotion2.velocity[0] = 0;
+    } else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
+        motion2.position.x =  window_width_px - motion2.scale[0]/2; // Stop at right boundary
 		motion2.velocity[0] = 0;
-	}
-	else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0] / 2)
-	{
-		motion2.position.x = window_width_px + motion2.scale[0] / 2 - motion2.scale.x; // Stop at right boundary
-		motion2.velocity[0] = 0;
-	}
-	if (motion2.position.y < motion2.scale[1] / 2)
-	{
-		motion2.position.y = motion2.scale[1] / 2; // Stop at the top boundary
+		gunMotion2.velocity[0] = 0;
+    }
+    if (motion2.position.y < motion2.scale[1]/2) {
+        motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
 		motion2.velocity[1] = 0;
-	}
+		gunMotion2.velocity[1] = 0;
+    }
+
 
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
@@ -298,12 +310,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	on_shoot();
 
+	// Update animations
+	animation_system.step(elapsed_ms_since_last_update);
+
 	return true;
 }
 
 // Reset the world state to its initial state
-void WorldSystem::restart_game()
-{
+
+void WorldSystem::restart_game() {
+
 	movable = true;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -320,21 +336,23 @@ void WorldSystem::restart_game()
 	registry.list_all_components();
 
 	// create a new Salmon
-	player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
-	registry.colors.insert(player1, {1.0f, 0.1f, 0.1f});
 
+  background = createBackground(renderer, window_width_px, window_height_px);
+
+	player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
+	Motion& player1Motion = registry.motions.get(player1);
+	gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, window_height_px - 100});
+	
+	//red player
 	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 50}, 0);
-	registry.colors.insert(player2, {0.1f, 0.1f, 1.0f});
+	Motion& player2Motion = registry.motions.get(player2);
+	gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, window_height_px - 200});
 
 	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
-	registry.colors.insert(ground, {0.0f, 0.0f, 0.0f});
-
-	platform1 = createBlock2(renderer, {window_width_px / 4, window_height_px - 220}, 250, 20);
-	registry.colors.insert(platform1, {0.0f, 0.0f, 0.0f});
-	platform2 = createBlock2(renderer, {3 * window_width_px / 4, window_height_px - 220}, 250, 20);
-	registry.colors.insert(platform2, {0.0f, 0.0f, 0.0f});
-	platform3 = createBlock2(renderer, {window_width_px / 2, window_height_px - 390}, 250, 20);
-	registry.colors.insert(platform3, {0.0f, 0.0f, 0.0f});
+	
+	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 220}, 250, 20);
+	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 220}, 250, 20);
+	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
 
 	portal1 = createPortal(renderer, {window_width_px / 2, window_height_px - 390 - 10}, 50, 100);
 	registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
@@ -342,8 +360,8 @@ void WorldSystem::restart_game()
 	portal2 = createPortal(renderer, {3 * window_width_px / 4, window_height_px - 220 - 10}, 50, 100);
 	registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
   
-  	createLaser(renderer);
-    initializeLaserAI();
+  createLaser(renderer);
+   initializeLaserAI();
 }
 
 // Compute collisions between entities
@@ -358,37 +376,32 @@ void WorldSystem::handle_collisions()
 		Entity entity_other = collisionsRegistry.components[i].other;
 		int direction = collisionsRegistry.components[i].direction;
 
-		if (registry.players.has(entity) && registry.blocks.has(entity_other))
-		{
-			if (direction == 1)
-			{ // top collision
-				Motion &motion = registry.motions.get(entity);
-				Block &block = registry.blocks.get(entity_other);
-				Player &player = registry.players.get(entity);
+
+		if (registry.players.has(entity) && registry.blocks.has(entity_other)) {
+			Motion& motion = registry.motions.get(entity);
+			Block& block = registry.blocks.get(entity_other);
+
+				Player& player = registry.players.get(entity);
+			if (direction == 1) { // top collision
+				
 				motion.velocity[1] = 0.0f;
-				motion.position[1] = block.y - (motion.scale[1] / 2);
+				
+				motion.position[1] = block.y - abs(motion.scale[1] / 2);
 				player.jumpable = true;
-			}
-			else if (direction == 2)
-			{ // bot collision
-				Motion &motion = registry.motions.get(entity);
-				Block &block = registry.blocks.get(entity_other);
+        
+			} else if (direction == 2) { // bot collision
+				
+				// player.jumpable = false;
 				motion.velocity[1] = 0.0f;
-				motion.position[1] = block.y + block.height + (motion.scale[1] / 2);
-			}
-			else if (direction == 3)
-			{ // left collision
-				Motion &motion = registry.motions.get(entity);
-				Block &block = registry.blocks.get(entity_other);
+				motion.position[1] = block.y + abs(motion.scale[1] / 2) + block.height;
+			} else if (direction == 3) { // left collision
+				
 				motion.velocity[0] = 0.0f;
-				motion.position[0] = block.x - (motion.scale[1] / 2);
-			}
-			else if (direction == 4)
-			{ // right collision
-				Motion &motion = registry.motions.get(entity);
-				Block &block = registry.blocks.get(entity_other);
+				motion.position[0] = block.x - (abs(motion.scale[0]) / 2);
+			} else if (direction == 4) { // right collision
+				
 				motion.velocity[0] = 0.0f;
-				motion.position[0] = block.x + block.width + (motion.scale[1] / 2);
+				motion.position[0] = block.x + block.width + (abs(motion.scale[0]) / 2);
 			}
 		}
 
@@ -408,7 +421,8 @@ void WorldSystem::handle_collisions()
 					// end music
 					Mix_PlayChannel(-1, end_music, 0);
 					Motion &motion = registry.motions.get(entity);
-					motion.angle = M_PI / 4;
+					motion.angle = M_PI / 2;
+					motion.scale.y = motion.scale.y / 2;
 					movable = false;
 
 				}
@@ -457,7 +471,6 @@ void WorldSystem::handle_collisions()
 			}
 			
 		}
-
 		if (registry.portals.has(entity) && registry.bullets.has(entity_other))
 		{
 			registry.remove_all_components_of(entity_other);
@@ -484,6 +497,11 @@ bool WorldSystem::is_over() const
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
 
+
+	if (!movable) {
+		return;
+	}
+	
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
@@ -499,13 +517,94 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		return;
 	}
 
+
+
 	Motion& motion1 = registry.motions.get(player1);
 	Motion& motion2 = registry.motions.get(player2);
+
 	Gravity& gravity1 = registry.gravities.get(player1);
 	Gravity& gravity2 = registry.gravities.get(player2);
 	Player& p1 = registry.players.get(player1);
 	Player& p2 = registry.players.get(player2);
+	
+	
+	if (key == GLFW_KEY_H) {
+		if (action == GLFW_PRESS) {	
+			helpPanel = createHelpPanel(renderer, window_width_px, window_height_px);
+			
+			// Add help text
+			std::string instructions = 
+				"Controls:\n"
+				"Player 1 (Blue):\n"
+				"WASD - Movement\n"
+				"Q - Shoot\n\n"
+				"Player 2 (Red):\n"
+				"Arrow Keys - Movement\n"
+				"/ - Shoot\n\n"
+				"R - Restart Game";
+
+		//	helpText = createText(renderer, instructions, vec2(window_width_px/2, window_height_px/2-100), true);
+			
+		} else if (action == GLFW_RELEASE) {
+			registry.remove_all_components_of(helpPanel);
+			registry.remove_all_components_of(helpText);
+		}
+	}
+
+
 	if (key == GLFW_KEY_A) {
+    if (action == GLFW_PRESS) {
+			gravity1.g[0] = -700.f;
+			p1.direction = 0; // Facing left
+			player1_left_button = true;
+			p1.is_moving = true;
+        if (motion1.scale.x > 0) motion1.scale.x *=-1;
+
+    } else if (action == GLFW_RELEASE) {
+		if (!player1_right_button) {
+				gravity1.g[0] = 0.f;
+				p1.is_moving = false;
+			}
+		player1_left_button = false;
+    }
+}
+
+if (key == GLFW_KEY_D) {
+
+    if (action == GLFW_PRESS) {
+		gravity1.g[0] = +700.f;
+        p1.direction = 1; // Facing right
+		player1_right_button = true;
+		p1.is_moving = true;
+        if (motion1.scale.x < 0) motion1.scale.x *= -1;
+
+    } else if (action == GLFW_RELEASE) {
+		if (!player1_left_button) {
+				gravity1.g[0] = 0.f;
+				p1.is_moving = false;
+		}
+		player1_right_button = false;
+    }
+}
+
+if (key == GLFW_KEY_W) {
+    if (action == GLFW_PRESS && p1.jumpable == true) {
+        motion1.velocity[1] += -600;
+        p1.jumpable = false;
+    }
+}
+
+if (key == GLFW_KEY_Q) {
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player1)) {
+		int dir;
+		if (p1.direction == 0) dir = -1; // left
+		else dir = 1;
+		vec2 bullet_position = registry.motions.get(player1).position + vec2({abs(registry.motions.get(player1).scale.x / 2) * dir, 0.f});
+		Entity bullet = createBullet(renderer, 1, bullet_position, p1.direction);
+		registry.gunTimers.emplace(player1);
+
+		// shoot sound
+		Mix_PlayChannel(-1, shoot_sound, 0);
     	if (action == GLFW_PRESS) {
         	gravity1.g[0] = -p1.lr_accel;
         	p1.direction = 0; // Facing left
@@ -518,30 +617,30 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	if (key == GLFW_KEY_D) {
-    	if (action == GLFW_PRESS) {
-        	gravity1.g[0] = +p1.lr_accel;
-        	p1.direction = 1; // Facing right
-			player1_right_button = true;
-		}
-		else if (action == GLFW_RELEASE)
-		{
-			if (!player1_left_button) gravity1.g[0] = 0.f;
-			player1_right_button = false;
-		}
-	}
+// 	if (key == GLFW_KEY_D) {
+//     	if (action == GLFW_PRESS) {
+//         	gravity1.g[0] = +p1.lr_accel;
+//         	p1.direction = 1; // Facing right
+// 			player1_right_button = true;
+// 		}
+// 		else if (action == GLFW_RELEASE)
+// 		{
+// 			if (!player1_left_button) gravity1.g[0] = 0.f;
+// 			player1_right_button = false;
+// 		}
+// 	}
 
-	if (key == GLFW_KEY_W) {
-		if (action == GLFW_PRESS && p1.jumpable == true) {
-			motion1.velocity[1] += p1.jump_accel;
-			p1.jumpable = false;
-		}
-	}
+// 	if (key == GLFW_KEY_W) {
+// 		if (action == GLFW_PRESS && p1.jumpable == true) {
+// 			motion1.velocity[1] += p1.jump_accel;
+// 			p1.jumpable = false;
+// 		}
+// 	}
 
-	if (key == GLFW_KEY_Q) {
-		if (action == GLFW_PRESS) player1_shooting = true;
-    	else if (action == GLFW_RELEASE) player1_shooting = false;
-	}
+// 	if (key == GLFW_KEY_Q) {
+// 		if (action == GLFW_PRESS) player1_shooting = true;
+//     	else if (action == GLFW_RELEASE) player1_shooting = false;
+// 	}
 
 
 	// shoot arrow for player 1
@@ -588,47 +687,42 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-	if (key == GLFW_KEY_LEFT) {
-    	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = -p2.lr_accel;
-        	p2.direction = 0; // Facing left
-			player2_left_button = true;
-		}
-		else if (action == GLFW_RELEASE)
-		{
-			if (!player2_right_button) gravity2.g[0] = 0.f;
-			player2_left_button = false;
-		}
-	}
-	if (key == GLFW_KEY_RIGHT) {
-    	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = +p2.lr_accel;
-        	p2.direction = 1; // Facing right
-			player2_right_button = true;
-		}
-		else if (action == GLFW_RELEASE)
-		{
-			if (!player2_left_button) gravity2.g[0] = 0.f;
-			player2_right_button = false;
-		}
-	}
-	if (key == GLFW_KEY_UP) {
-		if (action == GLFW_PRESS && p2.jumpable == true) {
-			motion2.velocity[1] += p2.jump_accel;
-			p2.jumpable = false;
-		}
-	}
-	if (key == GLFW_KEY_SLASH) {
-		if (action == GLFW_PRESS) player2_shooting = true;
-    	else if (action == GLFW_RELEASE) player2_shooting = false;
-	}
+// 	if (key == GLFW_KEY_LEFT) {
+//     	if (action == GLFW_PRESS) {
+//         	gravity2.g[0] = -p2.lr_accel;
+//         	p2.direction = 0; // Facing left
+// 			player2_left_button = true;
+// 		}
+// 		else if (action == GLFW_RELEASE)
+// 		{
+// 			if (!player2_right_button) gravity2.g[0] = 0.f;
+// 			player2_left_button = false;
+// 		}
+// 	}
+// 	if (key == GLFW_KEY_RIGHT) {
+//     	if (action == GLFW_PRESS) {
+//         	gravity2.g[0] = +p2.lr_accel;
+//         	p2.direction = 1; // Facing right
+// 			player2_right_button = true;
+// 		}
+// 		else if (action == GLFW_RELEASE)
+// 		{
+// 			if (!player2_left_button) gravity2.g[0] = 0.f;
+// 			player2_right_button = false;
+// 		}
+// 	}
+// 	if (key == GLFW_KEY_UP) {
+// 		if (action == GLFW_PRESS && p2.jumpable == true) {
+// 			motion2.velocity[1] += p2.jump_accel;
+// 			p2.jumpable = false;
+// 		}
+// 	}
+// 	if (key == GLFW_KEY_SLASH) {
+// 		if (action == GLFW_PRESS) player2_shooting = true;
+//     	else if (action == GLFW_RELEASE) player2_shooting = false;
+// 	}
 
-	// Debugging
-	if (key == GLFW_KEY_G)
-	{
-		if (action == GLFW_RELEASE) debugging.in_debug_mode = false;
-		else debugging.in_debug_mode = true;
-	}
+
 
 	// Control the current speed with `<` `>`
 	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
@@ -641,8 +735,72 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		current_speed += 0.1f;
 		printf("Current speed = %f\n", current_speed);
 	}
-	current_speed = fmax(0.f, current_speed);
 }
+
+if (key == GLFW_KEY_LEFT) {
+    if (action == GLFW_PRESS) {
+        gravity2.g[0] = -700.f;
+        p2.direction = 0; // Facing left
+        if (motion2.scale.x > 0) motion2.scale.x *= -1;
+        player2_left_button = true;
+		p2.is_moving = true;
+    } else if (action == GLFW_RELEASE) {
+        if (!player2_right_button) {
+            gravity2.g[0] = 0.f;
+			p2.is_moving = false;
+        }
+        player2_left_button = false;
+    }
+}
+
+if (key == GLFW_KEY_RIGHT) {
+    if (action == GLFW_PRESS) {
+        gravity2.g[0] = +700.f;
+        p2.direction = 1; // Facing right
+        player2_right_button = true;
+		p2.is_moving = true;
+        if (motion2.scale.x < 0) motion2.scale.x = -motion2.scale.x;
+    } else if (action == GLFW_RELEASE) {
+        if (!player2_left_button) {
+            gravity2.g[0] = 0.f;
+			p2.is_moving = false;
+        }
+
+        player2_right_button = false;
+    }
+}
+
+if (key == GLFW_KEY_UP) {
+    if (action == GLFW_PRESS && p2.jumpable == true) {
+        motion2.velocity[1] += -600;
+		
+        p2.jumpable = false;
+    }
+}
+
+if (key == GLFW_KEY_SLASH) {
+    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player2)) {
+        int dir;
+        if (p2.direction == 0) dir = -1;
+        else dir = 1;
+        vec2 bullet_position = registry.motions.get(player2).position + vec2({abs(registry.motions.get(player2).scale.x / 2) * dir, 0.f});
+        Entity bullet = createBullet(renderer, 2, bullet_position, p2.direction);
+        registry.gunTimers.emplace(player2);
+
+        // shoot sound
+        Mix_PlayChannel(-1, shoot_sound, 0);
+    } 
+}
+
+// Debugging
+if (key == GLFW_KEY_G ) {
+    if (action == GLFW_RELEASE)
+        debugging.in_debug_mode = false;
+    else
+        debugging.in_debug_mode = true;
+}
+
+
 
 void WorldSystem::on_mouse_move(vec2 mouse_position)
 {

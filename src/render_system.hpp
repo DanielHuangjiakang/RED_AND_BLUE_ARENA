@@ -2,10 +2,24 @@
 
 #include <array>
 #include <utility>
+#include <memory>
+#include <map>
 
 #include "common.hpp"
 #include "components.hpp"
 #include "tiny_ecs.hpp"
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+// font character structure
+struct Character {
+	unsigned int TextureID;  // ID handle of the glyph texture
+	glm::ivec2   Size;       // Size of glyph
+	glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
+	unsigned int Advance;    // Offset to advance to next glyph
+	char character;
+};
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
@@ -30,15 +44,29 @@ class RenderSystem {
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
-	const std::array<std::string, texture_count> texture_paths = {
+const std::array<std::string, texture_count> texture_paths = {
 			textures_path("green_fish.png"),
-			textures_path("eel.png") };
-
+			textures_path("eel.png"),
+			textures_path("city.png"),
+			textures_path("/redRun/redRun1.png"),
+			textures_path("/redRun/redRun2.png"),
+			textures_path("/redRun/redRun3.png"),
+			textures_path("/blueRun/blueRun1.png"),
+			textures_path("/blueRun/blueRun2.png"),
+			textures_path("/blueRun/blueRun3.png"),
+			textures_path("bullet.png"),
+			textures_path("block.png"),
+			textures_path("pad.png"),
+			textures_path("/assets/2 Guns/6_1.png"),
+			textures_path("/assets/2 Guns/4_1.png"),
+			textures_path("help.png")
+		};
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
 		shader_path("egg"),
+		shader_path("font"),
 		shader_path("salmon"),
 		shader_path("textured"),
 		shader_path("water") };
@@ -66,6 +94,7 @@ public:
 	// The draw loop first renders to this texture, then it is used for the wind
 	// shader
 	bool initScreenTexture();
+	bool fontInit(GLFWwindow& window, const std::string& font_filename, unsigned int font_default_size);
 
 	// Destroy resources associated to one or all entities created by the system
 	~RenderSystem();
@@ -74,6 +103,16 @@ public:
 	void draw();
 
 	mat3 createProjectionMatrix();
+
+		void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
+
+	// Add these member variables for font rendering
+	GLuint m_font_shaderProgram;
+	GLuint m_font_VAO;
+	GLuint m_font_VBO;
+	std::map<GLchar, Character> m_ftCharacters;
+
+	std::string readShaderFile(const std::string& filepath);
 
 private:
 	// Internal drawing functions for each entity type
@@ -89,6 +128,7 @@ private:
 	GLuint off_screen_render_buffer_depth;
 
 	Entity screen_state_entity;
+
 };
 
 bool loadEffectFromFile(

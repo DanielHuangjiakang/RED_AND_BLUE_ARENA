@@ -11,6 +11,8 @@ struct Player
 	bool jumpable = false;
 	bool direction;  // 0 for left, 1 for right, 
 	int health = 3;
+
+	bool is_moving = false;
 	float jump_accel = -600.f;
 	float lr_accel = 1000.f;
 };
@@ -27,6 +29,12 @@ struct Weapon
 {
     std::string type;
 	int damage;
+};
+
+struct Text {
+	std::string text;
+	vec2 position;
+	bool is_visible;
 };
 
 // All data relevant to the shape and motion of entities
@@ -141,17 +149,33 @@ struct Mesh
 enum class TEXTURE_ASSET_ID {
 	FISH = 0,
 	EEL = FISH + 1,
-	TEXTURE_COUNT = EEL + 1
+
+	CITY = EEL + 1,
+	RED_RUN_1 = CITY + 1,
+	RED_RUN_2 = RED_RUN_1 + 1,
+	RED_RUN_3 = RED_RUN_2 + 1,
+	BLUE_RUN_1 = RED_RUN_3 + 1,
+	BLUE_RUN_2 = BLUE_RUN_1 + 1,
+	BLUE_RUN_3 = BLUE_RUN_2 + 1,
+	BULLET = BLUE_RUN_3 + 1,
+	BLOCK = BULLET + 1,
+	PAD = BLOCK + 1,
+	RED_GUN = PAD + 1,
+	BLUE_GUN = RED_GUN + 1,
+	HELP = BLUE_GUN + 1,
+	TEXTURE_COUNT = HELP + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
 	EGG = COLOURED + 1,
-	SALMON = EGG + 1,
+	FONT = EGG + 1,
+	SALMON = FONT + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
 	EFFECT_COUNT = WATER + 1
+	
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -172,6 +196,13 @@ struct RenderRequest {
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
 
+
+// animation
+struct AnimationFrame {
+    std::vector<TEXTURE_ASSET_ID> frames;
+    int current_frame = 0;
+    float frame_time = 0.f;
+  
 struct Laser {};
 
 struct Lifetime {
