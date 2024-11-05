@@ -66,10 +66,10 @@ private:
 
 	bool player1_right_button = false;
 	bool player1_left_button = false;
-	int player1_shooting = 0;
+	bool player1_shooting = false;
 	bool player2_right_button = false;
 	bool player2_left_button = false;
-	int player2_shooting = 0;
+	bool player2_shooting = false;
 
 	// Stage atrributes
 	Entity helpPanel;
@@ -94,6 +94,8 @@ private:
 	Mix_Chunk* salmon_dead_sound;
 	Mix_Chunk* salmon_eat_sound;
 	Mix_Chunk* portal_sound;
+	Mix_Chunk* buck_shot_sound;
+	
 
 	// C++ random number generator
 	std::default_random_engine rng;

@@ -1,5 +1,7 @@
 // internal
 #include "physics_system.hpp"
+#include "components.hpp"
+#include "tiny_ecs_registry.hpp"
 #include "world_init.hpp"
 #include <iostream>
 
@@ -35,6 +37,72 @@ int collides(const Motion& motion1, const Motion& motion2)
         else return 2; // bot collision
     }
 }
+
+void compute_transformed_vertices(const Mesh& mesh, const Motion& motion, std::vector<vec2>& out_vertices)
+{
+    out_vertices.clear();
+    out_vertices.reserve(mesh.vertices.size());
+
+    float cos_theta = cos(motion.angle);
+    float sin_theta = sin(motion.angle);
+
+    for (const ColoredVertex& vertex : mesh.vertices)
+    {
+        vec2 v = { vertex.position.x * motion.scale.x, vertex.position.y * motion.scale.y };
+        vec2 v_rotated = { v.x * cos_theta - v.y * sin_theta, v.x * sin_theta + v.y * cos_theta };
+        vec2 v_transformed = v_rotated + motion.position;
+        out_vertices.push_back(v_transformed);
+    }
+}
+
+
+
+// bool mesh_collides(Entity entity_i, Entity entity_j)
+// {
+//     Motion& motion_j = registry.motions.get(entity_j);
+// 	Motion& motion_i = registry.motions.get(entity_i);
+// 	Mesh* mesh1 = registry.meshPtrs.get(entity_j);
+
+//     std::vector<vec2> transformed_vertices;
+//     compute_transformed_vertices(*mesh1, motion_j, transformed_vertices);
+
+//     for (size_t i = 0; i < mesh1->vertex_indices.size(); i += 1)
+//     {
+//         vec2& v1 = transformed_vertices[mesh1->vertex_indices[i]];
+// 		if()
+//     }
+
+//     return false; // no collision
+// }
+
+bool mesh_collides(Entity entity_i, Entity entity_j)
+{
+    Motion& motion_j = registry.motions.get(entity_j);
+    Motion& motion_i = registry.motions.get(entity_i);
+    Mesh* mesh1 = registry.meshPtrs.get(entity_j);
+
+    std::vector<vec2> transformed_vertices;
+    compute_transformed_vertices(*mesh1, motion_j, transformed_vertices);
+
+    // Get the bounding box for entity_i (portal)
+    vec2 portal_min = motion_i.position - abs(motion_i.scale / 2.f);
+    vec2 portal_max = motion_i.position + abs(motion_i.scale / 2.f);
+
+    for (size_t i = 0; i < mesh1->vertex_indices.size(); i += 1)
+    {
+        vec2& v1 = transformed_vertices[mesh1->vertex_indices[i]];
+
+        // Check if the transformed vertex is within the portal's bounding box
+        if (v1.x >= portal_min.x && v1.x <= portal_max.x &&
+            v1.y >= portal_min.y && v1.y <= portal_max.y)
+        {
+            return true; // Collision detected
+        }
+    }
+
+    return false; // No collision
+}
+
 
 void PhysicsSystem::step(float elapsed_ms)
 {
@@ -81,18 +149,42 @@ void PhysicsSystem::step(float elapsed_ms)
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
 		for(uint j = i+1; j<motion_container.components.size(); j++)
 		{
+			
 			Motion& motion_j = motion_container.components[j];
 			int collision = collides(motion_i, motion_j);
+			
 			if (collision)
 			{
 				Entity entity_j = motion_container.entities[j];
-				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				auto& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				collision1.direction = collision;
-				auto& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-				collision2.direction = collision;
+			
+				if (registry.players.has(entity_i) && registry.portals.has(entity_j)) {
+					// mesh collision code
+					if (mesh_collides(entity_i, entity_j)) {
+						auto& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+						collision1.direction = collision;
+						auto& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+						collision2.direction = collision;
+					}
+				} else if (registry.players.has(entity_j) && registry.portals.has(entity_i)) {
+					// mesh collision code
+					if (mesh_collides(entity_j, entity_i)) {
+						auto& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+						collision1.direction = collision;
+						auto& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+						collision2.direction = collision;
+					}
+				} else {
+					// Create a collisions event
+					// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+					auto& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+					collision1.direction = collision;
+					auto& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+					collision2.direction = collision;
+				}
+		
 			}
 		}
 	}
 }
+
+
