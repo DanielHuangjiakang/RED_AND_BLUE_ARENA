@@ -66,10 +66,10 @@ private:
 
 	bool player1_right_button = false;
 	bool player1_left_button = false;
-	bool player1_shooting = false;
+	int player1_shooting = 0;
 	bool player2_right_button = false;
 	bool player2_left_button = false;
-	bool player2_shooting = false;
+	int player2_shooting = 0;
 
 	// Stage atrributes
 	Entity helpPanel;
@@ -101,12 +101,12 @@ private:
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
 
-  float calculateDistance(vec2 pos1, vec2 pos2);
+  	float calculateDistance(vec2 pos1, vec2 pos2);
 	void updateLaserVelocity(Entity laserEntity, Motion& player1Motion, Motion& player2Motion);
 	DecisionTreeNode* rootNode;
-  float laserRange = 10.0f;
-  float laserCoolDownTime = 2000.0f;  // CoolDown time in milliseconds
-  float laserCoolDownTimer = 0.0f;
+  	float laserRange = 10.0f;
+  	float laserCoolDownTime = 2000.0f;  // CoolDown time in milliseconds
+  	float laserCoolDownTimer = 0.0f;
 	void initializeLaserAI();
 	bool isPlayerInRange();
 	void handleLaserCollisions();
