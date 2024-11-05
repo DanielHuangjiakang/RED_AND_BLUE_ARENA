@@ -11,7 +11,10 @@ struct Player
 	bool jumpable = false;
 	bool direction;  // 0 for left, 1 for right, 
 	int health = 3;
+
 	bool is_moving = false;
+	float jump_accel = -600.f;
+	float lr_accel = 1000.f;
 };
 
 struct GunTimer {
@@ -21,7 +24,6 @@ struct GunTimer {
 struct Bullet {
 	int side; // side = 1 for blue, side = 2 for red
 };
-
 // Weapon component
 struct Weapon
 {
@@ -50,8 +52,17 @@ struct Block {
 	int height;
 };
 
+// A sturct for portals, similar to how blocks work but with different collision.
+struct Portal {
+	int x;
+	int y;
+	int width;
+	int height;
+};
+
 struct Gravity {
 	vec2 g = {0.f, 750.f};
+	bool drag = false;
 };
 
 // Stucture to store collision information
@@ -185,9 +196,15 @@ struct RenderRequest {
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
 
+
 // animation
 struct AnimationFrame {
     std::vector<TEXTURE_ASSET_ID> frames;
     int current_frame = 0;
     float frame_time = 0.f;
+  
+struct Laser {};
+
+struct Lifetime {
+    float counter_ms;
 };

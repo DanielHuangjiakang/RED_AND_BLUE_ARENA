@@ -19,8 +19,17 @@ Entity createGun(RenderSystem* renderer, int side, vec2 position);
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height);
 Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height);
 
+
+// Portals
+Entity createPortal(RenderSystem* renderer, vec2 position, int width, int height);
+
 // the bullet
 Entity createBullet(RenderSystem* renderer, int side, vec2 position, int direction);
 
+
 // text
 Entity createText(RenderSystem* renderer, const std::string text, vec2 position, bool is_visible);
+// the arrow
+std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 position, int direction);
+Entity createLaser(RenderSystem* renderer);
+Entity createLaserBeam(vec2 start, vec2 end);

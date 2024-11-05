@@ -34,8 +34,6 @@ int collides(const Motion& motion1, const Motion& motion2)
         if (motion1.position[1] < motion2.position[1]) return 1; // top collision
         else return 2; // bot collision
     }
-
-    return 0; // no collision
 }
 
 void PhysicsSystem::step(float elapsed_ms)
@@ -55,11 +53,26 @@ void PhysicsSystem::step(float elapsed_ms)
 		Gravity& gravity = gravity_registry.components[i];
 		Entity entity = gravity_registry.entities[i];
 		Motion& motion = registry.motions.get(entity);
-		Player player = registry.players.get(entity);
 		motion.velocity += gravity.g * step_seconds;
-		if (abs(motion.velocity[0]) > 700) motion.velocity[0] = ((motion.velocity[0] > 0) - (motion.velocity[0] < 0)) * 700;
-		if (abs(motion.velocity[1]) > 700) motion.velocity[1] = ((motion.velocity[1] > 0) - (motion.velocity[1] < 0)) * 700;
-		motion.velocity[0] = 0.95 * motion.velocity[0];	
+
+		float signx = (motion.velocity[0] > 0) - (motion.velocity[0] < 0);
+		if (gravity.drag) {
+			motion.velocity[0] += -1 * signx * step_seconds * 500.f;
+			if ((motion.velocity[0] > 0) - (motion.velocity[0] < 0) != signx) {
+				motion.velocity[0] = 0.f;
+			}
+		}
+
+		float signy = (motion.velocity[1] > 0) - (motion.velocity[1] < 0);
+		if (registry.players.has(entity)) {
+			if (abs(motion.velocity[0]) > 350) motion.velocity[0] = signx * 350;
+			if (abs(motion.velocity[1]) > 700) motion.velocity[1] = signy * 700;
+		} // else {
+			// if (abs(motion.velocity[0]) > 300) motion.velocity[0] = signx * 300;
+			// if (abs(motion.velocity[1]) > 300) motion.velocity[1] = signy * 300;
+		// }
+
+
 	}	
 
 
