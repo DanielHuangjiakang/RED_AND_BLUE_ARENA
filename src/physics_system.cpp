@@ -57,7 +57,7 @@ void PhysicsSystem::step(float elapsed_ms)
 
 		float signx = (motion.velocity[0] > 0) - (motion.velocity[0] < 0);
 		if (gravity.drag) {
-			motion.velocity[0] += -1 * signx * step_seconds * 500.f;
+			motion.velocity[0] += -1 * signx * step_seconds * 800.f;
 			if ((motion.velocity[0] > 0) - (motion.velocity[0] < 0) != signx) {
 				motion.velocity[0] = 0.f;
 			}
@@ -67,14 +67,9 @@ void PhysicsSystem::step(float elapsed_ms)
 		if (registry.players.has(entity)) {
 			if (abs(motion.velocity[0]) > 350) motion.velocity[0] = signx * 350;
 			if (abs(motion.velocity[1]) > 700) motion.velocity[1] = signy * 700;
-		} // else {
-			// if (abs(motion.velocity[0]) > 300) motion.velocity[0] = signx * 300;
-			// if (abs(motion.velocity[1]) > 300) motion.velocity[1] = signy * 300;
-		// }
-
+		} 
 
 	}	
-
 
 	// Check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;

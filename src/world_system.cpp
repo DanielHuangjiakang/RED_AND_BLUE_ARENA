@@ -1,5 +1,6 @@
 // Header
 #include "world_system.hpp"
+#include "GLFW/glfw3.h"
 #include "common.hpp"
 #include "world_init.hpp"
 
@@ -115,6 +116,7 @@ GLFWwindow *WorldSystem::create_window()
 	hit_sound = Mix_LoadWAV(audio_path("hit_sound.wav").c_str());
 	shoot_sound = Mix_LoadWAV(audio_path("shoot.wav").c_str());
 	laser_sound = Mix_LoadWAV(audio_path("laser.wav").c_str());
+	portal_sound = Mix_LoadWAV(audio_path("portal.wav").c_str());
 
 	salmon_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
@@ -128,6 +130,7 @@ GLFWwindow *WorldSystem::create_window()
 				audio_path("shoot.wav").c_str(),
 				audio_path("hit_sound.wav").c_str(),
 				audio_path("end_music.wav").c_str(),
+				audio_path("portal.wav").c_str(),
 				audio_path("laser.wav").c_str());
 		return nullptr;
 	}
@@ -172,7 +175,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         frame_count = 0;
     }
 	
-
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
@@ -434,6 +436,7 @@ void WorldSystem::handle_collisions()
 		{
 			Player &player = registry.players.get(entity);
 			Portal &portal = registry.portals.get(entity_other);
+			Mix_PlayChannel(-1, portal_sound, 0);
 			// since there are just 2 portals
 			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
 			{
@@ -443,15 +446,13 @@ void WorldSystem::handle_collisions()
 
 				if (player.direction == 1)
 				{
-					motion_player.position =  {motion_portal2.position.x + 50, motion_portal2.position.y};
+					motion_player.position =  {motion_portal2.position.x + 65, motion_portal2.position.y};
 				}
 
 				else 
 				{
-					motion_player.position =  {motion_portal2.position.x - 50, motion_portal2.position.y};
+					motion_player.position =  {motion_portal2.position.x - 65, motion_portal2.position.y};
 				}
-				
-
 				
 			}
 			else
@@ -461,12 +462,12 @@ void WorldSystem::handle_collisions()
 
 				if (player.direction == 1)
 				{
-					motion_player.position =  {motion_portal1.position.x + 50, motion_portal1.position.y};
+					motion_player.position =  {motion_portal1.position.x + 65, motion_portal1.position.y};
 				}
 
 				else 
 				{
-					motion_player.position =  {motion_portal1.position.x - 50, motion_portal1.position.y};
+					motion_player.position =  {motion_portal1.position.x - 65, motion_portal1.position.y};
 				}
 			}
 			
@@ -497,8 +498,9 @@ bool WorldSystem::is_over() const
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
 
-
 	if (!movable) {
+		player1_shooting = false;
+		player2_shooting = false;
 		return;
 	}
 	
@@ -510,13 +512,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		restart_game();
 	}
-
-	if (!movable) {
-		player1_shooting = false;
-		player2_shooting = false;
-		return;
-	}
-
 
 
 	Motion& motion1 = registry.motions.get(player1);
@@ -543,7 +538,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 				"/ - Shoot\n\n"
 				"R - Restart Game";
 
-		//	helpText = createText(renderer, instructions, vec2(window_width_px/2, window_height_px/2-100), true);
 			
 		} else if (action == GLFW_RELEASE) {
 			registry.remove_all_components_of(helpPanel);
@@ -551,97 +545,94 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		}
 	}
 
-
 	if (key == GLFW_KEY_A) {
     if (action == GLFW_PRESS) {
-			gravity1.g[0] = -700.f;
+			gravity1.g[0] = -1000.f;
 			p1.direction = 0; // Facing left
 			player1_left_button = true;
 			p1.is_moving = true;
         if (motion1.scale.x > 0) motion1.scale.x *=-1;
-
-    } else if (action == GLFW_RELEASE) {
-		if (!player1_right_button) {
+		} else if (action == GLFW_RELEASE) {
+			if (!player1_right_button) {
 				gravity1.g[0] = 0.f;
 				p1.is_moving = false;
 			}
 		player1_left_button = false;
-    }
-}
+    	}
+	}
 
-if (key == GLFW_KEY_D) {
+	if (key == GLFW_KEY_D) {
+		if (action == GLFW_PRESS) {
+			gravity1.g[0] = +1000.f;
+			p1.direction = 1; // Facing right
+			player1_right_button = true;
+			p1.is_moving = true;
+			if (motion1.scale.x < 0) motion1.scale.x *= -1;
 
-    if (action == GLFW_PRESS) {
-		gravity1.g[0] = +700.f;
-        p1.direction = 1; // Facing right
-		player1_right_button = true;
-		p1.is_moving = true;
-        if (motion1.scale.x < 0) motion1.scale.x *= -1;
-
-    } else if (action == GLFW_RELEASE) {
-		if (!player1_left_button) {
-				gravity1.g[0] = 0.f;
-				p1.is_moving = false;
-		}
-		player1_right_button = false;
-    }
-}
-
-if (key == GLFW_KEY_W) {
-    if (action == GLFW_PRESS && p1.jumpable == true) {
-        motion1.velocity[1] += -600;
-        p1.jumpable = false;
-    }
-}
-
-if (key == GLFW_KEY_Q) {
-	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player1)) {
-		int dir;
-		if (p1.direction == 0) dir = -1; // left
-		else dir = 1;
-		vec2 bullet_position = registry.motions.get(player1).position + vec2({abs(registry.motions.get(player1).scale.x / 2) * dir, 0.f});
-		Entity bullet = createBullet(renderer, 1, bullet_position, p1.direction);
-		registry.gunTimers.emplace(player1);
-
-		// shoot sound
-		Mix_PlayChannel(-1, shoot_sound, 0);
-    	if (action == GLFW_PRESS) {
-        	gravity1.g[0] = -p1.lr_accel;
-        	p1.direction = 0; // Facing left
-			player1_left_button = true;
-		}
-		else if (action == GLFW_RELEASE)
-		{
-			if (!player1_right_button) gravity1.g[0] = 0.f;
-			player1_left_button = false;
+		} else if (action == GLFW_RELEASE) {
+			if (!player1_left_button) {
+					gravity1.g[0] = 0.f;
+					p1.is_moving = false;
+			}
+			player1_right_button = false;
 		}
 	}
 
-// 	if (key == GLFW_KEY_D) {
-//     	if (action == GLFW_PRESS) {
-//         	gravity1.g[0] = +p1.lr_accel;
-//         	p1.direction = 1; // Facing right
-// 			player1_right_button = true;
-// 		}
-// 		else if (action == GLFW_RELEASE)
-// 		{
-// 			if (!player1_left_button) gravity1.g[0] = 0.f;
-// 			player1_right_button = false;
-// 		}
-// 	}
+	if (key == GLFW_KEY_W) {
+		if (action == GLFW_PRESS && p1.jumpable == true) {
+			motion1.velocity[1] += -600;
+			p1.jumpable = false;
+		}
+	}
 
-// 	if (key == GLFW_KEY_W) {
-// 		if (action == GLFW_PRESS && p1.jumpable == true) {
-// 			motion1.velocity[1] += p1.jump_accel;
-// 			p1.jumpable = false;
-// 		}
-// 	}
+	if (key == GLFW_KEY_Q) {
+		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player1)) {
+			int dir;
+			if (p1.direction == 0) dir = -1; // left
+			else dir = 1;
+			vec2 bullet_position = registry.motions.get(player1).position + vec2({abs(registry.motions.get(player1).scale.x / 2) * dir, 0.f});
+			Entity bullet = createBullet(renderer, 1, bullet_position, p1.direction);
+			registry.gunTimers.emplace(player1);
 
-// 	if (key == GLFW_KEY_Q) {
-// 		if (action == GLFW_PRESS) player1_shooting = true;
-//     	else if (action == GLFW_RELEASE) player1_shooting = false;
-// 	}
+			// shoot sound
+			Mix_PlayChannel(-1, shoot_sound, 0);
+			if (action == GLFW_PRESS) {
+				gravity1.g[0] = -p1.lr_accel;
+				p1.direction = 0; // Facing left
+				player1_left_button = true;
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				if (!player1_right_button) gravity1.g[0] = 0.f;
+				player1_left_button = false;
+			}
+		}
+	}
 
+		// if (key == GLFW_KEY_D) {
+		// 	if (action == GLFW_PRESS) {
+		//     	gravity1.g[0] = +p1.lr_accel;
+		//     	p1.direction = 1; // Facing right
+		// 		player1_right_button = true;
+		// 	}
+		// 	else if (action == GLFW_RELEASE)
+		// 	{
+		// 		if (!player1_left_button) gravity1.g[0] = 0.f;
+		// 		player1_right_button = false;
+		// 	}
+		// }
+
+		// if (key == GLFW_KEY_W) {
+		// 	if (action == GLFW_PRESS && p1.jumpable == true) {
+		// 		motion1.velocity[1] += p1.jump_accel;
+		// 		p1.jumpable = false;
+		// 	}
+		// }
+
+		// if (key == GLFW_KEY_Q) {
+		// 	if (action == GLFW_PRESS) player1_shooting = true;
+		// 	else if (action == GLFW_RELEASE) player1_shooting = false;
+		// }
 
 	// shoot arrow for player 1
 	if (key == GLFW_KEY_E)
@@ -667,7 +658,7 @@ if (key == GLFW_KEY_Q) {
 
 	//shoot arrow for player 2
 
-	if (key == GLFW_KEY_RIGHT_CONTROL)
+	if (key == GLFW_KEY_RIGHT_SHIFT)
 	{
 		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player2))
 		{
@@ -687,117 +678,104 @@ if (key == GLFW_KEY_Q) {
 		}
 	}
 
-// 	if (key == GLFW_KEY_LEFT) {
-//     	if (action == GLFW_PRESS) {
-//         	gravity2.g[0] = -p2.lr_accel;
-//         	p2.direction = 0; // Facing left
-// 			player2_left_button = true;
-// 		}
-// 		else if (action == GLFW_RELEASE)
-// 		{
-// 			if (!player2_right_button) gravity2.g[0] = 0.f;
-// 			player2_left_button = false;
-// 		}
-// 	}
-// 	if (key == GLFW_KEY_RIGHT) {
-//     	if (action == GLFW_PRESS) {
-//         	gravity2.g[0] = +p2.lr_accel;
-//         	p2.direction = 1; // Facing right
-// 			player2_right_button = true;
-// 		}
-// 		else if (action == GLFW_RELEASE)
-// 		{
-// 			if (!player2_left_button) gravity2.g[0] = 0.f;
-// 			player2_right_button = false;
-// 		}
-// 	}
-// 	if (key == GLFW_KEY_UP) {
-// 		if (action == GLFW_PRESS && p2.jumpable == true) {
-// 			motion2.velocity[1] += p2.jump_accel;
-// 			p2.jumpable = false;
-// 		}
-// 	}
-// 	if (key == GLFW_KEY_SLASH) {
-// 		if (action == GLFW_PRESS) player2_shooting = true;
-//     	else if (action == GLFW_RELEASE) player2_shooting = false;
-// 	}
+		// if (key == GLFW_KEY_LEFT) {
+		// 	if (action == GLFW_PRESS) {
+		//     	gravity2.g[0] = -p2.lr_accel;
+		//     	p2.direction = 0; // Facing left
+		// 		player2_left_button = true;
+		// 	}
+		// 	else if (action == GLFW_RELEASE)
+		// 	{
+		// 		if (!player2_right_button) gravity2.g[0] = 0.f;
+		// 		player2_left_button = false;
+		// 	}
+		// }
+		// if (key == GLFW_KEY_RIGHT) {
+		// 	if (action == GLFW_PRESS) {
+		//     	gravity2.g[0] = +p2.lr_accel;
+		//     	p2.direction = 1; // Facing right
+		// 		player2_right_button = true;
+		// 	}
+		// 	else if (action == GLFW_RELEASE)
+		// 	{
+		// 		if (!player2_left_button) gravity2.g[0] = 0.f;
+		// 		player2_right_button = false;
+		// 	}
+		// }
+		// if (key == GLFW_KEY_UP) {
+		// 	if (action == GLFW_PRESS && p2.jumpable == true) {
+		// 		motion2.velocity[1] += p2.jump_accel;
+		// 		p2.jumpable = false;
+		// 	}
+		// }
+		// if (key == GLFW_KEY_SLASH) {
+		// 	if (action == GLFW_PRESS) player2_shooting = true;
+		// 	else if (action == GLFW_RELEASE) player2_shooting = false;
+		// }
 
 
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA)
-	{
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
+	if (key == GLFW_KEY_LEFT) {
+    	if (action == GLFW_PRESS) {
+        	gravity2.g[0] = -1000.f;
+        	p2.direction = 0; // Facing left
+        	if (motion2.scale.x > 0) motion2.scale.x *= -1;
+        	player2_left_button = true;
+			p2.is_moving = true;
+   		} else if (action == GLFW_RELEASE) {
+        	if (!player2_right_button) {
+            	gravity2.g[0] = 0.f;
+				p2.is_moving = false;
+        	}
+        	player2_left_button = false;
+    	}
 	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD)
-	{
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-}
 
-if (key == GLFW_KEY_LEFT) {
-    if (action == GLFW_PRESS) {
-        gravity2.g[0] = -700.f;
-        p2.direction = 0; // Facing left
-        if (motion2.scale.x > 0) motion2.scale.x *= -1;
-        player2_left_button = true;
-		p2.is_moving = true;
-    } else if (action == GLFW_RELEASE) {
-        if (!player2_right_button) {
-            gravity2.g[0] = 0.f;
-			p2.is_moving = false;
-        }
-        player2_left_button = false;
-    }
-}
-
-if (key == GLFW_KEY_RIGHT) {
-    if (action == GLFW_PRESS) {
-        gravity2.g[0] = +700.f;
-        p2.direction = 1; // Facing right
-        player2_right_button = true;
-		p2.is_moving = true;
-        if (motion2.scale.x < 0) motion2.scale.x = -motion2.scale.x;
-    } else if (action == GLFW_RELEASE) {
+	if (key == GLFW_KEY_RIGHT) {
+    	if (action == GLFW_PRESS) {
+        	gravity2.g[0] = +1000.f;
+        	p2.direction = 1; // Facing right
+        	player2_right_button = true;
+			p2.is_moving = true;
+        	if (motion2.scale.x < 0) motion2.scale.x = -motion2.scale.x;
+    	} else if (action == GLFW_RELEASE) {
         if (!player2_left_button) {
             gravity2.g[0] = 0.f;
 			p2.is_moving = false;
         }
 
         player2_right_button = false;
-    }
-}
+    	}
+	}
 
-if (key == GLFW_KEY_UP) {
-    if (action == GLFW_PRESS && p2.jumpable == true) {
-        motion2.velocity[1] += -600;
-		
-        p2.jumpable = false;
-    }
-}
+	if (key == GLFW_KEY_UP) {
+		if (action == GLFW_PRESS && p2.jumpable == true) {
+			motion2.velocity[1] += -600;
+			
+			p2.jumpable = false;
+		}
+	}
 
-if (key == GLFW_KEY_SLASH) {
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player2)) {
-        int dir;
-        if (p2.direction == 0) dir = -1;
-        else dir = 1;
-        vec2 bullet_position = registry.motions.get(player2).position + vec2({abs(registry.motions.get(player2).scale.x / 2) * dir, 0.f});
-        Entity bullet = createBullet(renderer, 2, bullet_position, p2.direction);
-        registry.gunTimers.emplace(player2);
+	if (key == GLFW_KEY_SLASH) {
+		if ((action == GLFW_PRESS || action == GLFW_REPEAT) && !registry.gunTimers.has(player2)) {
+			int dir;
+			if (p2.direction == 0) dir = -1;
+			else dir = 1;
+			vec2 bullet_position = registry.motions.get(player2).position + vec2({abs(registry.motions.get(player2).scale.x / 2) * dir, 0.f});
+			Entity bullet = createBullet(renderer, 2, bullet_position, p2.direction);
+			registry.gunTimers.emplace(player2);
 
-        // shoot sound
-        Mix_PlayChannel(-1, shoot_sound, 0);
-    } 
-}
+			// shoot sound
+			Mix_PlayChannel(-1, shoot_sound, 0);
+		} 
+	}
 
-// Debugging
-if (key == GLFW_KEY_G ) {
-    if (action == GLFW_RELEASE)
-        debugging.in_debug_mode = false;
-    else
-        debugging.in_debug_mode = true;
+	// Debugging
+	if (key == GLFW_KEY_G ) {
+		if (action == GLFW_RELEASE)
+			debugging.in_debug_mode = false;
+		else
+			debugging.in_debug_mode = true;
+	}
 }
 
 
