@@ -46,6 +46,9 @@ private:
 	// restart level
 	void restart_game();
 
+	// 
+	bool movable = true;
+
 	// OpenGL window handle
 	GLFWwindow* window;
 

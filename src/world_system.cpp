@@ -169,12 +169,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	int dir1 = motion1.scale.x > 0 ? 1 : -1;		
     gunMotion1.position = motion1.position + vec2(35 * dir1, 0);
     gunMotion1.scale.x = motion1.scale.x; // Match player direction
-    if (motion1.position.x < motion1.scale[0]/2) {
-        motion1.position.x = motion1.scale[0]/2; // Stop at left boundary
-		motion1.velocity[0] = 0;
+    if (motion1.position.x < abs(motion1.scale[0]/2)) {
+        motion1.position.x = abs(motion1.scale.x/2); // Stop at left boundary
+		motion1.velocity.x = 0;
 		gunMotion1.velocity[0] = 0;
     } else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
-        motion1.position.x = window_width_px + motion1.scale[0]/2 - motion1.scale.x; // Stop at right boundary
+        motion1.position.x = window_width_px - motion1.scale[0]/2; // Stop at right boundary
 		motion1.velocity[0] = 0;
 		gunMotion1.velocity[0] = 0;
     }
@@ -191,12 +191,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	int dir2 = motion2.scale.x > 0 ? 1 : -1;		
     gunMotion2.position = motion2.position + vec2(35 * dir2, 0);
     gunMotion2.scale.x = motion2.scale.x; // Match player direction
-    if (motion2.position.x < motion2.scale[0]/2) {
-        motion2.position.x = motion2.scale[0]/2; // Stop at left boundary
-		motion2.velocity[0] = 0;
+    if (motion2.position.x < abs(motion2.scale[0]/2)) {
+        motion2.position.x = abs(motion2.scale[0]/2); // Stop at left boundary
+		motion2.velocity.x = 0;
 		gunMotion2.velocity[0] = 0;
     } else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
-        motion2.position.x =  window_width_px + motion2.scale[0]/2 - motion2.scale.x; // Stop at right boundary
+        motion2.position.x =  window_width_px - motion2.scale[0]/2; // Stop at right boundary
 		motion2.velocity[0] = 0;
 		gunMotion2.velocity[0] = 0;
     }
@@ -265,6 +265,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 // Reset the world state to its initial state
 void WorldSystem::restart_game() {
+
+	movable = true;
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
@@ -318,13 +320,13 @@ void WorldSystem::handle_collisions() {
 				
 				motion.velocity[1] = 0.0f;
 				
-				motion.position[1] = block.y - (motion.scale[1] / 2);
+				motion.position[1] = block.y - abs(motion.scale[1] / 2);
 				player.jumpable = true;
 			} else if (direction == 2) { // bot collision
 				
-				player.jumpable = true;
+				// player.jumpable = false;
 				motion.velocity[1] = 0.0f;
-				motion.position[1] = block.y + (motion.scale[1] / 2) + block.height;
+				motion.position[1] = block.y + abs(motion.scale[1] / 2) + block.height;
 			} else if (direction == 3) { // left collision
 				
 				motion.velocity[0] = 0.0f;
@@ -348,7 +350,9 @@ void WorldSystem::handle_collisions() {
 					// end music
 					Mix_PlayChannel(-1, end_music, 0);
                     Motion& motion = registry.motions.get(entity);
-                    motion.angle = M_PI / 4;
+                    motion.angle = M_PI / 2;
+					motion.scale.y = motion.scale.y / 2;
+					movable = false;
                 }
                 registry.remove_all_components_of(entity_other);
             }
@@ -373,6 +377,11 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
+
+	if (!movable) {
+		return;
+	}
+	
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
@@ -381,10 +390,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         restart_game();
 	}
 
+
+
 	Motion& motion1 = registry.motions.get(player1);
 	Motion& motion2 = registry.motions.get(player2);
-	// Motion& gunMotion1 = registry.motions.get(gun1);
-	// Motion& gunMotion2 = registry.motions.get(gun2);
+
 	Gravity& gravity1 = registry.gravities.get(player1);
 	Gravity& gravity2 = registry.gravities.get(player2);
 	Player& p1 = registry.players.get(player1);
@@ -406,10 +416,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 				"/ - Shoot\n\n"
 				"R - Restart Game";
 
-			//Entity helpText = createText(renderer, instructions, vec2(window_width_px/2, window_height_px/2), true);
+		//	helpText = createText(renderer, instructions, vec2(window_width_px/2, window_height_px/2-100), true);
 			
 		} else if (action == GLFW_RELEASE) {
 			registry.remove_all_components_of(helpPanel);
+			registry.remove_all_components_of(helpText);
 		}
 	}
 

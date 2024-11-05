@@ -23,4 +23,4 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 Entity createBullet(RenderSystem* renderer, int side, vec2 position, int direction);
 
 // text
-Entity createText(RenderSystem* renderer, const std::string& text, vec2 position, bool is_visible);
+Entity createText(RenderSystem* renderer, const std::string text, vec2 position, bool is_visible);
