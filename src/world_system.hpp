@@ -40,6 +40,8 @@ public:
 
 	// Should the game be over ?
 	bool is_over()const;
+
+	float fps;
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);

@@ -168,7 +168,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     frame_count++;
 
     if (total_time > 1000.0f) {
-        float fps = frame_count / (total_time / 1000.0f);
+        fps = frame_count / (total_time / 1000.0f);
 		std::stringstream title_ss;
         title_ss << "Game Screen - FPS: " << static_cast<int>(fps);
         glfwSetWindowTitle(window, title_ss.str().c_str());

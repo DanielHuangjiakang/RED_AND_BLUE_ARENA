@@ -9,8 +9,20 @@
 #include "components.hpp"
 #include "tiny_ecs.hpp"
 
+// fonts
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <map>				// map of character textures
+
+#include <iostream>
+#include <assert.h>
+#include <fstream>			// for ifstream
+#include <sstream>			// for ostringstream
+
+// matrices
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // font character structure
 struct Character {
@@ -106,15 +118,20 @@ public:
 
 	mat3 createProjectionMatrix();
 
-		void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
+	/* TODO: init fonts */
+	bool fontInit(GLFWwindow* window, const std::string& font_filename, unsigned int font_default_size);
 
-	// Add these member variables for font rendering
-	GLuint m_font_shaderProgram;
-	GLuint m_font_VAO;
-	GLuint m_font_VBO;
-	std::map<GLchar, Character> m_ftCharacters;
+	// A3
+	/* TODO: render fonts */
+	void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
 
-	std::string readShaderFile(const std::string& filepath);
+	float getTextWidth(const std::string& text, float scale);
+
+	void renderFont();
+
+	void renderIntroScreen();
+
+	void renderHelpText();
 
 private:
 	// Internal drawing functions for each entity type
@@ -131,7 +148,15 @@ private:
 
 	Entity screen_state_entity;
 
+	// font elements
+	std::map<char, Character> m_ftCharacters;
+	GLuint m_font_shaderProgram;
+	GLuint m_font_VAO;
+	GLuint m_font_VBO;
+
 };
 
 bool loadEffectFromFile(
 	const std::string& vs_path, const std::string& fs_path, GLuint& out_program);
+
+std::string readShaderFile(const std::string& filename);
