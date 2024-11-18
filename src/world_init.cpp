@@ -111,10 +111,12 @@ Entity createIntro(RenderSystem* renderer, int width, int height) {
 
 	auto& motion = registry.motions.emplace(entity);
 	motion.velocity = {0,0};
+	motion.position = {width / 2, height / 2};
+	motion.scale = {width, height};
 	
 	registry.renderRequests.insert(
 		entity,
-		{TEXTURE_ASSET_ID::CITY,
+		{TEXTURE_ASSET_ID::INTRO1,
 		EFFECT_ASSET_ID::TEXTURED,
 		GEOMETRY_BUFFER_ID::SPRITE}
 	);
@@ -131,7 +133,14 @@ Entity createBackground(RenderSystem* renderer, int width, int height) {
  	motion.position = {width / 2, height / 2};
 	motion.scale = {width, height};
 
-	if (registry.stageSelection ==1 ) {
+	if (!registry.stageSelection) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::INTRO,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	} else if (registry.stageSelection ==1 ) {
 		registry.renderRequests.insert(
 			entity,
 			{ TEXTURE_ASSET_ID::CITY,
@@ -171,12 +180,20 @@ Entity createStageChoice(RenderSystem* renderer, int x, int y, int width, int he
  	motion.position = {x + (width / 2), y + (height / 2)};
 	motion.scale = {width, height};
 
-	registry.renderRequests.insert(
-		entity,
- 		{ TEXTURE_ASSET_ID::CITY, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::TEXTURED,
- 			GEOMETRY_BUFFER_ID::SPRITE });
-
+	if (stage ==1 ) {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::CITY,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	} else /*if (registry.stageSelection == 2)*/ {
+			registry.renderRequests.insert(
+				entity,
+				{TEXTURE_ASSET_ID::DESERT,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE}
+			);
+	}
  	return entity;
 	
 

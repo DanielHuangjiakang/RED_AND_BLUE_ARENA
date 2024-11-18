@@ -366,9 +366,9 @@ void WorldSystem::restart_game() {
 		Entity stageSelectionBackground = createBackground(renderer, window_width_px, window_height_px);
 
 		// Create stage button entities
-		Entity stageButton1 = createStageChoice(renderer, window_width_px / 4, window_height_px / 2, 200, 50, 1);
-		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2, window_height_px / 2, 200, 50, 2);
-		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px / 4, window_height_px / 2, 200, 50, 3);
+		Entity stageButton1 = createStageChoice(renderer, 10, window_height_px / 2, 400, 200, 1);
+		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2, 400, 200, 2);
+		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px / 4-100, window_height_px / 2, 400, 200, 3);
 
 	}
 
@@ -479,6 +479,7 @@ void WorldSystem::handle_collisions()
 					motion.angle = M_PI / 2;
 					motion.scale.y = motion.scale.y / 2;
 					movable = false;
+					registry.winner = player.side == 1 ? 2 : 1;
 
 				}
 				registry.remove_all_components_of(entity_other);
@@ -559,6 +560,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		glfwGetWindowSize(window, &w, &h);
 		registry.stageSelection =0;
 		registry.winner = 0;
+		registry.stages.clear();
 		restart_game();
 	}
 

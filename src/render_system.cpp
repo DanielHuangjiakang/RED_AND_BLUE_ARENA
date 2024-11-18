@@ -200,13 +200,14 @@ void RenderSystem::drawToScreen()
 				  // no offset from the bound index buffer
 	gl_has_errors();
 }
-
 void RenderSystem::renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans)
 	{
-		// use program, load variables, bind to VAO, then iterate thru chars
+		// TODO: use program, load variables, bind to VAO, then iterate thru chars
 		
 		// activate the shader program
 		glUseProgram(m_font_shaderProgram);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// get shader uniforms
 		GLint textColor_location =
@@ -256,10 +257,9 @@ void RenderSystem::renderText(std::string text, float x, float y, float scale, c
 			// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 			x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
 		}
-		glBindVertexArray(0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindBuffer(GL_ARRAY_BUFFER,1);
+    	glBindVertexArray(1);
 	}
-
 // Render our game world
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
 void RenderSystem::draw()
