@@ -12,14 +12,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-// font character structure
-struct Character {
-	unsigned int TextureID;  // ID handle of the glyph texture
-	glm::ivec2   Size;       // Size of glyph
-	glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
-	unsigned int Advance;    // Offset to advance to next glyph
-	char character;
-};
+
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
@@ -75,9 +68,26 @@ const std::array<std::string, texture_count> texture_paths = {
 		shader_path("textured"),
 		shader_path("water") };
 
+		// font character structure
+struct Character {
+	unsigned int TextureID;  // ID handle of the glyph texture
+	glm::ivec2   Size;       // Size of glyph
+	glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
+	unsigned int Advance;    // Offset to advance to next glyph
+	char character;
+};
+
+	GLuint vao;
+
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
 	std::array<Mesh, geometry_count> meshes;
+
+		// font elements
+	std::map<char, Character> m_ftCharacters;
+	GLuint m_font_shaderProgram;
+	GLuint m_font_VAO;
+	GLuint m_font_VBO;
 
 public:
 	// Initialize the window
@@ -108,13 +118,7 @@ public:
 
 	mat3 createProjectionMatrix();
 
-		void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
-
-	// Add these member variables for font rendering
-	std::map<char, Character> m_ftCharacters;
-	GLuint m_font_shaderProgram;
-	GLuint m_font_VAO;
-	GLuint m_font_VBO;
+	void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
 
 
 private:
