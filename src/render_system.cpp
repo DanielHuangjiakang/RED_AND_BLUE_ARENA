@@ -280,13 +280,13 @@ void RenderSystem::draw()
 		drawTexturedMesh(entity, projection_2D);
 	}
 	
-	// for (Entity entity : registry.texts.entities) {
-	// 	const Text& text = registry.texts.get(entity);
-	// 	if (text.is_visible) {
-	// 		renderText(text.text, text.position.x, text.position.y, 1.0f, {1.0f, 1.0f, 1.0f}, mat4(1.0f));
-	// 	}
-	// }
-
+	if (registry.intro) {
+		renderText("GAME", window_width_px/2-200, window_height_px/2 + 200.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+		renderText("Press Space to start", window_width_px/2-150, window_height_px/2-200.0f, 1.5f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+	}
+	if (!registry.stageSelection && !registry.intro) {
+		renderText("SELECT STAGE", window_width_px/2-200, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+	}
 
 	// Truely render to the screen
 	drawToScreen();

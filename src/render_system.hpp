@@ -61,7 +61,9 @@ const std::array<std::string, texture_count> texture_paths = {
 			textures_path("pad.png"),
 			textures_path("/assets/2 Guns/6_1.png"),
 			textures_path("/assets/2 Guns/4_1.png"),
-			textures_path("help.png")
+			textures_path("help.png"),
+			textures_path("desert.png")
+			//textures_path("intro.png")
 		};
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -96,7 +98,7 @@ public:
 	// The draw loop first renders to this texture, then it is used for the wind
 	// shader
 	bool initScreenTexture();
-	bool fontInit(GLFWwindow& window, const std::string& font_filename, unsigned int font_default_size);
+	bool fontInit(GLFWwindow* window, const std::string& font_filename, unsigned int font_default_size);
 
 	// Destroy resources associated to one or all entities created by the system
 	~RenderSystem();
@@ -109,17 +111,17 @@ public:
 		void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
 
 	// Add these member variables for font rendering
+	std::map<char, Character> m_ftCharacters;
 	GLuint m_font_shaderProgram;
 	GLuint m_font_VAO;
 	GLuint m_font_VBO;
-	std::map<GLchar, Character> m_ftCharacters;
 
-	std::string readShaderFile(const std::string& filepath);
 
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
+	std::string readShaderFile(const std::string& filepath);
 
 	// Window handle
 	GLFWwindow* window;

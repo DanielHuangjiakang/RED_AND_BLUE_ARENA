@@ -104,6 +104,23 @@ Entity createGun(RenderSystem* renderer, int side, vec2 position) {
 	return entity;
 }
 
+Entity createIntro(RenderSystem* renderer, int width, int height) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& motion = registry.motions.emplace(entity);
+	motion.velocity = {0,0};
+	
+	registry.renderRequests.insert(
+		entity,
+		{TEXTURE_ASSET_ID::CITY,
+		EFFECT_ASSET_ID::TEXTURED,
+		GEOMETRY_BUFFER_ID::SPRITE}
+	);
+	return entity;
+}
+
 Entity createBackground(RenderSystem* renderer, int width, int height) {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
@@ -113,14 +130,56 @@ Entity createBackground(RenderSystem* renderer, int width, int height) {
  	motion.velocity = { 0, 0 };
  	motion.position = {width / 2, height / 2};
 	motion.scale = {width, height};
-	
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::CITY,
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	if (registry.stageSelection ==1 ) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::CITY,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+	} else /*if (registry.stageSelection == 2)*/ {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::DESERT,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	}
+	// } else {
+	// 	registry.renderRequests.insert(
+	// 		entity,
+	// 		{TEXTURE_ASSET_ID::}
+	// 	)
+	// }
 
 	return entity;
+}
+
+Entity createStageChoice(RenderSystem* renderer, int x, int y, int width, int height, int stage) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& motion = registry.motions.emplace(entity);
+	auto& stageChoice = registry.stages.emplace(entity);
+
+	stageChoice.x = x;
+	stageChoice.y = y;
+	stageChoice.stage = stage;
+
+	motion.velocity = { 0.f, 0.f };
+ 	motion.position = {x + (width / 2), y + (height / 2)};
+	motion.scale = {width, height};
+
+	registry.renderRequests.insert(
+		entity,
+ 		{ TEXTURE_ASSET_ID::CITY, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
+
+ 	return entity;
+	
+
 }
 
 
