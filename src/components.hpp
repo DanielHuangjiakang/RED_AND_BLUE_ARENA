@@ -210,3 +210,11 @@ struct Laser {};
 struct Lifetime {
     float counter_ms;
 };
+
+struct Stage {
+    vec2 groundPosition;
+    vec2 groundSize;
+    std::vector<vec2> portalPositions;
+    std::vector<vec2> platformPositions;
+    std::vector<vec2> platformSizes;
+};

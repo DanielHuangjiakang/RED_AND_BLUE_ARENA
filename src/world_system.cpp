@@ -323,50 +323,24 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 // Reset the world state to its initial state
 
 void WorldSystem::restart_game() {
+    movable = true;
 
-	movable = true;
-	// Debugging for memory/component leaks
-	registry.list_all_components();
-	printf("Restarting\n");
+    registry.list_all_components();
+    printf("Restarting\n");
 
-	// Reset the game speed
-	current_speed = 1.f;
+    current_speed = 1.f;
 
-	// Remove all entities that we created
-	while (registry.motions.entities.size() > 0)
-		registry.remove_all_components_of(registry.motions.entities.back());
+    while (registry.motions.entities.size() > 0)
+        registry.remove_all_components_of(registry.motions.entities.back());
 
-	// Debugging for memory/component leaks
-	registry.list_all_components();
+    registry.list_all_components();
 
-	// create a new Salmon
+    background = createBackground(renderer, window_width_px, window_height_px);
 
-  background = createBackground(renderer, window_width_px, window_height_px);
-
-	player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
-	Motion& player1Motion = registry.motions.get(player1);
-	gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, window_height_px - 100});
-	
-	//red player
-	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 50}, 0);
-	Motion& player2Motion = registry.motions.get(player2);
-	gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, window_height_px - 200});
-
-	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
-	
-	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 220}, 250, 20);
-	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 220}, 250, 20);
-	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
-
-	portal1 = createPortal(renderer, {window_width_px / 2, window_height_px - 390 - 10}, 50, 100);
-	registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-
-	portal2 = createPortal(renderer, {3 * window_width_px / 4, window_height_px - 220 - 10}, 50, 100);
-	registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-  
-  	createLaser(renderer);
-   initializeLaserAI();
+    // Create the current stage
+    createStage(currentStage);
 }
+
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions()
@@ -499,7 +473,10 @@ bool WorldSystem::is_over() const
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
-	
+	if (action == GLFW_PRESS && key == GLFW_KEY_N) {
+    next_stage();
+	}
+
 	
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
@@ -857,4 +834,46 @@ void WorldSystem::on_shoot() {
         }
         registry.gunTimers.emplace(player2);
     }
+}
+
+void WorldSystem::next_stage() {
+    currentStage = (currentStage + 1) % stages.size(); // Loop back to the first stage
+    restart_game();
+}
+
+void WorldSystem::createStage(int currentStage) {
+	// Create the new
+	const Stage& stage = stages[currentStage];
+	// Create players
+    player1 = createPlayer(renderer, 1, {200, stage.groundPosition.y}, 1);
+    Motion& player1Motion = registry.motions.get(player1);
+    gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.groundPosition.y - 50});
+
+    player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.groundPosition.y}, 0);
+    Motion& player2Motion = registry.motions.get(player2);
+    gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.groundPosition.y - 50});
+
+    // Create ground
+    ground = createBlock1(renderer, stage.groundPosition.x, stage.groundPosition.y, stage.groundSize.x, stage.groundSize.y);
+    // Create platforms
+    for (size_t i = 0; i < stage.platformPositions.size(); i++) {
+        vec2 pos = stage.platformPositions[i];
+        vec2 size = stage.platformSizes[i];
+        createBlock2(renderer, pos, size.x, size.y);
+    }
+
+    // Create portals
+    for (size_t i = 0; i < stage.portalPositions.size(); i++) {
+        vec2 pos = stage.portalPositions[i];
+        Entity portal = createPortal(renderer, pos, 50, 100);
+        registry.colors.insert(portal, {1.0f, 0.5f, 0.3f});
+        if (i == 0)
+            portal1 = portal;
+        else if (i == 1)
+            portal2 = portal;
+    }
+
+    // Additional stage-specific logic (e.g., lasers)
+    createLaser(renderer);
+    initializeLaserAI();
 }

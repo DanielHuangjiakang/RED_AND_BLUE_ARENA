@@ -59,8 +59,8 @@ int main()
     	glm::vec3 font_color = glm::vec3(1.0, 1.0, 1.0);
 
 		// Render the game score
-		std::string score_text = "Score: " + std::to_string(world.fps);
-		renderer.renderText(score_text, 10.0f, window_height_px - text_height, 0.8f, font_color, font_trans);
+		std::string fps_text = "FPS: " + std::to_string(world.fps);
+		renderer.renderText(fps_text, 10.0f, window_height_px - text_height, 0.8f, font_color, font_trans);
 
 		
 		// flicker-free display with a double buffer
