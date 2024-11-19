@@ -45,11 +45,21 @@ struct Motion {
 	float angle = 0.f;
 };
 
+struct Winner {
+
+};
+
 struct Block {
 	int x;
 	int y;
 	int width;
 	int height;
+};
+
+struct StageChoice {
+	int stage;
+	int x;
+	int y;
 };
 
 // A sturct for portals, similar to how blocks work but with different collision.
@@ -163,7 +173,41 @@ enum class TEXTURE_ASSET_ID {
 	RED_GUN = PAD + 1,
 	BLUE_GUN = RED_GUN + 1,
 	HELP = BLUE_GUN + 1,
-	TEXTURE_COUNT = HELP + 1
+	DESERT = HELP +1,
+	INTRO = DESERT +1,
+	INTRO1 = INTRO+1,
+	REDWIN = INTRO1+1,
+	BLUEWIN=REDWIN+1,
+	BW1= BLUEWIN+1,
+	BW2 = BW1 +1,
+	BW3 = BW2 +1,
+	BW4 = BW3 +1,
+	BW5 = BW4 +1,
+	BW6 = BW5 +1,
+	BW7 = BW6 +1,
+	BW8 = BW7 +1,
+	BW9 = BW8 +1,
+	BW10 = BW9 +1,
+	BW11= BW10 +1,
+	BW12= BW11 +1,
+	BW13 = BW12 +1,
+	BW14 = BW13 +1,
+	RW1 = BW14+1,
+	RW2 = RW1 +1,
+	RW3 = RW2 +1,
+	RW4 = RW3 +1,
+	RW5 = RW4 +1,
+	RW6 = RW5 +1,
+	RW7 = RW6 +1,
+	RW8 = RW7 +1,
+	RW9 = RW8 +1,
+	RW10 = RW9 +1,
+	RW11 = RW10 +1,
+	RW12 = RW11 +1,
+	RW13 = RW12 +1,
+	RW14 = RW13 +1,
+	ICEMOUNTAIN=RW14+1,
+	TEXTURE_COUNT = ICEMOUNTAIN + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -175,8 +219,8 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
 	EFFECT_COUNT = WATER + 1
-	
 };
+
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
