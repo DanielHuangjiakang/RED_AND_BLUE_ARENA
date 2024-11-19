@@ -132,6 +132,10 @@ GLFWwindow *WorldSystem::create_window()
 	salmon_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
 
+	laser2_sound = Mix_LoadWAV(audio_path("laser2.wav").c_str());
+	healthpickup_sound = Mix_LoadWAV(audio_path("healthpickup.wav").c_str());
+	explosion_sound = Mix_LoadWAV(audio_path("explosion.wav").c_str());
+
 	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
@@ -143,6 +147,9 @@ GLFWwindow *WorldSystem::create_window()
 				audio_path("end_music.wav").c_str(),
 				audio_path("portal.wav").c_str(),
 				audio_path("buck_shot.wav").c_str(),
+				audio_path("laser2.wav").c_str(),
+				audio_path("healthpickup.wav").c_str(),
+				audio_path("explosion.wav").c_str(),
 				audio_path("laser.wav").c_str());
 		return nullptr;
 	}
@@ -197,6 +204,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         total_time = 0.0f;
         frame_count = 0;
     }
+
+
 
 	if (!registry.intro && registry.stageSelection) {
 	
@@ -416,7 +425,6 @@ void WorldSystem::restart_game() {
 		Entity stageButton1 = createStageChoice(renderer, 10, window_height_px / 2, 400, 200, 1);
 		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2, 400, 200, 2);
 		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px / 4-100, window_height_px / 2, 400, 200, 3);
-
 	}
 
 
@@ -582,7 +590,6 @@ void WorldSystem::handle_collisions()
 					motion.scale.y = motion.scale.y / 2;
 					movable = false;
 					registry.winner = player.side == 1 ? 2 : 1;
-
 				}
 				registry.remove_all_components_of(entity_other);
 			}
@@ -699,12 +706,13 @@ void WorldSystem::handle_collisions()
             if ((registry.players.has(entity) && registry.players.get(entity).side != registry.grenades.get(entity_other).side) || registry.blocks.has(entity)) {
                 Motion& motion = registry.motions.get(entity_other);
                 createExplosion(motion.position);
+				Mix_PlayChannel(-1, explosion_sound, 0);
                 registry.remove_all_components_of(entity_other);
             } 
         }
 
         if (registry.players.has(entity) && registry.explosions.has(entity_other))
-        {
+        {	
             Explosion& explosion = registry.explosions.get(entity_other);
             if (explosion.damagable) {
                 Player& player = registry.players.get(entity);
@@ -720,8 +728,13 @@ void WorldSystem::handle_collisions()
                     motion.angle = M_PI / 2;
                     motion.scale.y = motion.scale.y / 2;
                     movable = false;
+
+					// registry.stageSelection =0;
+					// registry.winner = 0;
+					// registry.stages.clear();
+					// restart_game();
                 }
-				
+
                 explosion.damagable = false;
             }
 
@@ -733,7 +746,7 @@ void WorldSystem::handle_collisions()
             if (registry.players.get(entity).side != registry.lasers2.get(entity_other).side && laser2.damagable) {
                 Player& player = registry.players.get(entity);
                 player.health -= 3;
-
+		
 				if (player.health <= 0)
                 {
 					player.health = 0;
@@ -809,6 +822,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 					p2.items.pop();
 					if (item.id == 0) {
 						p2.health += 3;
+						Mix_PlayChannel(-1, healthpickup_sound, 0);
 					} else if (item.id == 1) {
 						createGrenade(renderer, motion2.position, p2.direction, p2.side);
 					} else {
@@ -816,6 +830,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 						if (p2.direction == 0) dir = -1;
 						else dir = 1;
 						createLaserBeam2(motion2.position + vec2({abs(motion2.scale.x / 2) * dir, 0.f}), p2.direction, p2.side);
+						Mix_PlayChannel(-1, laser2_sound, 0);
 					}
 				}
 			} else if (action == GLFW_RELEASE) {
@@ -831,6 +846,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 					p1.items.pop();
 					if (item.id == 0) {
 						p1.health += 3;
+						Mix_PlayChannel(-1, healthpickup_sound, 0);
 					} else if (item.id == 1) {
 						createGrenade(renderer, motion1.position, p1.direction, p1.side);
 					} else {
@@ -838,6 +854,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 						if (p1.direction == 0) dir = -1;
 						else dir = 1;
 						createLaserBeam2(motion1.position + vec2({abs(motion1.scale.x / 2) * dir, 0.f}), p1.direction, p1.side);
+						Mix_PlayChannel(-1, laser2_sound, 0);
 					}
 				}
 			} else if (action == GLFW_RELEASE) {

@@ -265,21 +265,21 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 }
 
 Entity createHelpPanel(RenderSystem* renderer, int width, int height) {
-	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-	registry.meshPtrs.emplace(entity, &mesh);
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+    registry.meshPtrs.emplace(entity, &mesh);
 
-	auto& motion = registry.motions.emplace(entity);
-	motion.velocity = { 0, 0 };
-	motion.position = {width / 2, height / 2};
-	motion.scale = {width, height};
+    auto& motion = registry.motions.emplace(entity);
+    motion.velocity = { 0, 0 };
+    motion.position = {width / 2, height / 2};
+    motion.scale = {width/2, height/2};
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::HELP,
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
-	return entity;
+    registry.renderRequests.insert(
+        entity,
+        { TEXTURE_ASSET_ID::HELP,
+          EFFECT_ASSET_ID::TEXTURED,
+          GEOMETRY_BUFFER_ID::SPRITE });
+    return entity;
 }
 
 Entity createText(RenderSystem* renderer, std::string text_content, vec2 position, bool is_visible) {
