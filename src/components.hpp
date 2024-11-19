@@ -1,20 +1,26 @@
 #pragma once
 #include "common.hpp"
 #include <vector>
+#include <queue>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
+
+struct Item
+{
+    int id; // 0 = health potion, 1 = grenade, 2 = laser gun        
+};
 
 // Player component
 struct Player
 {
 	int side; // side = 1 for blue, side = 2 for red
 	bool jumpable = false;
-	bool direction;  // 0 for left, 1 for right, 
-	int health = 3;
-
+	bool direction;  // 0 for left, 1 for right
+	int health = 10;
 	bool is_moving = false;
-	float jump_accel = -600.f;
-	float lr_accel = 1000.f;
+	float jump_accel = -550.f;
+	float lr_accel = 1200.f;
+	std::queue<Item> items;
 };
 
 struct GunTimer {
@@ -24,6 +30,19 @@ struct GunTimer {
 struct Bullet {
 	int side; // side = 1 for blue, side = 2 for red
 };
+
+struct Background {
+
+};
+
+struct Grenade {
+	int side; // side = 1 for blue, side = 2 for red
+};
+
+struct Explosion {
+	bool damagable = true;
+};
+
 // Weapon component
 struct Weapon
 {
@@ -172,7 +191,13 @@ enum class TEXTURE_ASSET_ID {
 	DESERT = HELP +1,
 	INTRO = DESERT +1,
 	INTRO1 = INTRO+1,
-	TEXTURE_COUNT = INTRO1 + 1
+	GRENADE = INTRO1 + 1,
+	POTION = GRENADE + 1,
+	LASER = POTION + 1,
+	LONG_LASER = LASER + 1,
+	EXPLOSION = LONG_LASER + 1,
+	ICEMOUNTAIN = EXPLOSION + 1,
+	TEXTURE_COUNT = ICEMOUNTAIN + 1,
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -215,6 +240,11 @@ struct AnimationFrame {
 };
   
 struct Laser {};
+
+struct Laser2 {
+	int side;
+	bool damagable = true;
+};
 
 struct Lifetime {
     float counter_ms;

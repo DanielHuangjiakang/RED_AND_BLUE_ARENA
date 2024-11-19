@@ -1,4 +1,5 @@
 
+#include "tiny_ecs_registry.hpp"
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
 
@@ -60,9 +61,9 @@ int main()
 		// Render the game score
 		std::string score_text = "FPS: " + std::to_string(world.fps);
 		renderer.renderText(score_text, 10.0f, window_height_px - text_height, 0.8f, font_color, font_trans);
-
 		// Render dynamic HP text for players
-		for (Entity player_entity : registry.players.entities) {
+		if (registry.stageSelection != 0) {
+			for (Entity player_entity : registry.players.entities) {
 			Player& player = registry.players.get(player_entity);
 			Motion& motion = registry.motions.get(player_entity);
 
@@ -73,9 +74,10 @@ int main()
 			std::string hp_text = "HP: " + std::to_string(player.health);
 
 			renderer.renderText(hp_text, hp_x, window_height_px - hp_y + 10.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f), glm::mat4(1.0f));
+			}
 		}
-
-		if (world.toogle_life_timer > 0 && world.toogle_life > 0)
+		
+		if (world.toogle_life_timer > 0 && world.toogle_life > 0 && registry.stageSelection != 0)
         {
             for (size_t i = 0; i < registry.players.size(); i++)
             {
@@ -83,19 +85,18 @@ int main()
                 Motion &player_motion = registry.motions.get(player);
 
                 // Prepare text
-                    std::string text = "health + 3";
-                    glm::vec3 text_color = glm::vec3(0.f, 1.0f, 0.f);
-                    glm::mat4 font_trans = glm::mat4(1.0f);
+				std::string text = "health + 3";
+				glm::vec3 text_color = glm::vec3(0.f, 1.0f, 0.f);
+				glm::mat4 font_trans = glm::mat4(1.0f);
 
-                    // Calculate text position (above the fish)
-                    float scale = .5f; // Adjust as needed
-                    float text_x = player_motion.position.x - 10;
-                    float text_y = player_motion.position.y - 30.f;
+				// Calculate text position (above the fish)
+				float scale = .5f; // Adjust as needed
+				float text_x = player_motion.position.x - 10;
+				float text_y = player_motion.position.y - 30.f;
 
-                    // Render the text
-                    renderer.renderText(text, text_x, window_height_px - text_y + 10.0f, scale, text_color, font_trans);
+				// Render the text
+				renderer.renderText(text, text_x, window_height_px - text_y + 10.0f, scale, text_color, font_trans);
             }
-
         }
 
 		if (world.showMatchRecords) {

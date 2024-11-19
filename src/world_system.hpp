@@ -85,10 +85,14 @@ private:
 	bool player1_right_button = false;
 	bool player1_left_button = false;
 	int player1_shooting = 0;
+	bool player1_item = true;
 	bool player2_right_button = false;
 	bool player2_left_button = false;
 	int player2_shooting = 0;
+	bool player2_item = true;
 
+	float next_item_spawn;
+	
 	// Stage atrributes
 	Entity helpPanel;
 	Entity helpText;
