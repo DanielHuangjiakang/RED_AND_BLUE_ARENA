@@ -31,6 +31,7 @@ int main()
 
 	// initialize the main systems
 	renderer.init(window);
+
 	world.init(&renderer);
 
 	// variable timestep loop
@@ -50,6 +51,21 @@ int main()
 		world.handle_collisions();
 
 		renderer.draw();
+
+		float text_height = 50.0f;
+
+		// In both fontInit and draw
+    	glm::mat4 font_trans = glm::mat4(1.0f);
+    	glm::vec3 font_color = glm::vec3(1.0, 1.0, 1.0);
+
+		// Render the game score
+		std::string fps_text = "FPS: " + std::to_string(world.fps);
+		renderer.renderText(fps_text, 10.0f, window_height_px - text_height, 0.8f, font_color, font_trans);
+
+		
+		// flicker-free display with a double buffer
+		glfwSwapBuffers(window);
+		gl_has_errors();
 	}
 
 	return EXIT_SUCCESS;

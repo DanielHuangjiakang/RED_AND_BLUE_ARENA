@@ -9,8 +9,20 @@
 #include "components.hpp"
 #include "tiny_ecs.hpp"
 
+// fonts
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <map>				// map of character textures
+
+#include <iostream>
+#include <assert.h>
+#include <fstream>			// for ifstream
+#include <sstream>			// for ostringstream
+
+// matrices
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 
@@ -152,7 +164,6 @@ public:
 
 	void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
 
-
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
@@ -169,7 +180,15 @@ private:
 
 	Entity screen_state_entity;
 
+	// font elements
+	std::map<char, Character> m_ftCharacters;
+	GLuint m_font_shaderProgram;
+	GLuint m_font_VAO;
+	GLuint m_font_VBO;
+
 };
 
 bool loadEffectFromFile(
 	const std::string& vs_path, const std::string& fs_path, GLuint& out_program);
+
+std::string readShaderFile(const std::string& filename);

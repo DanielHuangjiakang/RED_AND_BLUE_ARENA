@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.0)
 project(salmon)
 
 # set c++11
@@ -118,6 +118,7 @@ elseif (IS_OS_WINDOWS)
     set(FREETYPE_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/lib/freetype.dll")
   
 
+
     # Copy and rename dlls
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -185,10 +186,31 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${FREETYPE_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} glm::glm ${FREETYPE_LIBRARY})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} glm::glm)
+
+# FreeType configuration
+if(IS_OS_WINDOWS)
+  set(FREETYPE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype")
+  target_include_directories(${PROJECT_NAME} PRIVATE
+    "${FREETYPE_DIR}/include"
+    "${FREETYPE_DIR}/include/freetype"
+  )
+  target_link_libraries(${PROJECT_NAME} PRIVATE
+    "${FREETYPE_DIR}/release dll/win64/freetype.lib"
+  )
+
+  # Copy DLL to output directory
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${FREETYPE_DIR}/release dll/win64/freetype.dll"
+    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/freetype.dll"
+  )
+else()
+  find_package(Freetype REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PRIVATE Freetype::Freetype)
+endif()
 
 # Needed to add this
 if(IS_OS_LINUX)
-    target_link_libraries(${PROJECT_NAME} PUBLIC glfw ${CMAKE_DL_LIBS})
+  target_link_libraries(${PROJECT_NAME} PUBLIC glfw ${CMAKE_DL_LIBS})
 endif()
-
