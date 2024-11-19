@@ -9,4 +9,3 @@ Makefile
 .idea
 cmake-build-debug
 CMakeLists.txt
-ext/project_path.hpp
