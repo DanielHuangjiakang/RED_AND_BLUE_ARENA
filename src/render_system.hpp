@@ -134,6 +134,8 @@ public:
 
 
 	void renderMatchRecords(const std::deque<std::string>& match_records);
+
+	std::vector<std::string> wrapText(const std::string& text, float max_width, float scale);
 	
 private:
 	// Internal drawing functions for each entity type
@@ -155,3 +157,4 @@ private:
 
 bool loadEffectFromFile(
 	const std::string& vs_path, const std::string& fs_path, GLuint& out_program);
+

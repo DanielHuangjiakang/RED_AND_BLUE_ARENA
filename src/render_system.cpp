@@ -295,9 +295,62 @@ void RenderSystem::draw()
 	}
 	
 	if (registry.intro) {
-		renderText("RED VS BLUE ARENA", window_width_px/2-200, window_height_px/2 + 200.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
-		renderText("Press Space to start", window_width_px/2-150, window_height_px/2-200.0f, 1.5f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+		float max_line_width = window_width_px * 0.7f; // 80% of screen width
+		float scale = 1.0f;
+		std::string story_text =
+			"In a fantasy world, the red and blue nations are locked in a century's old rivalry. "
+			"Each nation selects a champion to fight in one-on-one duels in a deadly arena. "
+			"Two players will control a champion from each nation as they battle each other in the arena, for glory. "
+			"To spice up the battlefield, the arena will include a variety of features such as items, "
+			"a deadly laser, and portals to keep gameplay dynamic and fresh. "
+			"The arena is certainly a dangerous front where steel and guns collide, and one nation will collapse.";
+
+		std::vector<std::string> wrapped_text = wrapText(story_text, max_line_width, scale);
+
+		float start_y = window_height_px / 2 + 100.0f;
+		for (const std::string& line : wrapped_text) {
+			float line_width = getTextWidth(line, scale);
+			float x_position = (window_width_px - line_width) / 2;
+			renderText(line, x_position, start_y, scale, {1.0f, 1.0f, 1.0f}, glm::mat4(1.0f));
+			start_y -= 30.0f; // Adjust line spacing
+		}
+
+		// Title "RED VS BLUE ARENA"
+		std::string title_text = "RED VS BLUE ARENA";
+		float title_scale = 2.0f;
+
+		// Calculate the width for each individual word
+		float red_width = getTextWidth("RED", title_scale);
+		float vs_width = getTextWidth(" VS ", title_scale);
+		float blue_width = getTextWidth("BLUE", title_scale);
+		float arena_width = getTextWidth(" ARENA", title_scale);
+
+		// Total width of the title
+		float total_title_width = red_width + vs_width + blue_width + arena_width;
+
+		// Calculate starting x position to center the entire title
+		float title_x = (window_width_px - total_title_width) / 2;
+
+		// Render each part of the title
+		renderText("RED", title_x, window_height_px / 2 + 200.0f, title_scale, {1.0f, 0.0f, 0.0f}, glm::mat4(1.0f));
+		title_x += red_width;
+
+		renderText(" VS ", title_x, window_height_px / 2 + 200.0f, title_scale, {1.0f, 1.0f, 1.0f}, glm::mat4(1.0f));
+		title_x += vs_width;
+
+		renderText("BLUE", title_x, window_height_px / 2 + 200.0f, title_scale, {0.0f, 0.0f, 1.0f}, glm::mat4(1.0f));
+		title_x += blue_width;
+
+		renderText(" ARENA", title_x, window_height_px / 2 + 200.0f, title_scale, {1.0f, 1.0f, 1.0f}, glm::mat4(1.0f));
+
+		// Instructions "Press Space to start"
+		std::string instruction_text = "Press Space to start";
+		float instruction_scale = 1.5f;
+		float instruction_width = getTextWidth(instruction_text, instruction_scale);
+		float instruction_x = (window_width_px - instruction_width) / 2;
+		renderText(instruction_text, instruction_x, window_height_px / 2 - 200.0f, instruction_scale, {1.0f, 1.0f, 1.0f}, glm::mat4(1.0f));
 	}
+
 	if (!registry.stageSelection && !registry.intro) {
 		renderText("SELECT STAGE", window_width_px/2-200, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
 	}
@@ -333,4 +386,30 @@ float RenderSystem::getTextWidth(const std::string& text, float scale)
         width += (ch.Advance >> 6) * scale;
     }
     return width;
+}
+
+std::vector<std::string> RenderSystem::wrapText(const std::string& text, float max_width, float scale) {
+    std::istringstream words(text);
+    std::string word;
+    std::string line;
+    std::vector<std::string> lines;
+    float line_width = 0.0f;
+
+    while (words >> word) {
+        float word_width = getTextWidth(word + " ", scale);
+        if (line_width + word_width > max_width) {
+            lines.push_back(line);
+            line = word + " ";
+            line_width = word_width;
+        } else {
+            line += word + " ";
+            line_width += word_width;
+        }
+    }
+
+    if (!line.empty()) {
+        lines.push_back(line);
+    }
+
+    return lines;
 }

@@ -92,7 +92,7 @@ private:
 	bool player2_item = true;
 
 	float next_item_spawn;
-	
+
 	// Stage atrributes
 	Entity helpPanel;
 	Entity helpText;
@@ -118,6 +118,9 @@ private:
 	Mix_Chunk* portal_sound;
 	Mix_Chunk* buck_shot_sound;
 	
+	Mix_Chunk* laser2_sound;
+	Mix_Chunk* healthpickup_sound;
+	Mix_Chunk* explosion_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
