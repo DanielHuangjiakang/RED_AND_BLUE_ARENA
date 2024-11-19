@@ -26,6 +26,7 @@ public:
 	ComponentContainer<Gravity> gravities;
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<Grenade> grenades;
+	ComponentContainer<Explosion> explosions;
 	ComponentContainer<GunTimer> gunTimers;
 	ComponentContainer<Item> items;
 
@@ -36,6 +37,7 @@ public:
 
 	ComponentContainer<Portal> portals;
   	ComponentContainer<Laser> lasers;
+	ComponentContainer<Laser2> lasers2;
 	ComponentContainer<Lifetime> lifetimes;
 
 
@@ -58,6 +60,7 @@ public:
 		registry_list.push_back(&gunTimers);
 		registry_list.push_back(&items);
 		registry_list.push_back(&grenades);
+		registry_list.push_back(&explosions);
 
 		registry_list.push_back(&animations);
 		registry_list.push_back(&texts);
@@ -65,6 +68,7 @@ public:
 
 		registry_list.push_back(&portals);
     	registry_list.push_back(&lasers);
+		registry_list.push_back(&lasers2);
 		registry_list.push_back(&lifetimes);
 
 	}

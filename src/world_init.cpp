@@ -359,7 +359,7 @@ Entity createLaserBeam(vec2 start, vec2 target) {
     return beam;
 }
 
-Entity createLaserBeam2(vec2 start, int direction) {
+Entity createLaserBeam2(vec2 start, int direction, int side) {
 	auto beam = Entity();
 	int dir = 0;
 	if (direction == 0) dir = -1;
@@ -369,6 +369,9 @@ Entity createLaserBeam2(vec2 start, int direction) {
 	vec2 midpoint = (start + target) * 0.5f;
 	Motion& motion = registry.motions.emplace(beam);
     motion.position = midpoint;
+
+	Laser2& laser2 = registry.lasers2.emplace(beam);
+	laser2.side = side;
 
     motion.scale = {1210.0f, 44.0f};
     registry.renderRequests.insert(
@@ -392,8 +395,6 @@ Entity createRandomItem(RenderSystem* renderer, Motion motion) {
 	Motion& item_motion = registry.motions.emplace(entity);
 	item_motion = motion;
 
-
-
 	if (item.id == 0) {
 		registry.renderRequests.insert(
         	entity,
@@ -416,33 +417,47 @@ Entity createRandomItem(RenderSystem* renderer, Motion motion) {
     	);
 	}
 
-
-	
-
 	return entity;
 }
 
-Entity createGrenade(RenderSystem* renderer, vec2 position, int direction) {
+Entity createGrenade(RenderSystem* renderer, vec2 position, int direction, int side) {
 	auto entity = Entity();
-	registry.grenades.emplace(entity);
+	Grenade& grenade = registry.grenades.emplace(entity);
+	grenade.side = side;
 
 	auto& motion = registry.motions.emplace(entity);
 	int dir = 0;
 	if (direction == 0) dir = -1;
 	else dir = 1;
  	motion.velocity = { 500 * dir, -100 }; 
- 	motion.position = position;
-	motion.scale = { 25, 25 }; // width * height
+	motion.scale = { 30, 45 }; // width * height
+	motion.position = {position.x + dir * (motion.scale.x), position.y - motion.scale.y};
 
 	Gravity& gravity = registry.gravities.emplace(entity);
 	gravity.g.y = 300.f;
-
-	// registry.colors.insert(entity, {0.0f, 1.0f, 0.0f});
 
 	registry.renderRequests.insert(
         entity,
         {TEXTURE_ASSET_ID::GRENADE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
     );
 	
+	return entity;
+}
+
+Entity createExplosion(vec2 position) {
+	auto entity = Entity();
+	registry.explosions.emplace(entity);
+
+	auto& motion = registry.motions.emplace(entity);
+ 	motion.position = position;
+	motion.scale = { 200, 165 }; // width * height
+
+	registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::EXPLOSION, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    );
+
+	auto& lifetime = registry.lifetimes.emplace(entity);
+    lifetime.counter_ms = 150; 
 	return entity;
 }

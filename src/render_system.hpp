@@ -65,7 +65,8 @@ const std::array<std::string, texture_count> texture_paths = {
 			textures_path("grenade.png"),
 			textures_path("potion.png"),
 			textures_path("laser.png"),
-			textures_path("long_laser.png")
+			textures_path("long_laser.png"),
+			textures_path("explosion.png")
 		};
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.

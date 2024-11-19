@@ -36,7 +36,11 @@ struct Background {
 };
 
 struct Grenade {
+	int side; // side = 1 for blue, side = 2 for red
+};
 
+struct Explosion {
+	bool damagable = true;
 };
 
 // Weapon component
@@ -181,7 +185,8 @@ enum class TEXTURE_ASSET_ID {
 	POTION = GRENADE + 1,
 	LASER = POTION + 1,
 	LONG_LASER = LASER + 1,
-	TEXTURE_COUNT = LONG_LASER + 1
+	EXPLOSION = LONG_LASER + 1,
+	TEXTURE_COUNT = EXPLOSION + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -224,6 +229,11 @@ struct AnimationFrame {
 };
   
 struct Laser {};
+
+struct Laser2 {
+	int side;
+	bool damagable = true;
+};
 
 struct Lifetime {
     float counter_ms;
