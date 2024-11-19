@@ -16,6 +16,11 @@
 #include "tiny_ecs_registry.hpp"
 #include "decisionTree.hpp"
 
+// for portal randomization
+#include <random>
+
+using namespace std;
+
 
 // create the underwater world
 WorldSystem::WorldSystem()
@@ -144,6 +149,11 @@ GLFWwindow *WorldSystem::create_window()
 	Mix_VolumeChunk(hit_sound, 6);
 	Mix_VolumeChunk(shoot_sound, 6);
 	Mix_VolumeChunk(end_music, 10);
+
+	glfwSetMouseButtonCallback(window, [](GLFWwindow* wnd, int button, int action, int mods) {
+		((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_button(button, action, mods);
+	});
+
 	return window;
 }
 
@@ -167,8 +177,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     total_time += elapsed_ms_since_last_update;
     frame_count++;
 
+	// updating the timer for printing text.
+	toogle_life_timer -= elapsed_ms_since_last_update;
+
     if (total_time > 1000.0f) {
-        fps = frame_count / (total_time / 1000.0f);
+        float fps = frame_count / (total_time / 1000.0f);
 		std::stringstream title_ss;
         title_ss << "Game Screen - FPS: " << static_cast<int>(fps);
         glfwSetWindowTitle(window, title_ss.str().c_str());
@@ -176,8 +189,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         total_time = 0.0f;
         frame_count = 0;
     }
-	
 
+	if (!registry.intro && registry.stageSelection) {
+	
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
@@ -316,6 +330,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// Update animations
 	animation_system.step(elapsed_ms_since_last_update);
+	}
 
 	return true;
 }
@@ -323,24 +338,143 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 // Reset the world state to its initial state
 
 void WorldSystem::restart_game() {
-    movable = true;
+	toogle_life = 0;
+	toogle_life_timer = 0;
+	// Create an intro screen
+	if (registry.intro) {
+		// Create intro entities
+		Entity introBackground = createIntro(renderer, window_width_px, window_height_px);
 
-    registry.list_all_components();
-    printf("Restarting\n");
+		// Create stage selection button entities
+		// Entity stageButton1 = createBlock2(renderer, {window_width_px / 4, window_height_px / 2}, 200, 50);
+		// Entity stageButton2 = createBlock2(renderer, {window_width_px / 2, window_height_px / 2}, 200, 50);
+		// Entity stageButton3 = createBlock2(renderer, {3 * window_width_px / 4, window_height_px / 2}, 200, 50);
 
-    current_speed = 1.f;
+		// // Handle stage button clicks
+		// if (registry.mouseButtons.has(stageButton1)) {
+		// 	// Select stage 1
+		// 	registry.stageSelection = false;
+		// 	registry.intro = false;
+		// 	// Load stage 1
+		// } else if (registry.mouseButtons.has(stageButton2)) {
+		// 	// Select stage 2
+		// 	registry.stageSelection = false;
+		// 	registry.intro = false;
+		// 	// Load stage 2
+		// } else if (registry.mouseButtons.has(stageButton3)) {
+		// 	// Select stage 3
+		// 	registry.stageSelection = false;
+		// 	registry.intro = false;
+		// 	// Load stage 3
+		// }
+	}
 
-    while (registry.motions.entities.size() > 0)
-        registry.remove_all_components_of(registry.motions.entities.back());
+	// Create a Stage Selection screen when a key is pressed
+	if (!registry.intro && !registry.stageSelection) {
+		// Create stage selection entities
+		Entity stageSelectionBackground = createBackground(renderer, window_width_px, window_height_px);
 
-    registry.list_all_components();
+		// Create stage button entities
+		Entity stageButton1 = createStageChoice(renderer, 10, window_height_px / 2, 400, 200, 1);
+		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2, 400, 200, 2);
+		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px / 4-100, window_height_px / 2, 400, 200, 3);
+
+	}
+
+
+	if (!registry.intro && registry.stageSelection) {
+	movable = true;
+	// Debugging for memory/component leaks
+	registry.list_all_components();
+	printf("Restarting\n");
+
+	// Reset the game speed
+	current_speed = 1.f;
+
+	// Remove all entities that we created
+	while (registry.motions.entities.size() > 0)
+		registry.remove_all_components_of(registry.motions.entities.back());
+
+	// Debugging for memory/component leaks
+	registry.list_all_components();
+
+	// create a new Salmon
 
     background = createBackground(renderer, window_width_px, window_height_px);
 
-    // Create the current stage
-    createStage(currentStage);
-}
+	player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
+	Motion& player1Motion = registry.motions.get(player1);
+	gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, window_height_px - 100});
+	
+	//red player
+	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 50}, 0);
+	Motion& player2Motion = registry.motions.get(player2);
+	gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, window_height_px - 200});
 
+	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
+	
+	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 220}, 250, 20);
+	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 220}, 250, 20);
+	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
+
+	//generate portal position based on rand num generated
+	random_device rd;                        
+    mt19937 generator(rd());                 
+    uniform_int_distribution<int> dist(0, 2);
+
+	int rand1 = dist(generator);
+
+	int rand2 = dist(generator);
+
+	// Avoid hash collision
+	while (rand1 == rand2)
+	{
+		rand2 = dist(generator);
+	}
+	
+	if (rand1 == 0)
+	{
+		// use platform 1 for portal 1
+		portal1 = createPortal(renderer, {window_width_px/4, window_height_px - 220 - 10}, 50, 100);
+	    registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+	}
+	else if (rand1 == 1)
+	{
+		// use platform 2 for portal 1
+		portal1 = createPortal(renderer, {3 * window_width_px/4, window_height_px - 220 - 10}, 50, 100);
+	    registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+	}
+	else if (rand1 == 2)
+	{
+		//use platform 3 for portal 1
+		portal1 = createPortal(renderer, {window_width_px/2, window_height_px - 390 - 10}, 50, 100);
+	    registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+	}
+
+	if (rand2 == 0)
+	{
+		// use platform 1 for portal 2
+		portal2 = createPortal(renderer, {window_width_px/4, window_height_px - 220 - 10}, 50, 100);
+	    registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+	}
+	else if (rand2 == 1)
+	{
+		// use platform 2 for portal 2
+		portal2 = createPortal(renderer, {3 * window_width_px/4, window_height_px - 220 - 10}, 50, 100);
+	    registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+	}
+	else if (rand2 == 2)
+	{
+		//use platform 3 for portal 2
+		portal2 = createPortal(renderer, {window_width_px/2, window_height_px - 390 - 10}, 50, 100);
+	    registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+	}
+	
+  
+  	createLaser(renderer);
+    initializeLaserAI();
+	}
+}
 
 // Compute collisions between entities
 void WorldSystem::handle_collisions()
@@ -383,6 +517,13 @@ void WorldSystem::handle_collisions()
 			}
 		}
 
+		// add collision between blocks & bullets such that bullets should disappear when colliding with the block
+		if ( registry.blocks.has(entity) && registry.bullets.has(entity_other))
+		{
+			registry.remove_all_components_of(entity_other);
+		}
+		
+
 		if (registry.players.has(entity) && registry.bullets.has(entity_other))
 		{
 			Player &player = registry.players.get(entity);
@@ -402,6 +543,7 @@ void WorldSystem::handle_collisions()
 					motion.angle = M_PI / 2;
 					motion.scale.y = motion.scale.y / 2;
 					movable = false;
+					registry.winner = player.side == 1 ? 2 : 1;
 
 				}
 				registry.remove_all_components_of(entity_other);
@@ -450,7 +592,46 @@ void WorldSystem::handle_collisions()
 		}
 		if (registry.portals.has(entity) && registry.bullets.has(entity_other))
 		{
-			registry.remove_all_components_of(entity_other);
+			// updated behaviour such that bullets can be teleported too
+			Portal &portal = registry.portals.get(entity);
+			Motion &motion_portal1 = registry.motions.get(portal1);
+			Motion &motion_bullet = registry.motions.get(entity_other);
+			Motion &motion_portal2 = registry.motions.get(portal2);
+
+			// since there are just 2 portals
+			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
+			{
+				// teleport player to the pos of portal2
+
+				
+
+				if (motion_bullet.velocity.x >= 0)
+				{
+					motion_bullet.position =  {motion_portal2.position.x + 65, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
+				}
+
+				else 
+				{
+					motion_bullet.position =  {motion_portal2.position.x - 65, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
+				}
+				
+			}
+			else
+			{
+
+				if (motion_bullet.velocity.x >= 0)
+				{
+					motion_bullet.position =  {motion_portal1.position.x + 65, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
+				}
+
+				else 
+				{
+					motion_bullet.position =  {motion_portal1.position.x - 65, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
+				}
+			}
+
+			
+
 		}
 
 		if (registry.bullets.has(entity) && registry.bullets.has(entity_other))
@@ -473,164 +654,188 @@ bool WorldSystem::is_over() const
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod)
 {
-	if (action == GLFW_PRESS && key == GLFW_KEY_N) {
-    next_stage();
-	}
-
+	
 	
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R)
 	{
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
-
+		registry.stageSelection =0;
+		registry.winner = 0;
+		registry.stages.clear();
 		restart_game();
 	}
 
+	if (registry.intro) {
+		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) registry.intro = false;
+		restart_game();
+	}
 
-	Motion& motion1 = registry.motions.get(player1);
-	Motion& motion2 = registry.motions.get(player2);
+	if (!registry.intro && registry.stageSelection) {
 
-	Gravity& gravity1 = registry.gravities.get(player1);
-	Gravity& gravity2 = registry.gravities.get(player2);
-	Player& p1 = registry.players.get(player1);
-	Player& p2 = registry.players.get(player2);
+		Motion& motion1 = registry.motions.get(player1);
+		Motion& motion2 = registry.motions.get(player2);
 
-	if (!movable) {
-        player1_shooting = 0;
-        player2_shooting = 0;
-        gravity1.g[0] = 0.f;
-        gravity2.g[0] = 0.f;
-        p1.is_moving = false;
-        p2.is_moving = false;
-        return;
-    }
-	
-	if (key == GLFW_KEY_H) {
-		if (action == GLFW_PRESS) {	
-			helpPanel = createHelpPanel(renderer, window_width_px, window_height_px);
-			
-			// Add help text
-			std::string instructions = 
-				"Controls:\n"
-				"Player 1 (Blue):\n"
-				"WASD - Movement\n"
-				"Q - Shoot\n\n"
-				"Player 2 (Red):\n"
-				"Arrow Keys - Movement\n"
-				"/ - Shoot\n\n"
-				"R - Restart Game";
+		Gravity& gravity1 = registry.gravities.get(player1);
+		Gravity& gravity2 = registry.gravities.get(player2);
+		Player& p1 = registry.players.get(player1);
+		Player& p2 = registry.players.get(player2);
 
-			
-		} else if (action == GLFW_RELEASE) {
-			registry.remove_all_components_of(helpPanel);
-			registry.remove_all_components_of(helpText);
+		if (!movable) {
+			player1_shooting = 0;
+			player2_shooting = 0;
+			gravity1.g[0] = 0.f;
+			gravity2.g[0] = 0.f;
+			p1.is_moving = false;
+			p2.is_moving = false;
+			return;
 		}
-	}
+		
+		if (key == GLFW_KEY_H) {
+			if (action == GLFW_PRESS) {	
+				helpPanel = createHelpPanel(renderer, window_width_px, window_height_px);
+				
+				// Add help text
+				std::string instructions = 
+					"Controls:\n"
+					"Player 1 (Blue):\n"
+					"WASD - Movement\n"
+					"Q - Shoot\n\n"
+					"Player 2 (Red):\n"
+					"Arrow Keys - Movement\n"
+					"/ - Shoot\n\n"
+					"R - Restart Game";
 
-	if (key == GLFW_KEY_A) {
-    if (action == GLFW_PRESS) {
-			gravity1.g[0] = -1000.f;
-			p1.direction = 0; // Facing left
-			player1_left_button = true;
-			p1.is_moving = true;
-        if (motion1.scale.x > 0) motion1.scale.x *=-1;
-		} else if (action == GLFW_RELEASE) {
-			if (!player1_right_button) {
-				gravity1.g[0] = 0.f;
-				p1.is_moving = false;
+				
+			} else if (action == GLFW_RELEASE) {
+				registry.remove_all_components_of(helpPanel);
+				registry.remove_all_components_of(helpText);
 			}
-		player1_left_button = false;
-    	}
-	}
+		}
 
-	if (key == GLFW_KEY_D) {
+		if (key == GLFW_KEY_A) {
 		if (action == GLFW_PRESS) {
-			gravity1.g[0] = +1000.f;
-			p1.direction = 1; // Facing right
-			player1_right_button = true;
-			p1.is_moving = true;
-			if (motion1.scale.x < 0) motion1.scale.x *= -1;
-
-		} else if (action == GLFW_RELEASE) {
-			if (!player1_left_button) {
+				gravity1.g[0] = -1000.f;
+				p1.direction = 0; // Facing left
+				player1_left_button = true;
+				p1.is_moving = true;
+			if (motion1.scale.x > 0) motion1.scale.x *=-1;
+			} else if (action == GLFW_RELEASE) {
+				if (!player1_right_button) {
 					gravity1.g[0] = 0.f;
 					p1.is_moving = false;
+				}
+			player1_left_button = false;
 			}
-			player1_right_button = false;
 		}
-	}
 
-	if (key == GLFW_KEY_W) {
-		if (action == GLFW_PRESS && p1.jumpable == true) {
-			motion1.velocity[1] += -600;
-			p1.jumpable = false;
+		if (key == GLFW_KEY_D) {
+			if (action == GLFW_PRESS) {
+				gravity1.g[0] = +1000.f;
+				p1.direction = 1; // Facing right
+				player1_right_button = true;
+				p1.is_moving = true;
+				if (motion1.scale.x < 0) motion1.scale.x *= -1;
+
+			} else if (action == GLFW_RELEASE) {
+				if (!player1_left_button) {
+						gravity1.g[0] = 0.f;
+						p1.is_moving = false;
+				}
+				player1_right_button = false;
+			}
 		}
-	}
 
-	if (key == GLFW_KEY_Q) {
-        if (action == GLFW_PRESS) player1_shooting = 1;
-        else if (action == GLFW_RELEASE) player1_shooting = 0;
-    }
+		if (key == GLFW_KEY_W) {
+			if (action == GLFW_PRESS && p1.jumpable == true) {
+				motion1.velocity[1] += -600;
+				p1.jumpable = false;
+			}
+		}
 
-	if (key == GLFW_KEY_SLASH) {
-        if (action == GLFW_PRESS) player2_shooting = 1;
-        else if (action == GLFW_RELEASE) player2_shooting = 0;
-    }
+		
 
-	// shoot arrow for player 1
-    if (key == GLFW_KEY_E)
-    {
-        if (action == GLFW_PRESS) player1_shooting = 2;
-        else if (action == GLFW_RELEASE) player1_shooting = 0;
-    }
+		if (key == GLFW_KEY_Q) {
+			if (action == GLFW_PRESS) player1_shooting = 1;
+			else if (action == GLFW_RELEASE) player1_shooting = 0;
+		}
 
-    //shoot arrow for player 2
-    if (key == GLFW_KEY_RIGHT_SHIFT)
-    {
-        if (action == GLFW_PRESS) player2_shooting = 2;
-        else if (action == GLFW_RELEASE) player2_shooting = 0;
-    }
+		if (key == GLFW_KEY_SLASH) {
+			if (action == GLFW_PRESS) player2_shooting = 1;
+			else if (action == GLFW_RELEASE) player2_shooting = 0;
+		}
+
+		// shoot arrow for player 1
+		if (key == GLFW_KEY_E)
+		{
+			if (action == GLFW_PRESS) player1_shooting = 2;
+			else if (action == GLFW_RELEASE) player1_shooting = 0;
+		}
+
+		//shoot arrow for player 2
+		if (key == GLFW_KEY_RIGHT_SHIFT)
+		{
+			if (action == GLFW_PRESS) player2_shooting = 2;
+			else if (action == GLFW_RELEASE) player2_shooting = 0;
+		}
 
 
-	if (key == GLFW_KEY_LEFT) {
-    	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = -1000.f;
-        	p2.direction = 0; // Facing left
-        	if (motion2.scale.x > 0) motion2.scale.x *= -1;
-        	player2_left_button = true;
-			p2.is_moving = true;
-   		} else if (action == GLFW_RELEASE) {
-        	if (!player2_right_button) {
-            	gravity2.g[0] = 0.f;
+		if (key == GLFW_KEY_LEFT) {
+			if (action == GLFW_PRESS) {
+				gravity2.g[0] = -1000.f;
+				p2.direction = 0; // Facing left
+				if (motion2.scale.x > 0) motion2.scale.x *= -1;
+				player2_left_button = true;
+				p2.is_moving = true;
+			} else if (action == GLFW_RELEASE) {
+				if (!player2_right_button) {
+					gravity2.g[0] = 0.f;
+					p2.is_moving = false;
+				}
+				player2_left_button = false;
+			}
+		}
+
+		// for toogling +3 lives
+
+		if (key == GLFW_KEY_T)
+		{
+			toogle_life = 1;
+			// printing the text for 3s.
+			toogle_life_timer = 3000.f;
+
+			Player &player1_e = registry.players.get(player1);
+			Player &player2_e = registry.players.get(player2);
+
+			player1_e.health += 3;
+			player2_e.health += 3;
+		}
+		
+
+		if (key == GLFW_KEY_RIGHT) {
+			if (action == GLFW_PRESS) {
+				gravity2.g[0] = +1000.f;
+				p2.direction = 1; // Facing right
+				player2_right_button = true;
+				p2.is_moving = true;
+				if (motion2.scale.x < 0) motion2.scale.x = -motion2.scale.x;
+			} else if (action == GLFW_RELEASE) {
+			if (!player2_left_button) {
+				gravity2.g[0] = 0.f;
 				p2.is_moving = false;
-        	}
-        	player2_left_button = false;
-    	}
-	}
+			}
 
-	if (key == GLFW_KEY_RIGHT) {
-    	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = +1000.f;
-        	p2.direction = 1; // Facing right
-        	player2_right_button = true;
-			p2.is_moving = true;
-        	if (motion2.scale.x < 0) motion2.scale.x = -motion2.scale.x;
-    	} else if (action == GLFW_RELEASE) {
-        if (!player2_left_button) {
-            gravity2.g[0] = 0.f;
-			p2.is_moving = false;
-        }
+			player2_right_button = false;
+			}
+		}
 
-        player2_right_button = false;
-    	}
-	}
-
-	if (key == GLFW_KEY_UP) {
-		if (action == GLFW_PRESS && p2.jumpable == true) {
-			motion2.velocity[1] += -600;
-			
-			p2.jumpable = false;
+		if (key == GLFW_KEY_UP) {
+			if (action == GLFW_PRESS && p2.jumpable == true) {
+				motion2.velocity[1] += -600;
+				
+				p2.jumpable = false;
+			}
 		}
 	}
 
@@ -642,8 +847,6 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_debug_mode = true;
 	}
 }
-
-
 
 void WorldSystem::on_mouse_move(vec2 mouse_position)
 {
@@ -836,44 +1039,38 @@ void WorldSystem::on_shoot() {
     }
 }
 
-void WorldSystem::next_stage() {
-    currentStage = (currentStage + 1) % stages.size(); // Loop back to the first stage
-    restart_game();
+
+void WorldSystem::on_mouse_button(int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        vec2 mouse_position = {static_cast<float>(xpos), static_cast<float>(ypos)};
+        
+        for (Entity entity : registry.stages.entities) {
+            if (isMouseOverEntity(mouse_position, entity)) {
+                handleEntityClick(entity);
+                break; // Exit after the first entity is clicked
+            }
+        }
+    }
 }
 
-void WorldSystem::createStage(int currentStage) {
-	// Create the new
-	const Stage& stage = stages[currentStage];
-	// Create players
-    player1 = createPlayer(renderer, 1, {200, stage.groundPosition.y}, 1);
-    Motion& player1Motion = registry.motions.get(player1);
-    gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.groundPosition.y - 50});
+// Function to check if the mouse is over the entity
+bool WorldSystem::isMouseOverEntity(vec2 mouse_position, Entity entity) {
+    Motion& motion = registry.motions.get(entity);
 
-    player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.groundPosition.y}, 0);
-    Motion& player2Motion = registry.motions.get(player2);
-    gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.groundPosition.y - 50});
+    return (mouse_position.x >= motion.position.x - motion.scale.x / 2 &&
+            mouse_position.x <= motion.position.x + motion.scale.x / 2 &&
+            mouse_position.y >= motion.position.y - motion.scale.y / 2 &&
+            mouse_position.y <= motion.position.y + motion.scale.y / 2);
+}
 
-    // Create ground
-    ground = createBlock1(renderer, stage.groundPosition.x, stage.groundPosition.y, stage.groundSize.x, stage.groundSize.y);
-    // Create platforms
-    for (size_t i = 0; i < stage.platformPositions.size(); i++) {
-        vec2 pos = stage.platformPositions[i];
-        vec2 size = stage.platformSizes[i];
-        createBlock2(renderer, pos, size.x, size.y);
-    }
-
-    // Create portals
-    for (size_t i = 0; i < stage.portalPositions.size(); i++) {
-        vec2 pos = stage.portalPositions[i];
-        Entity portal = createPortal(renderer, pos, 50, 100);
-        registry.colors.insert(portal, {1.0f, 0.5f, 0.3f});
-        if (i == 0)
-            portal1 = portal;
-        else if (i == 1)
-            portal2 = portal;
-    }
-
-    // Additional stage-specific logic (e.g., lasers)
-    createLaser(renderer);
-    initializeLaserAI();
+void WorldSystem::handleEntityClick(Entity entity) {
+    // Implement your logic here, e.g., selecting the entity or triggering an action
+	if (registry.stages.has(entity)) {
+		StageChoice& s = registry.stages.get(entity);
+		registry.stageSelection = s.stage;
+		restart_game();
+	}
+    std::cout << "Entity clicked: " << entity << std::endl;
 }

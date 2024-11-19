@@ -31,7 +31,6 @@ int main()
 
 	// initialize the main systems
 	renderer.init(window);
-
 	world.init(&renderer);
 
 	// variable timestep loop
@@ -52,21 +51,18 @@ int main()
 
 		renderer.draw();
 
-		float text_height = 50.0f;
-
-		// In both fontInit and draw
-    	glm::mat4 font_trans = glm::mat4(1.0f);
-    	glm::vec3 font_color = glm::vec3(1.0, 1.0, 1.0);
-
-		// Render the game score
-		std::string fps_text = "FPS: " + std::to_string(world.fps);
-		renderer.renderText(fps_text, 10.0f, window_height_px - text_height, 0.8f, font_color, font_trans);
-
-		
-		// flicker-free display with a double buffer
-		glfwSwapBuffers(window);
-		gl_has_errors();
+		if (world.toogle_life_timer > 0 && world.toogle_life > 0)
+		{
+				// Display high score achievement message
+				printf("!");
+				std::string new_high_score_text = "New High Score Achieved!";
+				float new_high_score_text_width = renderer.getTextWidth(new_high_score_text, 1.5f);
+				glm::mat4 font_trans = glm::mat4(1.0f);
+				renderer.renderText(new_high_score_text, (window_width_px - new_high_score_text_width) / 2.0f, window_height_px / 2.0f, 1.5f, glm::vec3(1.0f, 0.0f, 0.0f), font_trans);
+		}
 	}
+
+	glfwSwapBuffers(window);
 
 	return EXIT_SUCCESS;
 }

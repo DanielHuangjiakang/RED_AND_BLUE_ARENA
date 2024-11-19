@@ -9,29 +9,10 @@
 #include "components.hpp"
 #include "tiny_ecs.hpp"
 
-// fonts
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <map>				// map of character textures
 
-#include <iostream>
-#include <assert.h>
-#include <fstream>			// for ifstream
-#include <sstream>			// for ostringstream
 
-// matrices
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-// font character structure
-struct Character {
-	unsigned int TextureID;  // ID handle of the glyph texture
-	glm::ivec2   Size;       // Size of glyph
-	glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
-	unsigned int Advance;    // Offset to advance to next glyph
-	char character;
-};
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
@@ -73,7 +54,10 @@ const std::array<std::string, texture_count> texture_paths = {
 			textures_path("pad.png"),
 			textures_path("/assets/2 Guns/6_1.png"),
 			textures_path("/assets/2 Guns/4_1.png"),
-			textures_path("help.png")
+			textures_path("help.png"),
+			textures_path("desert.png"),
+			textures_path("intro.jpg"),
+			textures_path("intro1.jpg")
 		};
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -85,9 +69,26 @@ const std::array<std::string, texture_count> texture_paths = {
 		shader_path("textured"),
 		shader_path("water") };
 
+		// font character structure
+struct Character {
+	unsigned int TextureID;  // ID handle of the glyph texture
+	glm::ivec2   Size;       // Size of glyph
+	glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
+	unsigned int Advance;    // Offset to advance to next glyph
+	char character;
+};
+
+	GLuint vao;
+
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
 	std::array<Mesh, geometry_count> meshes;
+
+		// font elements
+	std::map<char, Character> m_ftCharacters;
+	GLuint m_font_shaderProgram;
+	GLuint m_font_VAO;
+	GLuint m_font_VBO;
 
 public:
 	// Initialize the window
@@ -103,12 +104,14 @@ public:
 	void initializeGlMeshes();
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
+	float RenderSystem::getTextWidth(const std::string& text, float scale);
+
 	void initializeGlGeometryBuffers();
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the wind
 	// shader
 	bool initScreenTexture();
-	bool fontInit(GLFWwindow& window, const std::string& font_filename, unsigned int font_default_size);
+	bool fontInit(GLFWwindow* window, const std::string& font_filename, unsigned int font_default_size);
 
 	// Destroy resources associated to one or all entities created by the system
 	~RenderSystem();
@@ -118,25 +121,14 @@ public:
 
 	mat3 createProjectionMatrix();
 
-	/* TODO: init fonts */
-	bool fontInit(GLFWwindow* window, const std::string& font_filename, unsigned int font_default_size);
-
-	// A3
-	/* TODO: render fonts */
 	void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
 
-	float getTextWidth(const std::string& text, float scale);
-
-	void renderFont();
-
-	void renderIntroScreen();
-
-	void renderHelpText();
 
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
+	std::string readShaderFile(const std::string& filepath);
 
 	// Window handle
 	GLFWwindow* window;
@@ -148,15 +140,7 @@ private:
 
 	Entity screen_state_entity;
 
-	// font elements
-	std::map<char, Character> m_ftCharacters;
-	GLuint m_font_shaderProgram;
-	GLuint m_font_VAO;
-	GLuint m_font_VBO;
-
 };
 
 bool loadEffectFromFile(
 	const std::string& vs_path, const std::string& fs_path, GLuint& out_program);
-
-std::string readShaderFile(const std::string& filename);

@@ -104,6 +104,25 @@ Entity createGun(RenderSystem* renderer, int side, vec2 position) {
 	return entity;
 }
 
+Entity createIntro(RenderSystem* renderer, int width, int height) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& motion = registry.motions.emplace(entity);
+	motion.velocity = {0,0};
+	motion.position = {width / 2, height / 2};
+	motion.scale = {width, height};
+	
+	registry.renderRequests.insert(
+		entity,
+		{TEXTURE_ASSET_ID::INTRO1,
+		EFFECT_ASSET_ID::TEXTURED,
+		GEOMETRY_BUFFER_ID::SPRITE}
+	);
+	return entity;
+}
+
 Entity createBackground(RenderSystem* renderer, int width, int height) {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
@@ -113,14 +132,71 @@ Entity createBackground(RenderSystem* renderer, int width, int height) {
  	motion.velocity = { 0, 0 };
  	motion.position = {width / 2, height / 2};
 	motion.scale = {width, height};
-	
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::CITY,
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	if (!registry.stageSelection) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::INTRO,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	} else if (registry.stageSelection ==1 ) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::CITY,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+	} else /*if (registry.stageSelection == 2)*/ {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::DESERT,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	}
+	// } else {
+	// 	registry.renderRequests.insert(
+	// 		entity,
+	// 		{TEXTURE_ASSET_ID::}
+	// 	)
+	// }
 
 	return entity;
+}
+
+Entity createStageChoice(RenderSystem* renderer, int x, int y, int width, int height, int stage) {
+	auto entity = Entity();
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& motion = registry.motions.emplace(entity);
+	auto& stageChoice = registry.stages.emplace(entity);
+
+	stageChoice.x = x;
+	stageChoice.y = y;
+	stageChoice.stage = stage;
+
+	motion.velocity = { 0.f, 0.f };
+ 	motion.position = {x + (width / 2), y + (height / 2)};
+	motion.scale = {width, height};
+
+	if (stage ==1 ) {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::CITY,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	} else /*if (registry.stageSelection == 2)*/ {
+			registry.renderRequests.insert(
+				entity,
+				{TEXTURE_ASSET_ID::DESERT,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE}
+			);
+	}
+ 	return entity;
+	
+
 }
 
 
@@ -265,46 +341,46 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
 	else dir = 1;
  	motion.velocity = { 500 * dir, -30 }; 
  	motion.position = {position.x, position.y - 30.0f};;;
-	motion.scale = { 8, 8 }; // width * height
+	motion.scale = { 15, 6 }; // width * height
 
 	auto& motion2 = registry.motions.emplace(entity2);
  	motion2.velocity = { 500 * dir, -20 }; 
  	motion2.position = {position.x, position.y - 20.0f};;
-	motion2.scale = { 8, 8 }; // width * height
+	motion2.scale = { 15, 6 }; // width * height
 
 	auto& motion3 = registry.motions.emplace(entity3);
  	motion3.velocity = { 500 * dir, 20 }; 
  	motion3.position = {position.x, position.y + 20.0f};;
-	motion3.scale = { 8, 8 }; // width * height
+	motion3.scale = { 15, 6 }; // width * height
 
 	auto& motion4 = registry.motions.emplace(entity4);
  	motion4.velocity = { 500 * dir, 30 }; 
  	motion4.position = {position.x, position.y + 30.0f};;
-	motion4.scale = { 8, 8 }; // width * height
+	motion4.scale = { 15, 6 }; // width * height
 
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::BULLET, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 	
 	registry.renderRequests.insert(
 		entity2,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::BULLET, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 	
 	registry.renderRequests.insert(
 		entity3,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::BULLET, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 	
 	registry.renderRequests.insert(
 		entity4,
- 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
- 			EFFECT_ASSET_ID::SALMON,
- 			GEOMETRY_BUFFER_ID::SQUARE });
+ 		{ TEXTURE_ASSET_ID::BULLET, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE });
 	
 	return {entity, entity2, entity3, entity4};
 }
