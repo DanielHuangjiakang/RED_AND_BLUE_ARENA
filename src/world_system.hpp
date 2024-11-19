@@ -6,6 +6,8 @@
 // stlib
 #include <vector>
 #include <random>
+#include <deque>
+#include <string>
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -46,6 +48,16 @@ public:
 
 	// Should the game be over ?
 	bool is_over()const;
+
+	void loadMatchRecords();
+
+	void recordMatchResult();
+
+	float fps;
+
+	bool showMatchRecords = false; 
+
+	std::deque<std::string> match_records;
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);

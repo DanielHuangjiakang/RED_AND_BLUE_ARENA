@@ -4,6 +4,9 @@
 #include <utility>
 #include <memory>
 #include <map>
+#include <deque>
+#include <string>
+
 
 #include "common.hpp"
 #include "components.hpp"
@@ -104,7 +107,7 @@ public:
 	void initializeGlMeshes();
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
-	float RenderSystem::getTextWidth(const std::string& text, float scale);
+	float getTextWidth(const std::string& text, float scale);
 
 	void initializeGlGeometryBuffers();
 	// Initialize the screen texture used as intermediate render target
@@ -124,6 +127,7 @@ public:
 	void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
 
 
+	void renderMatchRecords(const std::deque<std::string>& match_records);
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);

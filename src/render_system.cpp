@@ -305,9 +305,6 @@ void RenderSystem::draw()
 	// Truely render to the screen
 	drawToScreen();
 
-	// flicker-free display with a double buffer
-	glfwSwapBuffers(window);
-	gl_has_errors();
 }
 
 mat3 RenderSystem::createProjectionMatrix()
