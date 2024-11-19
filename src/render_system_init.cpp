@@ -576,30 +576,25 @@ void RenderSystem::renderMatchRecords(const std::deque<std::string>& match_recor
         record_stream >> blue_label >> blue_score >> dash >> red_label >> red_score;
 
         // Calculate individual text positions and render them with appropriate colors
-        float record_x_offset = bg_position.x + 10.0f;
+        float record_x_offset = bg_position.x + 80.0f;
 
-        // Render "Blue" label in blue
-        glm::vec3 blue_color = {0.0f, 0.0f, 1.0f};
-        renderText(blue_label, record_x_offset, y_offset, record_font_scale, blue_color, font_trans);
-        record_x_offset += getTextWidth(blue_label, record_font_scale) + 5.0f;
-
-        // Render Blue score
-        glm::vec3 blue_score_color = (blue_score > red_score) ? glm::vec3(1.0f, 0.84f, 0.0f) : glm::vec3(1.0f, 1.0f, 1.0f); // Gold if winning
-        renderText(std::to_string(blue_score), record_x_offset, y_offset, record_font_scale, blue_score_color, font_trans);
-        record_x_offset += getTextWidth(std::to_string(blue_score), record_font_scale) + 10.0f;
-
-        // Render "-" in white
-        renderText(dash, record_x_offset, y_offset, record_font_scale, font_color, font_trans);
-        record_x_offset += getTextWidth(dash, record_font_scale) + 10.0f;
-
-        // Render "Red" label in red
-        glm::vec3 red_color = {1.0f, 0.0f, 0.0f};
-        renderText(red_label, record_x_offset, y_offset, record_font_scale, red_color, font_trans);
-        record_x_offset += getTextWidth(red_label, record_font_scale) + 5.0f;
-
+		  // Remove the colon ':' from labels if present
+        if (blue_label.back() == ':') {
+            blue_label.pop_back();
+        }
+        if (red_label.back() == ':') {
+            red_label.pop_back();
+        }
+    
         // Render Red score
-        glm::vec3 red_score_color = (red_score > blue_score) ? glm::vec3(1.0f, 0.84f, 0.0f) : glm::vec3(1.0f, 1.0f, 1.0f); // Gold if winning
-        renderText(std::to_string(red_score), record_x_offset, y_offset, record_font_scale, red_score_color, font_trans);
+		if (red_score > blue_score) {
+			 glm::vec3 red_score_color =glm::vec3(1.0f, 0.0f, 0.0f);
+			 renderText(red_label, record_x_offset, y_offset, record_font_scale, red_score_color, font_trans);
+		} else {
+        	glm::vec3 blue_score_color  = glm::vec3(0.0f, 0.84f, 1.0f);
+        	renderText(blue_label, record_x_offset, y_offset, record_font_scale, blue_score_color, font_trans);
+		}
+       
 
         y_offset -= line_height;
     }

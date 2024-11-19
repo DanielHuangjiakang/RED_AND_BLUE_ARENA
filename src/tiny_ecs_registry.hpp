@@ -25,14 +25,19 @@ public:
 	ComponentContainer<Block> blocks;
 	ComponentContainer<Gravity> gravities;
 	ComponentContainer<Bullet> bullets;
+	ComponentContainer<Grenade> grenades;
+	ComponentContainer<Explosion> explosions;
 	ComponentContainer<GunTimer> gunTimers;
 	ComponentContainer<StageChoice> stages;
+	ComponentContainer<Item> items;
 
 	ComponentContainer<AnimationFrame> animations;
 	ComponentContainer<Text> texts;
+	ComponentContainer<Background> backgrounds;
 
 	ComponentContainer<Portal> portals;
   	ComponentContainer<Laser> lasers;
+	ComponentContainer<Laser2> lasers2;
 	ComponentContainer<Lifetime> lifetimes;
 
 	bool intro = true;
@@ -56,12 +61,17 @@ public:
 		registry_list.push_back(&gravities);
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&gunTimers);
+		registry_list.push_back(&items);
+		registry_list.push_back(&grenades);
+		registry_list.push_back(&explosions);
 
 		registry_list.push_back(&animations);
 		registry_list.push_back(&texts);
+		registry_list.push_back(&backgrounds);
 
 		registry_list.push_back(&portals);
     	registry_list.push_back(&lasers);
+		registry_list.push_back(&lasers2);
 		registry_list.push_back(&lifetimes);
 
 	}

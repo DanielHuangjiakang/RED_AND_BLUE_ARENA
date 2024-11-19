@@ -60,7 +60,13 @@ const std::array<std::string, texture_count> texture_paths = {
 			textures_path("help.png"),
 			textures_path("desert.png"),
 			textures_path("intro.jpg"),
-			textures_path("intro1.jpg")
+			textures_path("intro1.jpg"),
+			textures_path("grenade.png"),
+			textures_path("potion.png"),
+			textures_path("laser.png"),
+			textures_path("long_laser.png"),
+			textures_path("explosion.png"),
+			textures_path("icemountain.jpg"),
 		};
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -128,6 +134,7 @@ public:
 
 
 	void renderMatchRecords(const std::deque<std::string>& match_records);
+	
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);

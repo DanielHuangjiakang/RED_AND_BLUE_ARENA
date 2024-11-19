@@ -124,78 +124,88 @@ Entity createIntro(RenderSystem* renderer, int width, int height) {
 }
 
 Entity createBackground(RenderSystem* renderer, int width, int height) {
-	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-	registry.meshPtrs.emplace(entity, &mesh);
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+    registry.meshPtrs.emplace(entity, &mesh);
 
-	auto& motion = registry.motions.emplace(entity);
- 	motion.velocity = { 0, 0 };
- 	motion.position = {width / 2, height / 2};
-	motion.scale = {width, height};
+    auto& motion = registry.motions.emplace(entity);
+     motion.velocity = { 0, 0 };
+     motion.position = {width / 2, height / 2};
+    motion.scale = {width, height};
 
-	if (!registry.stageSelection) {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::INTRO,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+    if (!registry.stageSelection) {
+        registry.renderRequests.insert(
+            entity,
+            { TEXTURE_ASSET_ID::INTRO,
+            EFFECT_ASSET_ID::TEXTURED,
+            GEOMETRY_BUFFER_ID::SPRITE });
 
-	} else if (registry.stageSelection ==1 ) {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::CITY,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
-	} else /*if (registry.stageSelection == 2)*/ {
-		registry.renderRequests.insert(
-			entity,
-			{TEXTURE_ASSET_ID::DESERT,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE}
-		);
-	}
-	// } else {
-	// 	registry.renderRequests.insert(
-	// 		entity,
-	// 		{TEXTURE_ASSET_ID::}
-	// 	)
-	// }
+    } else if (registry.stageSelection ==1 ) {
+        registry.renderRequests.insert(
+            entity,
+            { TEXTURE_ASSET_ID::CITY,
+            EFFECT_ASSET_ID::TEXTURED,
+            GEOMETRY_BUFFER_ID::SPRITE });
+    } else if (registry.stageSelection == 2) {
+        registry.renderRequests.insert(
+            entity,
+            {TEXTURE_ASSET_ID::DESERT,
+            EFFECT_ASSET_ID::TEXTURED,
+            GEOMETRY_BUFFER_ID::SPRITE}
+        );
+    } else {
+        registry.renderRequests.insert(
+            entity,
+            {TEXTURE_ASSET_ID::ICEMOUNTAIN,
+            EFFECT_ASSET_ID::TEXTURED,
+            GEOMETRY_BUFFER_ID::SPRITE}
+        );
+    }
 
-	return entity;
+	registry.backgrounds.emplace(entity);
+    return entity;
 }
 
+
 Entity createStageChoice(RenderSystem* renderer, int x, int y, int width, int height, int stage) {
-	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-	registry.meshPtrs.emplace(entity, &mesh);
+    auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+    registry.meshPtrs.emplace(entity, &mesh);
 
-	auto& motion = registry.motions.emplace(entity);
-	auto& stageChoice = registry.stages.emplace(entity);
+    auto& motion = registry.motions.emplace(entity);
+    auto& stageChoice = registry.stages.emplace(entity);
 
-	stageChoice.x = x;
-	stageChoice.y = y;
-	stageChoice.stage = stage;
+    stageChoice.x = x;
+    stageChoice.y = y;
+    stageChoice.stage = stage;
 
-	motion.velocity = { 0.f, 0.f };
- 	motion.position = {x + (width / 2), y + (height / 2)};
-	motion.scale = {width, height};
+    motion.velocity = { 0.f, 0.f };
+     motion.position = {x + (width / 2), y + (height / 2)};
+    motion.scale = {width, height};
 
-	if (stage ==1 ) {
-			registry.renderRequests.insert(
-				entity,
-				{ TEXTURE_ASSET_ID::CITY,
-				EFFECT_ASSET_ID::TEXTURED,
-				GEOMETRY_BUFFER_ID::SPRITE });
-	} else /*if (registry.stageSelection == 2)*/ {
-			registry.renderRequests.insert(
-				entity,
-				{TEXTURE_ASSET_ID::DESERT,
-				EFFECT_ASSET_ID::TEXTURED,
-				GEOMETRY_BUFFER_ID::SPRITE}
-			);
-	}
- 	return entity;
-	
+    if (stage ==1 ) {
+            registry.renderRequests.insert(
+                entity,
+                { TEXTURE_ASSET_ID::CITY,
+                EFFECT_ASSET_ID::TEXTURED,
+                GEOMETRY_BUFFER_ID::SPRITE });
+    } else if (stage == 2) {
+            registry.renderRequests.insert(
+                entity,
+                {TEXTURE_ASSET_ID::DESERT,
+                EFFECT_ASSET_ID::TEXTURED,
+                GEOMETRY_BUFFER_ID::SPRITE}
+            );
+    } else {
+        registry.renderRequests.insert(
+                entity,
+                {TEXTURE_ASSET_ID::ICEMOUNTAIN,
+                EFFECT_ASSET_ID::TEXTURED,
+                GEOMETRY_BUFFER_ID::SPRITE}
+        );
+    }
+     return entity;
+    
 
 }
 
@@ -431,5 +441,108 @@ Entity createLaserBeam(vec2 start, vec2 target) {
 	
 	auto& lifetime = registry.lifetimes.emplace(beam);
     lifetime.counter_ms = 1000; // Laser beam lasts for 1000 milliseconds (1 second)
+    return beam;
+}
+
+Entity createRandomItem(RenderSystem* renderer, Motion motion) {
+	auto entity = Entity();
+	Item& item = registry.items.emplace(entity);
+	std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::uniform_int_distribution<int> dist(0, 2);
+    item.id = dist(rng);
+
+	Motion& item_motion = registry.motions.emplace(entity);
+	item_motion = motion;
+
+	if (item.id == 0) {
+		registry.renderRequests.insert(
+        	entity,
+        	{TEXTURE_ASSET_ID::POTION, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    	);	
+	}
+	else if (item.id == 1) {
+		registry.renderRequests.insert(
+        	entity,
+        	{TEXTURE_ASSET_ID::GRENADE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    	);
+	}
+	
+	else  {
+		item_motion.scale = {45, 20};
+		item_motion.angle = 3 * M_PI / 4;
+		registry.renderRequests.insert(
+        	entity,
+        	{TEXTURE_ASSET_ID::LASER, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    	);
+	}
+
+	return entity;
+}
+
+Entity createGrenade(RenderSystem* renderer, vec2 position, int direction, int side) {
+	auto entity = Entity();
+	Grenade& grenade = registry.grenades.emplace(entity);
+	grenade.side = side;
+
+	auto& motion = registry.motions.emplace(entity);
+	int dir = 0;
+	if (direction == 0) dir = -1;
+	else dir = 1;
+ 	motion.velocity = { 500 * dir, -100 }; 
+	motion.scale = { 30, 45 }; // width * height
+	motion.position = {position.x + dir * (motion.scale.x), position.y - motion.scale.y};
+
+	Gravity& gravity = registry.gravities.emplace(entity);
+	gravity.g.y = 300.f;
+
+	registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::GRENADE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    );
+	
+	return entity;
+}
+
+Entity createExplosion(vec2 position) {
+	auto entity = Entity();
+	registry.explosions.emplace(entity);
+
+	auto& motion = registry.motions.emplace(entity);
+ 	motion.position = position;
+	motion.scale = { 200, 165 }; // width * height
+
+	registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::EXPLOSION, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    );
+
+	auto& lifetime = registry.lifetimes.emplace(entity);
+    lifetime.counter_ms = 150; 
+	return entity;
+}
+
+Entity createLaserBeam2(vec2 start, int direction, int side) {
+	auto beam = Entity();
+	int dir = 0;
+	if (direction == 0) dir = -1;
+	else dir = 1;
+
+	vec2 target = {start.x + dir * 1210, start.y};
+	vec2 midpoint = (start + target) * 0.5f;
+	Motion& motion = registry.motions.emplace(beam);
+    motion.position = midpoint;
+
+	Laser2& laser2 = registry.lasers2.emplace(beam);
+	laser2.side = side;
+
+    motion.scale = {1210.0f, 44.0f};
+    registry.renderRequests.insert(
+        beam,
+        {TEXTURE_ASSET_ID::LONG_LASER, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    );
+	
+	auto& lifetime = registry.lifetimes.emplace(beam);
+    lifetime.counter_ms = 150; // Laser beam lasts for 1000 milliseconds (1 second)
     return beam;
 }
