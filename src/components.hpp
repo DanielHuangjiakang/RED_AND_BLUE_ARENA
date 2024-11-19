@@ -52,6 +52,12 @@ struct Block {
 	int height;
 };
 
+struct StageChoice {
+	int stage;
+	int x;
+	int y;
+};
+
 // A sturct for portals, similar to how blocks work but with different collision.
 struct Portal {
 	int x;
@@ -163,7 +169,10 @@ enum class TEXTURE_ASSET_ID {
 	RED_GUN = PAD + 1,
 	BLUE_GUN = RED_GUN + 1,
 	HELP = BLUE_GUN + 1,
-	TEXTURE_COUNT = HELP + 1
+	DESERT = HELP +1,
+	INTRO = DESERT +1,
+	INTRO1 = INTRO+1,
+	TEXTURE_COUNT = INTRO1 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -175,8 +184,8 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
 	EFFECT_COUNT = WATER + 1
-	
 };
+
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
@@ -209,12 +218,4 @@ struct Laser {};
 
 struct Lifetime {
     float counter_ms;
-};
-
-struct Stage {
-    vec2 groundPosition;
-    vec2 groundSize;
-    std::vector<vec2> portalPositions;
-    std::vector<vec2> platformPositions;
-    std::vector<vec2> platformSizes;
 };

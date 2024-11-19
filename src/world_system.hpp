@@ -16,12 +16,18 @@
 #include "animation_system.hpp"
 #include "DecisionTree.hpp"
 
+#include <random>
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
 {
 public:
 	WorldSystem();
+
+	// keeping track of printing text for toogling +3 lives
+	int toogle_life;
+	int toogle_life_timer;
 
 	// Creates a window
 	GLFWwindow* create_window();
@@ -40,8 +46,6 @@ public:
 
 	// Should the game be over ?
 	bool is_over()const;
-
-	float fps;
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -113,31 +117,8 @@ private:
 	bool isPlayerInRange();
 	void handleLaserCollisions();
 	bool isLaserInRange(vec2 laserPosition, vec2 playerPosition);
-	int currentStage = 0;
-	void next_stage();
-	void createStage(int stage);
+	bool isMouseOverEntity(vec2 mouse_position, Entity entity);
+	void handleEntityClick(Entity entity);
+	void on_mouse_button(int button, int action, int mods);
 
-std::vector<Stage> stages = {
-    // Stage 1
-    {
-        {0, window_height_px - 50}, {window_width_px, 50}, 
-        {{200, 300}, {600, 200}}, // Portal positions
-        {{window_width_px / 4, window_height_px - 220}, {3 * window_width_px / 4, window_height_px - 220}}, // Platform positions
-        {{250, 20}, {250, 20}}  // Platform sizes
-    },
-    // Stage 2
-    {
-        {0, window_height_px - 70}, {window_width_px, 70}, 
-        {{150, 250}, {550, 150}}, // Portal positions
-        {{window_width_px / 3, window_height_px - 200}, {2 * window_width_px / 3, window_height_px - 200}}, // Platform positions
-        {{300, 30}, {300, 30}}  // Platform sizes
-    },
-    // Stage 3
-    {
-        {0, window_height_px - 100}, {window_width_px, 50}, 
-        {{300, 400}, {700, 300}}, // Portal positions
-        {{window_width_px / 2, window_height_px - 300}, {window_width_px / 4, window_height_px - 350}}, // Platform positions
-        {{200, 40}, {150, 25}}  // Platform sizes
-    }
-};
 };

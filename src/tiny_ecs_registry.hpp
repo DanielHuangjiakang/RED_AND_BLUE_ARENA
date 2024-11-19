@@ -26,14 +26,18 @@ public:
 	ComponentContainer<Gravity> gravities;
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<GunTimer> gunTimers;
+	ComponentContainer<StageChoice> stages;
 
 	ComponentContainer<AnimationFrame> animations;
 	ComponentContainer<Text> texts;
 
 	ComponentContainer<Portal> portals;
-  ComponentContainer<Laser> lasers;
+  	ComponentContainer<Laser> lasers;
 	ComponentContainer<Lifetime> lifetimes;
 
+	bool intro = true;
+	int winner = 0;
+	int stageSelection = 0;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -57,7 +61,7 @@ public:
 		registry_list.push_back(&texts);
 
 		registry_list.push_back(&portals);
-    registry_list.push_back(&lasers);
+    	registry_list.push_back(&lasers);
 		registry_list.push_back(&lifetimes);
 
 	}
