@@ -27,6 +27,27 @@ using namespace std;
 const size_t MAX_NUM_ITEMS = 2;
 size_t ITEM_SPAWN_DELAY_MS = 8000;
 
+std::vector<Stage> stagesArray = {
+    // Stage 1
+    {
+        {0, window_height_px - 50}, {window_width_px, 50}, 
+        {{window_width_px / 4, window_height_px - 250}, {window_width_px / 2, window_height_px - 450}, {3 * window_width_px / 4, window_height_px - 250}}, // Platform positions
+        {{250, 10}, {250, 10}, {250, 10}}  // Platform sizes
+    },
+    // Stage 2
+    {
+        {0, window_height_px - 70}, {window_width_px, 70}, 
+        {{window_width_px / 4, window_height_px - 450}, {window_width_px / 2, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
+        {{250, 10}, {250, 10}, {250, 10}}  // Platform sizes
+    },
+    // Stage 3
+    {
+        {0, window_height_px - 100}, {window_width_px, 50}, 
+        {{window_width_px / 4, window_height_px - 250},{3 * window_width_px / 4, window_height_px - 250},{window_width_px / 4, window_height_px - 450},{3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
+        {{300, 10}, {300, 10}, {200, 10}, {200, 10}}  // Platform sizes
+    }
+};
+
 // create the underwater world
 WorldSystem::WorldSystem()
 {
@@ -448,77 +469,78 @@ void WorldSystem::restart_game() {
 
     background = createBackground(renderer, window_width_px, window_height_px);
 
-	player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
-	Motion& player1Motion = registry.motions.get(player1);
-	gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, window_height_px - 100});
+	// player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
+	// Motion& player1Motion = registry.motions.get(player1);
+	// gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, window_height_px - 100});
 	
-	//red player
-	player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 50}, 0);
-	Motion& player2Motion = registry.motions.get(player2);
-	gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, window_height_px - 200});
+	// //red player
+	// player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 50}, 0);
+	// Motion& player2Motion = registry.motions.get(player2);
+	// gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, window_height_px - 200});
 
-	ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
+	// ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
 	
-	platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 220}, 250, 20);
-	platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 220}, 250, 20);
-	platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
+	// platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 220}, 250, 20);
+	// platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 220}, 250, 20);
+	// platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
 
-	//generate portal position based on rand num generated
-	random_device rd;                        
-    mt19937 generator(rd());                 
-    uniform_int_distribution<int> dist(0, 2);
+	// //generate portal position based on rand num generated
+	// random_device rd;                        
+    // mt19937 generator(rd());                 
+    // uniform_int_distribution<int> dist(0, 2);
 
-	int rand1 = dist(generator);
+	// int rand1 = dist(generator);
 
-	int rand2 = dist(generator);
+	// int rand2 = dist(generator);
 
-	// Avoid hash collision
-	while (rand1 == rand2)
-	{
-		rand2 = dist(generator);
-	}
+	// // Avoid hash collision
+	// while (rand1 == rand2)
+	// {
+	// 	rand2 = dist(generator);
+	// }
 	
-	if (rand1 == 0)
-	{
-		// use platform 1 for portal 1
-		portal1 = createPortal(renderer, {window_width_px/4, window_height_px - 220 - 10}, 50, 100);
-	    registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-	}
-	else if (rand1 == 1)
-	{
-		// use platform 2 for portal 1
-		portal1 = createPortal(renderer, {3 * window_width_px/4, window_height_px - 220 - 10}, 50, 100);
-	    registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-	}
-	else if (rand1 == 2)
-	{
-		//use platform 3 for portal 1
-		portal1 = createPortal(renderer, {window_width_px/2, window_height_px - 390 - 10}, 50, 100);
-	    registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-	}
+	// if (rand1 == 0)
+	// {
+	// 	// use platform 1 for portal 1
+	// 	portal1 = createPortal(renderer, {window_width_px/4, window_height_px - 220 - 10}, 50, 100);
+	//     registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+	// }
+	// else if (rand1 == 1)
+	// {
+	// 	// use platform 2 for portal 1
+	// 	portal1 = createPortal(renderer, {3 * window_width_px/4, window_height_px - 220 - 10}, 50, 100);
+	//     registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+	// }
+	// else if (rand1 == 2)
+	// {
+	// 	//use platform 3 for portal 1
+	// 	portal1 = createPortal(renderer, {window_width_px/2, window_height_px - 390 - 10}, 50, 100);
+	//     registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+	// }
 
-	if (rand2 == 0)
-	{
-		// use platform 1 for portal 2
-		portal2 = createPortal(renderer, {window_width_px/4, window_height_px - 220 - 10}, 50, 100);
-	    registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-	}
-	else if (rand2 == 1)
-	{
-		// use platform 2 for portal 2
-		portal2 = createPortal(renderer, {3 * window_width_px/4, window_height_px - 220 - 10}, 50, 100);
-	    registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-	}
-	else if (rand2 == 2)
-	{
-		//use platform 3 for portal 2
-		portal2 = createPortal(renderer, {window_width_px/2, window_height_px - 390 - 10}, 50, 100);
-	    registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-	}
+	// if (rand2 == 0)
+	// {
+	// 	// use platform 1 for portal 2
+	// 	portal2 = createPortal(renderer, {window_width_px/4, window_height_px - 220 - 10}, 50, 100);
+	//     registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+	// }
+	// else if (rand2 == 1)
+	// {
+	// 	// use platform 2 for portal 2
+	// 	portal2 = createPortal(renderer, {3 * window_width_px/4, window_height_px - 220 - 10}, 50, 100);
+	//     registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+	// }
+	// else if (rand2 == 2)
+	// {
+	// 	//use platform 3 for portal 2
+	// 	portal2 = createPortal(renderer, {window_width_px/2, window_height_px - 390 - 10}, 50, 100);
+	//     registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+	// }
 	
-  
-  	createLaser(renderer);
-    initializeLaserAI();
+  	// createLaser(renderer);
+    // initializeLaserAI();
+
+	createStage(registry.stageSelection - 1);
 	}
 }
 
@@ -1298,3 +1320,99 @@ void WorldSystem::recordMatchResult() {
         std::cerr << "fail to BattleRecord.txt" << std::endl;
     }
 }
+
+void WorldSystem::createStage(int currentStage) {
+    // Create the new stage
+    const Stage& stage = stagesArray[currentStage];
+    
+    // Create players
+    player1 = createPlayer(renderer, 1, {200, stage.groundPosition.y}, 1);
+    Motion& player1Motion = registry.motions.get(player1);
+    gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.groundPosition.y - 50});
+
+    player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.groundPosition.y}, 0);
+    Motion& player2Motion = registry.motions.get(player2);
+    gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.groundPosition.y - 50});
+
+    // Create ground
+    ground = createBlock1(renderer, stage.groundPosition.x, stage.groundPosition.y, stage.groundSize.x, stage.groundSize.y);
+    
+    // Create platforms
+    for (size_t i = 0; i < stage.platformPositions.size(); i++) {
+        vec2 pos = stage.platformPositions[i];
+        vec2 size = stage.platformSizes[i];
+        createBlock2(renderer, pos, size.x, size.y);
+    }
+
+    // Generate portal positions based on random numbers
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::uniform_int_distribution<int> dist(0, stage.platformPositions.size() - 1);
+
+    int rand1 = dist(generator);
+    int rand2 = dist(generator);
+
+    // Avoid placing both portals on the same platform
+    while (rand1 == rand2) {
+        rand2 = dist(generator);
+    }
+
+    // Use random platform positions for portals
+    vec2 portal1Pos = stage.platformPositions[rand1];
+    vec2 portal2Pos = stage.platformPositions[rand2];
+
+	// if (currentStage == 0) {
+	// // // Create portal 1
+    // // portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
+    // // registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+
+    // // // Create portal 2
+    // // portal2 = createPortal(renderer, {portal2Pos.x, portal2Pos.y - 10}, 50, 100);
+    // // registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+
+	// //  // Additional stage-specific logic (e.g., lasers)
+    // // createLaser(renderer);
+    // // initializeLaserAI();
+	// } 
+
+	// if (currentStage == 1) {
+	// // Create portal 1
+    // portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
+    // registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+
+    // // Create portal 2
+    // portal2 = createPortal(renderer, {portal2Pos.x, portal2Pos.y - 10}, 50, 100);
+    // registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+
+	// // Additional stage-specific logic (e.g., lasers)
+    // // createLaser(renderer);
+    // // initializeLaserAI();
+	// }
+
+	// if (currentStage == 2) {
+	// // Create portal 1
+    // portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
+    // registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+
+    // // Create portal 2
+    // portal2 = createPortal(renderer, {portal2Pos.x, portal2Pos.y - 10}, 50, 100);
+    // registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+
+	// // Additional stage-specific logic (e.g., lasers)
+    // createLaser(renderer);
+    // initializeLaserAI();
+	// }
+
+	// Create portal 1
+    portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
+    registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+
+    // Create portal 2
+    portal2 = createPortal(renderer, {portal2Pos.x, portal2Pos.y - 10}, 50, 100);
+    registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+
+	// Additional stage-specific logic (e.g., lasers)
+    createLaser(renderer);
+    initializeLaserAI();
+}
+

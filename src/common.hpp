@@ -39,6 +39,7 @@ const int window_height_px = 720;
 // The 'Transform' component handles transformations passed to the Vertex shader
 // (similar to the gl Immediate mode equivalent, e.g., glTranslate()...)
 // We recomment making all components non-copyable by derving from ComponentNonCopyable
+
 struct Transform {
 	mat3 mat = { { 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f}, { 0.f, 0.f, 1.f} }; // start with the identity
 	void scale(vec2 scale);

@@ -53,6 +53,8 @@ public:
 
 	void recordMatchResult();
 
+	void createStage(int currentStage);
+
 	float fps;
 
 	bool showMatchRecords = false; 
