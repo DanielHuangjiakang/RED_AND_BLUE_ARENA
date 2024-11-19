@@ -3,10 +3,8 @@
 
 void AnimationSystem::step(float elapsed_ms) {
     for (auto entity : registry.animations.entities) {
-        if (!registry.players.has(entity)&&!registry.winner.has(entity)) continue;
-
-
-        if (registry.players.has(entity)) {
+        if (!registry.players.has(entity)) continue;
+        
         auto& player = registry.players.get(entity);
         auto& animation = registry.animations.get(entity);
         auto& render_request = registry.renderRequests.get(entity);
@@ -23,18 +21,6 @@ void AnimationSystem::step(float elapsed_ms) {
             animation.current_frame = 0;
             animation.frame_time = 0.f;
             render_request.used_texture = animation.frames[0];
-        }
-        }
-        else {
-            auto& animation = registry.animations.get(entity);
-            auto& render_request = registry.renderRequests.get(entity);
-
-            animation.frame_time += elapsed_ms;
-            if (animation.frame_time >= FRAME_TIME) {
-                animation.frame_time = 0.f;
-                animation.current_frame = (animation.current_frame + 1) % animation.frames.size();
-                render_request.used_texture = animation.frames[animation.current_frame];
-            }
         }
     }
 } 

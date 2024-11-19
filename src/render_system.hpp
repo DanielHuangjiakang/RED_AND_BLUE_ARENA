@@ -24,7 +24,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
+// font character structure
+struct Character {
+	unsigned int TextureID;  // ID handle of the glyph texture
+	glm::ivec2   Size;       // Size of glyph
+	glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
+	unsigned int Advance;    // Offset to advance to next glyph
+	char character;
+};
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
@@ -66,41 +73,7 @@ const std::array<std::string, texture_count> texture_paths = {
 			textures_path("pad.png"),
 			textures_path("/assets/2 Guns/6_1.png"),
 			textures_path("/assets/2 Guns/4_1.png"),
-			textures_path("help.png"),
-			textures_path("desert.png"),
-			textures_path("intro.jpg"),
-			textures_path("intro1.jpg"),
-			textures_path("redVic.jpg"),
-			textures_path("blueVic.jpg"),
-			textures_path("/bluewin/1.png"),
-			textures_path("/bluewin/2.png"),
-			textures_path("/bluewin/3.png"),
-			textures_path("/bluewin/4.png"),
-			textures_path("/bluewin/5.png"),
-			textures_path("/bluewin/6.png"),
-			textures_path("/bluewin/7.png"),
-			textures_path("/bluewin/8.png"),
-			textures_path("/bluewin/9.png"),
-			textures_path("/bluewin/10.png"),
-			textures_path("/bluewin/11.png"),
-			textures_path("/bluewin/12.png"),
-			textures_path("/bluewin/13.png"),
-			textures_path("/bluewin/14.png"),
-			textures_path("/redwin/1.png"),
-			textures_path("/redwin/2.png"),
-			textures_path("/redwin/3.png"),
-			textures_path("/redwin/4.png"),
-			textures_path("/redwin/5.png"),
-			textures_path("/redwin/6.png"),
-			textures_path("/redwin/7.png"),
-			textures_path("/redwin/8.png"),
-			textures_path("/redwin/9.png"),
-			textures_path("/redwin/10.png"),
-			textures_path("/redwin/11.png"),
-			textures_path("/redwin/12.png"),
-			textures_path("/redwin/13.png"),
-			textures_path("/redwin/14.png"),
-			textures_path("icemountain.jpg"),
+			textures_path("help.png")
 		};
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -112,26 +85,9 @@ const std::array<std::string, texture_count> texture_paths = {
 		shader_path("textured"),
 		shader_path("water") };
 
-		// font character structure
-struct Character {
-	unsigned int TextureID;  // ID handle of the glyph texture
-	glm::ivec2   Size;       // Size of glyph
-	glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
-	unsigned int Advance;    // Offset to advance to next glyph
-	char character;
-};
-
-	GLuint vao;
-
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
 	std::array<Mesh, geometry_count> meshes;
-
-		// font elements
-	std::map<char, Character> m_ftCharacters;
-	GLuint m_font_shaderProgram;
-	GLuint m_font_VAO;
-	GLuint m_font_VBO;
 
 public:
 	// Initialize the window
@@ -152,7 +108,7 @@ public:
 	// The draw loop first renders to this texture, then it is used for the wind
 	// shader
 	bool initScreenTexture();
-	bool fontInit(GLFWwindow* window, const std::string& font_filename, unsigned int font_default_size);
+	bool fontInit(GLFWwindow& window, const std::string& font_filename, unsigned int font_default_size);
 
 	// Destroy resources associated to one or all entities created by the system
 	~RenderSystem();
@@ -162,13 +118,25 @@ public:
 
 	mat3 createProjectionMatrix();
 
+	/* TODO: init fonts */
+	bool fontInit(GLFWwindow* window, const std::string& font_filename, unsigned int font_default_size);
+
+	// A3
+	/* TODO: render fonts */
 	void renderText(std::string text, float x, float y, float scale, const glm::vec3& color, const glm::mat4& trans);
+
+	float getTextWidth(const std::string& text, float scale);
+
+	void renderFont();
+
+	void renderIntroScreen();
+
+	void renderHelpText();
 
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
-	std::string readShaderFile(const std::string& filepath);
 
 	// Window handle
 	GLFWwindow* window;

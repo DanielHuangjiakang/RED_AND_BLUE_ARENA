@@ -113,11 +113,6 @@ private:
 	bool isPlayerInRange();
 	void handleLaserCollisions();
 	bool isLaserInRange(vec2 laserPosition, vec2 playerPosition);
-	bool isMouseOverEntity(vec2 mouse_position, Entity entity);
-	void handleEntityClick(Entity entity);
-	void on_mouse_button(int button, int action, int mods);
-
-
 	int currentStage = 0;
 	void next_stage();
 	void createStage(int stage);
