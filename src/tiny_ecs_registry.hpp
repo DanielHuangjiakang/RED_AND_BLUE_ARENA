@@ -27,6 +27,7 @@ public:
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<GunTimer> gunTimers;
 	ComponentContainer<StageChoice> stages;
+	ComponentContainer<Winner> winner;
 
 	ComponentContainer<AnimationFrame> animations;
 	ComponentContainer<Text> texts;
@@ -36,7 +37,7 @@ public:
 	ComponentContainer<Lifetime> lifetimes;
 
 	bool intro = true;
-	int winner = 0;
+	int gamewinner = 0;
 	int stageSelection = 0;
 
 	// constructor that adds all containers for looping over them

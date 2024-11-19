@@ -47,6 +47,65 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
     return entity;
 }
 
+Entity createWinner(RenderSystem* renderer, int x, int y, int s) {
+	auto entity = Entity();
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+    registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& motion = registry.motions.emplace(entity);
+     motion.velocity = { 0, 0 }; 
+	 motion.position = {x, y};
+
+	auto& winner = registry.winner.emplace(entity);
+	auto& animation = registry.animations.emplace(entity);
+    if (s == 1) { // red player
+        animation.frames = {
+            TEXTURE_ASSET_ID::RW1,
+            TEXTURE_ASSET_ID::RW2,
+            TEXTURE_ASSET_ID::RW3,
+			TEXTURE_ASSET_ID::RW4,
+			TEXTURE_ASSET_ID::RW5,
+			TEXTURE_ASSET_ID::RW6,
+			TEXTURE_ASSET_ID::RW7,
+			TEXTURE_ASSET_ID::RW8,
+			TEXTURE_ASSET_ID::RW9,
+			TEXTURE_ASSET_ID::RW10,
+			TEXTURE_ASSET_ID::RW11,
+			TEXTURE_ASSET_ID::RW12,
+			TEXTURE_ASSET_ID::RW13,
+			TEXTURE_ASSET_ID::RW14,
+
+        };
+        motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
+    } else { // blue player
+        animation.frames = {
+            TEXTURE_ASSET_ID::BW1,
+            TEXTURE_ASSET_ID::BW2,
+            TEXTURE_ASSET_ID::BW3,
+			TEXTURE_ASSET_ID::BW4,
+			TEXTURE_ASSET_ID::BW5,
+			TEXTURE_ASSET_ID::BW6,
+			TEXTURE_ASSET_ID::BW7,
+			TEXTURE_ASSET_ID::BW8,
+			TEXTURE_ASSET_ID::BW9,
+			TEXTURE_ASSET_ID::BW10,
+			TEXTURE_ASSET_ID::BW11,
+			TEXTURE_ASSET_ID::BW12,
+			TEXTURE_ASSET_ID::BW13,
+			TEXTURE_ASSET_ID::BW14
+        };
+        motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
+
+		registry.renderRequests.insert(
+        entity,
+        { animation.frames[0], 
+          EFFECT_ASSET_ID::TEXTURED,
+          GEOMETRY_BUFFER_ID::SPRITE });
+	}
+
+    return entity;
+}
+
 
 // Create a portal at given pos
 // create a block based on its center (position), and its width and height
@@ -146,21 +205,52 @@ Entity createBackground(RenderSystem* renderer, int width, int height) {
 			{ TEXTURE_ASSET_ID::CITY,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
-	} else /*if (registry.stageSelection == 2)*/ {
+	} else if (registry.stageSelection == 2) {
 		registry.renderRequests.insert(
 			entity,
 			{TEXTURE_ASSET_ID::DESERT,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE}
 		);
+	} else {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::ICEMOUNTAIN,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE}
+		);
 	}
-	// } else {
-	// 	registry.renderRequests.insert(
-	// 		entity,
-	// 		{TEXTURE_ASSET_ID::}
-	// 	)
-	// }
 
+	return entity;
+}
+
+Entity createWinnerScreen(RenderSystem* renderer, int width, int height, int winner) {
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	auto& motion = registry.motions.emplace(entity);
+ 	motion.velocity = { 0, 0 };
+ 	motion.position = {width / 2, height / 2};
+	motion.scale = {width, height};
+
+	if (registry.gamewinner ==1 ){
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::REDWIN,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+			});
+	} else {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::BLUEWIN,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+			}
+		);
+	}
 	return entity;
 }
 
@@ -186,13 +276,20 @@ Entity createStageChoice(RenderSystem* renderer, int x, int y, int width, int he
 				{ TEXTURE_ASSET_ID::CITY,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE });
-	} else /*if (registry.stageSelection == 2)*/ {
+	} else if (stage == 2) {
 			registry.renderRequests.insert(
 				entity,
 				{TEXTURE_ASSET_ID::DESERT,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE}
 			);
+	} else {
+		registry.renderRequests.insert(
+				entity,
+				{TEXTURE_ASSET_ID::ICEMOUNTAIN,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE}
+		);
 	}
  	return entity;
 	
@@ -272,18 +369,6 @@ Entity createHelpPanel(RenderSystem* renderer, int width, int height) {
 	return entity;
 }
 
-Entity createText(RenderSystem* renderer, std::string text_content, vec2 position, bool is_visible) {
-	auto entity = Entity();
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-	registry.meshPtrs.emplace(entity, &mesh);
-
-	auto& text = registry.texts.emplace(entity);
-	text.text = text_content;
-	text.position = position;
-	text.is_visible = is_visible;
-
-	return entity;
-}	
 
 Entity createBullet(RenderSystem* renderer, int side, vec2 position, int direction) {
 	auto entity = Entity();

@@ -12,6 +12,8 @@ Entity createBackground(RenderSystem* renderer, int width, int height);
 Entity createIntro(RenderSystem* renderer, int width, int height);
 Entity createHelpPanel(RenderSystem* renderer, int width, int height);
 Entity createStageChoice(RenderSystem* renderer, int x, int y, int width, int height, int stage);
+Entity createWinnerScreen(RenderSystem* renderer, int width, int height, int winner);
+Entity createWinner(RenderSystem* renderer, int x, int y, int s);
 
 // the player
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction);

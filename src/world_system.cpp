@@ -182,7 +182,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         frame_count = 0;
     }
 
-	if (!registry.intro && registry.stageSelection) {
+	if (registry.gamewinner!=0) {
+		createWinnerScreen(renderer, window_width_px, window_height_px, registry.gamewinner);
+		//createWinner(renderer, window_width_px/2, window_height_px/2, registry.gamewinner);
+	}
+
+	if (!registry.intro && registry.stageSelection && !registry.gamewinner) {
 	
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
@@ -324,6 +329,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	animation_system.step(elapsed_ms_since_last_update);
 	}
 
+
 	return true;
 }
 
@@ -331,51 +337,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 void WorldSystem::restart_game() {
 
-	// Create an intro screen
 	if (registry.intro) {
-		// Create intro entities
 		Entity introBackground = createIntro(renderer, window_width_px, window_height_px);
-
-		// Create stage selection button entities
-		// Entity stageButton1 = createBlock2(renderer, {window_width_px / 4, window_height_px / 2}, 200, 50);
-		// Entity stageButton2 = createBlock2(renderer, {window_width_px / 2, window_height_px / 2}, 200, 50);
-		// Entity stageButton3 = createBlock2(renderer, {3 * window_width_px / 4, window_height_px / 2}, 200, 50);
-
-		// // Handle stage button clicks
-		// if (registry.mouseButtons.has(stageButton1)) {
-		// 	// Select stage 1
-		// 	registry.stageSelection = false;
-		// 	registry.intro = false;
-		// 	// Load stage 1
-		// } else if (registry.mouseButtons.has(stageButton2)) {
-		// 	// Select stage 2
-		// 	registry.stageSelection = false;
-		// 	registry.intro = false;
-		// 	// Load stage 2
-		// } else if (registry.mouseButtons.has(stageButton3)) {
-		// 	// Select stage 3
-		// 	registry.stageSelection = false;
-		// 	registry.intro = false;
-		// 	// Load stage 3
-		// }
 	}
 
-	// Create a Stage Selection screen when a key is pressed
 	if (!registry.intro && !registry.stageSelection) {
-		// Create stage selection entities
 		Entity stageSelectionBackground = createBackground(renderer, window_width_px, window_height_px);
 
-		// Create stage button entities
 		Entity stageButton1 = createStageChoice(renderer, 10, window_height_px / 2, 400, 200, 1);
 		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2, 400, 200, 2);
 		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px / 4-100, window_height_px / 2, 400, 200, 3);
-
 	}
 
-
 	if (!registry.intro && registry.stageSelection) {
+		registry.stages.clear();
 	movable = true;
-	// Debugging for memory/component leaks
 	registry.list_all_components();
 	printf("Restarting\n");
 
@@ -479,7 +455,7 @@ void WorldSystem::handle_collisions()
 					motion.angle = M_PI / 2;
 					motion.scale.y = motion.scale.y / 2;
 					movable = false;
-					registry.winner = player.side == 1 ? 2 : 1;
+					registry.gamewinner = player.side == 1 ? 1 : 2;
 
 				}
 				registry.remove_all_components_of(entity_other);
@@ -559,8 +535,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 		registry.stageSelection =0;
-		registry.winner = 0;
+		registry.gamewinner = 0;
 		registry.stages.clear();
+		if (registry.gamewinner) registry.gamewinner=0;
 		restart_game();
 	}
 
