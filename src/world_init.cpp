@@ -113,6 +113,8 @@ Entity createBackground(RenderSystem* renderer, int width, int height) {
  	motion.velocity = { 0, 0 };
  	motion.position = {width / 2, height / 2};
 	motion.scale = {width, height};
+
+	registry.backgrounds.emplace(entity);
 	
 	registry.renderRequests.insert(
 		entity,
@@ -232,7 +234,6 @@ Entity createBullet(RenderSystem* renderer, int side, vec2 position, int directi
  			GEOMETRY_BUFFER_ID::SPRITE });
 	
 	return entity;
-
 }
 
 std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 position, int direction) {
@@ -263,24 +264,24 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
 	int dir = 0;
 	if (direction == 0) dir = -1;
 	else dir = 1;
- 	motion.velocity = { 500 * dir, -30 }; 
- 	motion.position = {position.x, position.y - 30.0f};;;
-	motion.scale = { 8, 8 }; // width * height
+ 	motion.velocity = { 500 * dir, -120 }; 
+ 	motion.position = {position.x, position.y};
+	motion.scale = { 15, 6 }; // width * height
 
 	auto& motion2 = registry.motions.emplace(entity2);
- 	motion2.velocity = { 500 * dir, -20 }; 
- 	motion2.position = {position.x, position.y - 20.0f};;
-	motion2.scale = { 8, 8 }; // width * height
+ 	motion2.velocity = { 500 * dir, -40 }; 
+ 	motion2.position = {position.x, position.y};
+	motion2.scale = { 15, 6 }; // width * height
 
 	auto& motion3 = registry.motions.emplace(entity3);
- 	motion3.velocity = { 500 * dir, 20 }; 
- 	motion3.position = {position.x, position.y + 20.0f};;
-	motion3.scale = { 8, 8 }; // width * height
+ 	motion3.velocity = { 500 * dir, 40 }; 
+ 	motion3.position = {position.x, position.y};
+	motion3.scale = { 15, 6 }; // width * height
 
 	auto& motion4 = registry.motions.emplace(entity4);
- 	motion4.velocity = { 500 * dir, 30 }; 
- 	motion4.position = {position.x, position.y + 30.0f};;
-	motion4.scale = { 8, 8 }; // width * height
+ 	motion4.velocity = { 500 * dir, 120 }; 
+ 	motion4.position = {position.x, position.y};
+	motion4.scale = { 15, 6 }; // width * height
 
 	registry.renderRequests.insert(
 		entity,
@@ -319,7 +320,7 @@ Entity createLaser(RenderSystem* renderer) {
     std::random_device rd;
     std::default_random_engine rng(rd());
     std::uniform_real_distribution<float> distX(0.f, static_cast<float>(window_width_px));
-    std::uniform_real_distribution<float> distY(0.f, static_cast<float>(window_height_px));
+    std::uniform_real_distribution<float> distY(0.f, static_cast<float>(window_height_px / 2));
     vec2 position = {distX(rng), distY(rng)};
 
     auto& motion = registry.motions.emplace(entity);
@@ -345,7 +346,7 @@ Entity createLaserBeam(vec2 start, vec2 target) {
     // Set up the beam's motion properties
     Motion& motion = registry.motions.emplace(beam);
     motion.position = midpoint;
-    motion.scale = {25.f, beamLength};
+    motion.scale = {10.f, beamLength};
     motion.angle = -atan2(direction.x, direction.y);
     registry.colors.insert(beam, {1.0f, 1.0f, 0.0f});
     registry.renderRequests.insert(
@@ -356,4 +357,92 @@ Entity createLaserBeam(vec2 start, vec2 target) {
 	auto& lifetime = registry.lifetimes.emplace(beam);
     lifetime.counter_ms = 1000; // Laser beam lasts for 1000 milliseconds (1 second)
     return beam;
+}
+
+Entity createLaserBeam2(vec2 start, int direction) {
+	auto beam = Entity();
+	int dir = 0;
+	if (direction == 0) dir = -1;
+	else dir = 1;
+
+	vec2 target = {start.x + dir * 1210, start.y};
+	vec2 midpoint = (start + target) * 0.5f;
+	Motion& motion = registry.motions.emplace(beam);
+    motion.position = midpoint;
+
+    motion.scale = {1210.0f, 44.0f};
+    registry.renderRequests.insert(
+        beam,
+        {TEXTURE_ASSET_ID::LONG_LASER, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    );
+	
+	auto& lifetime = registry.lifetimes.emplace(beam);
+    lifetime.counter_ms = 150; // Laser beam lasts for 1000 milliseconds (1 second)
+    return beam;
+}
+
+Entity createRandomItem(RenderSystem* renderer, Motion motion) {
+	auto entity = Entity();
+	Item& item = registry.items.emplace(entity);
+	std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::uniform_int_distribution<int> dist(0, 2);
+    item.id = dist(rng);
+
+	Motion& item_motion = registry.motions.emplace(entity);
+	item_motion = motion;
+
+
+
+	if (item.id == 0) {
+		registry.renderRequests.insert(
+        	entity,
+        	{TEXTURE_ASSET_ID::POTION, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    	);	
+	}
+	else if (item.id == 1) {
+		registry.renderRequests.insert(
+        	entity,
+        	{TEXTURE_ASSET_ID::GRENADE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    	);
+	}
+	
+	else  {
+		item_motion.scale = {45, 20};
+		item_motion.angle = 3 * M_PI / 4;
+		registry.renderRequests.insert(
+        	entity,
+        	{TEXTURE_ASSET_ID::LASER, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    	);
+	}
+
+
+	
+
+	return entity;
+}
+
+Entity createGrenade(RenderSystem* renderer, vec2 position, int direction) {
+	auto entity = Entity();
+	registry.grenades.emplace(entity);
+
+	auto& motion = registry.motions.emplace(entity);
+	int dir = 0;
+	if (direction == 0) dir = -1;
+	else dir = 1;
+ 	motion.velocity = { 500 * dir, -100 }; 
+ 	motion.position = position;
+	motion.scale = { 25, 25 }; // width * height
+
+	Gravity& gravity = registry.gravities.emplace(entity);
+	gravity.g.y = 300.f;
+
+	// registry.colors.insert(entity, {0.0f, 1.0f, 0.0f});
+
+	registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::GRENADE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+    );
+	
+	return entity;
 }

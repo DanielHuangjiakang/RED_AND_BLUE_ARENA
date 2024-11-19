@@ -1,20 +1,26 @@
 #pragma once
 #include "common.hpp"
 #include <vector>
+#include <queue>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
+
+struct Item
+{
+    int id; // 0 = health potion, 1 = grenade, 2 = laser gun        
+};
 
 // Player component
 struct Player
 {
 	int side; // side = 1 for blue, side = 2 for red
 	bool jumpable = false;
-	bool direction;  // 0 for left, 1 for right, 
-	int health = 3;
-
+	bool direction;  // 0 for left, 1 for right
+	int health = 10;
 	bool is_moving = false;
-	float jump_accel = -600.f;
-	float lr_accel = 1000.f;
+	float jump_accel = -550.f;
+	float lr_accel = 1200.f;
+	std::queue<Item> items;
 };
 
 struct GunTimer {
@@ -24,6 +30,15 @@ struct GunTimer {
 struct Bullet {
 	int side; // side = 1 for blue, side = 2 for red
 };
+
+struct Background {
+
+};
+
+struct Grenade {
+
+};
+
 // Weapon component
 struct Weapon
 {
@@ -149,7 +164,6 @@ struct Mesh
 enum class TEXTURE_ASSET_ID {
 	FISH = 0,
 	EEL = FISH + 1,
-
 	CITY = EEL + 1,
 	RED_RUN_1 = CITY + 1,
 	RED_RUN_2 = RED_RUN_1 + 1,
@@ -163,7 +177,11 @@ enum class TEXTURE_ASSET_ID {
 	RED_GUN = PAD + 1,
 	BLUE_GUN = RED_GUN + 1,
 	HELP = BLUE_GUN + 1,
-	TEXTURE_COUNT = HELP + 1
+	GRENADE = HELP + 1,
+	POTION = GRENADE + 1,
+	LASER = POTION + 1,
+	LONG_LASER = LASER + 1,
+	TEXTURE_COUNT = LONG_LASER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

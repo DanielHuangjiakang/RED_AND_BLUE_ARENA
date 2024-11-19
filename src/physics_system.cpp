@@ -56,25 +56,6 @@ void compute_transformed_vertices(const Mesh& mesh, const Motion& motion, std::v
 }
 
 
-
-// bool mesh_collides(Entity entity_i, Entity entity_j)
-// {
-//     Motion& motion_j = registry.motions.get(entity_j);
-// 	Motion& motion_i = registry.motions.get(entity_i);
-// 	Mesh* mesh1 = registry.meshPtrs.get(entity_j);
-
-//     std::vector<vec2> transformed_vertices;
-//     compute_transformed_vertices(*mesh1, motion_j, transformed_vertices);
-
-//     for (size_t i = 0; i < mesh1->vertex_indices.size(); i += 1)
-//     {
-//         vec2& v1 = transformed_vertices[mesh1->vertex_indices[i]];
-// 		if()
-//     }
-
-//     return false; // no collision
-// }
-
 bool mesh_collides(Entity entity_i, Entity entity_j)
 {
     Motion& motion_j = registry.motions.get(entity_j);
@@ -136,7 +117,14 @@ void PhysicsSystem::step(float elapsed_ms)
 			if (abs(motion.velocity[0]) > 350) motion.velocity[0] = signx * 350;
 			if (abs(motion.velocity[1]) > 700) motion.velocity[1] = signy * 700;
 		} 
+	}	
 
+	auto& grenade_registry = registry.grenades;
+	for(uint i = 0; i< grenade_registry.size(); i++) 
+	{
+		Entity entity = grenade_registry.entities[i];
+		Motion& motion = registry.motions.get(entity);
+		motion.angle += step_seconds;
 	}	
 
 	// Check for collisions between all moving entities

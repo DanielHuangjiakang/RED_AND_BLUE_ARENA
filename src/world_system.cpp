@@ -8,17 +8,21 @@
 #include <cassert>
 #include <sstream>
 #include <iostream>
+#include <algorithm>   
 
-#include "physics_system.hpp"
+// #include "physics_system.hpp"
 
 #include "animation_system.hpp"
 
 #include "tiny_ecs_registry.hpp"
 #include "decisionTree.hpp"
 
+const size_t MAX_NUM_ITEMS = 2;
+size_t ITEM_SPAWN_DELAY_MS = 8000;
+
 
 // create the underwater world
-WorldSystem::WorldSystem()
+WorldSystem::WorldSystem(): next_item_spawn(ITEM_SPAWN_DELAY_MS)
 {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
@@ -124,7 +128,7 @@ GLFWwindow *WorldSystem::create_window()
 
 	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr)
 	{
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
+		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n make sure the data directory is present",
 				audio_path("music.wav").c_str(),
 				audio_path("death_sound.wav").c_str(),
 				audio_path("eat_sound.wav").c_str(),
@@ -200,15 +204,15 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         if (laserCoolDownTimer <= 0 && isPlayerInRange()) {
             laserCoolDownTimer = 3000;  // 3-second coolDown after attacking
         }
-		for (Entity entity : registry.lifetimes.entities) {
-        Lifetime& lifetime = registry.lifetimes.get(entity);
-        lifetime.counter_ms -= elapsed_ms_since_last_update;
+		for (Entity entity_other : registry.lifetimes.entities) {
+        	Lifetime& lifetime = registry.lifetimes.get(entity_other);
+        	lifetime.counter_ms -= elapsed_ms_since_last_update;
 
-        // Remove the entity when its lifetime expires
-        if (lifetime.counter_ms <= 0) {
-            registry.remove_all_components_of(entity);
-        }
-    }
+        	// Remove the entity when its lifetime expires
+        	if (lifetime.counter_ms <= 0) {
+            	registry.remove_all_components_of(entity_other);
+        	}
+    	}
     }
 
 	// Update player1's position and enforce boundaries
@@ -262,10 +266,38 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i)
 	{
 		Motion &motion = motions_registry.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f)
+		if (motion.position.x + abs(motion.scale.x) < 0.f || motion.position.x - abs(motion.scale.x) > window_width_px)
 		{
-			if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
+			if (!registry.players.has(motions_registry.entities[i])) {// don't remove the player
 				registry.remove_all_components_of(motions_registry.entities[i]);
+			}
+		}
+	}
+
+	next_item_spawn -= elapsed_ms_since_last_update * current_speed;
+	if (registry.items.components.size() < MAX_NUM_ITEMS && next_item_spawn < 0.f) {
+		next_item_spawn = (3 * ITEM_SPAWN_DELAY_MS / 4) + uniform_dist(rng) * (ITEM_SPAWN_DELAY_MS / 4);
+
+		// do rejection sampling on a circle with a hole in the center
+		bool restart_flag = true;
+		while (restart_flag) {
+			float r = (1 + 3 * uniform_dist(rng)) / 4 * (std::min(window_height_px, window_width_px) / 2);
+			float theta = uniform_dist(rng) * 2 * M_PI;
+
+			Motion item_motion;
+			item_motion.position = {(r * cos(theta)) + (window_width_px / 2), (r * sin(theta)) + (window_height_px / 2)};
+			item_motion.scale = {30, 45};
+
+			restart_flag = false;
+			for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
+				Motion &motion = motions_registry.components[i];
+				if (collides(item_motion, motion) && !registry.bullets.has(motions_registry.entities[i]) && !registry.backgrounds.has(motions_registry.entities[i])) {
+					restart_flag = true;
+					break;
+				}
+			}
+
+			if (!restart_flag) createRandomItem(renderer, item_motion);
 		}
 	}
 
@@ -339,9 +371,7 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// create a new Salmon
-
-  background = createBackground(renderer, window_width_px, window_height_px);
+  	background = createBackground(renderer, window_width_px, window_height_px);
 
 	player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
 	Motion& player1Motion = registry.motions.get(player1);
@@ -365,7 +395,7 @@ void WorldSystem::restart_game() {
 	registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
   
   	createLaser(renderer);
-   initializeLaserAI();
+    initializeLaserAI();
 }
 
 // Compute collisions between entities
@@ -384,26 +414,18 @@ void WorldSystem::handle_collisions()
 		if (registry.players.has(entity) && registry.blocks.has(entity_other)) {
 			Motion& motion = registry.motions.get(entity);
 			Block& block = registry.blocks.get(entity_other);
-
-				Player& player = registry.players.get(entity);
+			Player& player = registry.players.get(entity);
 			if (direction == 1) { // top collision
-				
 				motion.velocity[1] = 0.0f;
-				
 				motion.position[1] = block.y - abs(motion.scale[1] / 2);
 				player.jumpable = true;
-        
 			} else if (direction == 2) { // bot collision
-				
-				// player.jumpable = false;
 				motion.velocity[1] = 0.0f;
 				motion.position[1] = block.y + abs(motion.scale[1] / 2) + block.height;
 			} else if (direction == 3) { // left collision
-				
 				motion.velocity[0] = 0.0f;
 				motion.position[0] = block.x - (abs(motion.scale[0]) / 2);
 			} else if (direction == 4) { // right collision
-				
 				motion.velocity[0] = 0.0f;
 				motion.position[0] = block.x + block.width + (abs(motion.scale[0]) / 2);
 			}
@@ -415,74 +437,60 @@ void WorldSystem::handle_collisions()
 			if (player.side != registry.bullets.get(entity_other).side)
 			{
 				player.health -= 1;
-
 				// hit sound
 				Mix_PlayChannel(-1, hit_sound, 0);
 				if (player.health <= 0)
 				{
-					if (!registry.deathTimers.has(entity))
-						registry.deathTimers.emplace(entity);
+					if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
 					// end music
 					Mix_PlayChannel(-1, end_music, 0);
 					Motion &motion = registry.motions.get(entity);
 					motion.angle = M_PI / 2;
 					motion.scale.y = motion.scale.y / 2;
 					movable = false;
-
 				}
 				registry.remove_all_components_of(entity_other);
 			}
 		}
 
-		if (registry.players.has(entity) && registry.portals.has(entity_other))
+		if ((registry.players.has(entity) || registry.bullets.has(entity)) && registry.portals.has(entity_other))
 		{
-			Player &player = registry.players.get(entity);
+			Motion &motion_pb = registry.motions.get(entity);
 			Portal &portal = registry.portals.get(entity_other);
+			float y_offset = motion_pb.position.y - portal.y;
+			float x_offset;
+			registry.players.has(entity) ? x_offset = 65 : x_offset = 30;
 			Mix_PlayChannel(-1, portal_sound, 0);
-			// since there are just 2 portals
-			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
-			{
-				// teleport player to the pos of portal2
-				Motion &motion_portal2 = registry.motions.get(portal2);
-				Motion &motion_player = registry.motions.get(entity);
 
-				if (player.direction == 1)
-				{
-					motion_player.position =  {motion_portal2.position.x + 65, motion_portal2.position.y};
-				}
+			Motion motion_portal_to; 
+			if (portal.x == registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y) motion_portal_to = registry.motions.get(portal2);
+			else motion_portal_to = registry.motions.get(portal1);
 
-				else 
-				{
-					motion_player.position =  {motion_portal2.position.x - 65, motion_portal2.position.y};
-				}
-				
-			}
-			else
-			{
-				Motion &motion_portal1 = registry.motions.get(portal1);
-				Motion &motion_player = registry.motions.get(entity);
-
-				if (player.direction == 1)
-				{
-					motion_player.position =  {motion_portal1.position.x + 65, motion_portal1.position.y};
-				}
-
-				else 
-				{
-					motion_player.position =  {motion_portal1.position.x - 65, motion_portal1.position.y};
-				}
-			}
-			
+			if (motion_pb.position.x > portal.x) motion_pb.position = {motion_portal_to.position.x - x_offset, motion_portal_to.position.y + y_offset};
+			else motion_pb.position = {motion_portal_to.position.x + x_offset, motion_portal_to.position.y + y_offset};
 		}
-		if (registry.portals.has(entity) && registry.bullets.has(entity_other))
-		{
-			registry.remove_all_components_of(entity_other);
-		}
+
+		if (registry.bullets.has(entity) && registry.blocks.has(entity_other)) registry.remove_all_components_of(entity);
 
 		if (registry.bullets.has(entity) && registry.bullets.has(entity_other))
 		{
-			registry.remove_all_components_of(entity);
+			if (registry.bullets.get(entity).side != registry.bullets.get(entity).side) {
+				registry.remove_all_components_of(entity);
+				registry.remove_all_components_of(entity_other);
+			}
+		}
+
+		if (registry.players.has(entity) && registry.items.has(entity_other))
+		{
+			Player &player = registry.players.get(entity);
+			Item item = registry.items.get(entity_other);
+			if (player.items.size() == 3) {
+				player.items.pop();
+			}
+			player.items.push(item);
+			registry.items.remove(entity_other);
 			registry.remove_all_components_of(entity_other);
+			next_item_spawn = max(next_item_spawn, 5000.f);
 		}
 	}
 
@@ -553,7 +561,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (key == GLFW_KEY_A) {
     if (action == GLFW_PRESS) {
-			gravity1.g[0] = -1000.f;
+			gravity1.g[0] = -p1.lr_accel;
 			p1.direction = 0; // Facing left
 			player1_left_button = true;
 			p1.is_moving = true;
@@ -569,7 +577,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (key == GLFW_KEY_D) {
 		if (action == GLFW_PRESS) {
-			gravity1.g[0] = +1000.f;
+			gravity1.g[0] = +p1.lr_accel;
 			p1.direction = 1; // Facing right
 			player1_right_button = true;
 			p1.is_moving = true;
@@ -586,7 +594,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (key == GLFW_KEY_W) {
 		if (action == GLFW_PRESS && p1.jumpable == true) {
-			motion1.velocity[1] += -600;
+			motion1.velocity[1] += p1.jump_accel;
 			p1.jumpable = false;
 		}
 	}
@@ -596,7 +604,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
         else if (action == GLFW_RELEASE) player1_shooting = 0;
     }
 
-	if (key == GLFW_KEY_SLASH) {
+	if (key == GLFW_KEY_PERIOD) {
         if (action == GLFW_PRESS) player2_shooting = 1;
         else if (action == GLFW_RELEASE) player2_shooting = 0;
     }
@@ -609,16 +617,60 @@ void WorldSystem::on_key(int key, int, int action, int mod)
     }
 
     //shoot arrow for player 2
-    if (key == GLFW_KEY_RIGHT_SHIFT)
+    if (key == GLFW_KEY_SLASH)
     {
         if (action == GLFW_PRESS) player2_shooting = 2;
         else if (action == GLFW_RELEASE) player2_shooting = 0;
     }
 
+	if (key == GLFW_KEY_RIGHT_SHIFT) {
+		if (action == GLFW_PRESS && player2_item) {
+			player2_item = false;
+			if (!p2.items.empty()) {
+				Item item = p2.items.front();
+				p2.items.pop();
+				if (item.id == 0) {
+					p2.health += 3;
+				} else if (item.id == 1) {
+					createGrenade(renderer, motion2.position, p2.direction);
+				} else {
+					int dir = 0;
+					if (p2.direction == 0) dir = -1;
+					else dir = 1;
+					createLaserBeam2(motion2.position + vec2({abs(motion2.scale.x / 2) * dir, 0.f}), p2.direction);
+				}
+        	}
+		} else if (action == GLFW_RELEASE) {
+			player2_item = true;
+		}
+	}
+
+	if (key == GLFW_KEY_3) {
+		if (action == GLFW_PRESS && player1_item) {
+			player1_item = false;
+			if (!p1.items.empty()) {
+				Item item = p1.items.front();
+				p1.items.pop();
+				if (item.id == 0) {
+					p1.health += 3;
+				} else if (item.id == 1) {
+					createGrenade(renderer, motion1.position, p1.direction);
+				} else {
+					int dir = 0;
+					if (p1.direction == 0) dir = -1;
+					else dir = 1;
+					createLaserBeam2(motion1.position + vec2({abs(motion1.scale.x / 2) * dir, 0.f}), p1.direction);
+				}
+        	}
+		} else if (action == GLFW_RELEASE) {
+			player1_item = true;
+		}
+	}
+
 
 	if (key == GLFW_KEY_LEFT) {
     	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = -1000.f;
+        	gravity2.g[0] = -p2.lr_accel;
         	p2.direction = 0; // Facing left
         	if (motion2.scale.x > 0) motion2.scale.x *= -1;
         	player2_left_button = true;
@@ -634,7 +686,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (key == GLFW_KEY_RIGHT) {
     	if (action == GLFW_PRESS) {
-        	gravity2.g[0] = +1000.f;
+        	gravity2.g[0] = +p2.lr_accel;
         	p2.direction = 1; // Facing right
         	player2_right_button = true;
 			p2.is_moving = true;
@@ -651,8 +703,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 	if (key == GLFW_KEY_UP) {
 		if (action == GLFW_PRESS && p2.jumpable == true) {
-			motion2.velocity[1] += -600;
-			
+			motion2.velocity[1] += p2.jump_accel;
 			p2.jumpable = false;
 		}
 	}
@@ -801,7 +852,9 @@ void WorldSystem::handleLaserCollisions() {
                 if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
                     registry.deathTimers.emplace(playerEntity);
                     Mix_PlayChannel(-1, end_music, 0);
-                    playerMotion.angle = M_PI / 4;
+					playerMotion.angle = M_PI / 2;
+					playerMotion.scale.y = playerMotion.scale.y / 2;
+					movable = false;
                 }
             }
         }

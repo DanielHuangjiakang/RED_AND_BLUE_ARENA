@@ -26,6 +26,10 @@ Entity createPortal(RenderSystem* renderer, vec2 position, int width, int height
 // the bullet
 Entity createBullet(RenderSystem* renderer, int side, vec2 position, int direction);
 
+Entity createRandomItem(RenderSystem* renderer, Motion motion);
+
+Entity createGrenade(RenderSystem* renderer, vec2 position, int direction);
+
 
 // text
 Entity createText(RenderSystem* renderer, const std::string text, vec2 position, bool is_visible);
@@ -33,3 +37,4 @@ Entity createText(RenderSystem* renderer, const std::string text, vec2 position,
 std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 position, int direction);
 Entity createLaser(RenderSystem* renderer);
 Entity createLaserBeam(vec2 start, vec2 end);
+Entity createLaserBeam2(vec2 start, int direction);

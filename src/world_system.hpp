@@ -15,6 +15,7 @@
 
 #include "animation_system.hpp"
 #include "DecisionTree.hpp"
+#include "physics_system.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -49,7 +50,6 @@ private:
 	// restart level
 	void restart_game();
 
-	// 
 	bool movable = true;
 
 	// OpenGL window handle
@@ -58,6 +58,7 @@ private:
 	// Game state
 	RenderSystem* renderer;
 	AnimationSystem animation_system;
+	// PhysicsSystem physics_system;
 	float current_speed;
 	Entity player1;
 	Entity player2;
@@ -67,9 +68,13 @@ private:
 	bool player1_right_button = false;
 	bool player1_left_button = false;
 	int player1_shooting = 0;
+	bool player1_item = true;
 	bool player2_right_button = false;
 	bool player2_left_button = false;
 	int player2_shooting = 0;
+	bool player2_item = true;
+
+	float next_item_spawn;
 
 	// Stage atrributes
 	Entity helpPanel;
