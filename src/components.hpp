@@ -147,6 +147,13 @@ struct Mesh
 	std::vector<uint16_t> vertex_indices;
 };
 
+struct Stage {
+    vec2 groundPosition;
+    vec2 groundSize;
+    std::vector<vec2> platformPositions;
+    std::vector<vec2> platformSizes;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
