@@ -538,4 +538,69 @@ bool loadEffectFromFile(
 	return true;
 }
 
+void RenderSystem::renderMatchRecords(const std::deque<std::string>& match_records) {
+    glm::vec2 bg_size = {window_width_px / 4, window_height_px / 2};
+    glm::vec2 bg_position = {window_width_px - bg_size.x, window_height_px - bg_size.y};
+    glm::vec3 bg_color = {0.0f, 0.0f, 0.0f};
+    // renderRectangle(bg_position, bg_size, bg_color);
 
+    // Set font transform
+    glm::mat4 font_trans = glm::mat4(1.0f);
+
+    // Define the starting position for the text, within the rectangle
+    float y_offset = bg_position.y + bg_size.y - 40.0f; // Start a bit below the top of the rectangle
+    float line_height = 25.0f;
+
+    // Title font scale and rendering
+    float title_font_scale = 1.0f;
+    std::string title = "Recent Match Results:";
+    float title_text_width = getTextWidth(title, title_font_scale);
+    float title_x_offset = bg_position.x + (bg_size.x - title_text_width) / 2; // Center the title
+    glm::vec3 font_color = glm::vec3(1.0f, 1.0f, 1.0f);
+    renderText(title, title_x_offset, y_offset, title_font_scale, font_color, font_trans);
+    y_offset -= line_height;
+	y_offset -= 15.0f;
+	bg_position.x = bg_position.x + 60.0f;
+
+    // Record font scale and rendering
+    float record_font_scale = 1.0f;
+
+    // Traverse match records in reverse to display the most recent one at the top
+    for (auto it = match_records.rbegin(); it != match_records.rend(); ++it) {
+        if (y_offset < bg_position.y + 10.0f) break; // Stop if we go beyond the rectangle's bottom
+
+        // Parse the record string (assumes format "BLUE: X - RED: Y")
+        std::istringstream record_stream(*it);
+        std::string blue_label, dash, red_label;
+        int blue_score, red_score;
+        record_stream >> blue_label >> blue_score >> dash >> red_label >> red_score;
+
+        // Calculate individual text positions and render them with appropriate colors
+        float record_x_offset = bg_position.x + 10.0f;
+
+        // Render "Blue" label in blue
+        glm::vec3 blue_color = {0.0f, 0.0f, 1.0f};
+        renderText(blue_label, record_x_offset, y_offset, record_font_scale, blue_color, font_trans);
+        record_x_offset += getTextWidth(blue_label, record_font_scale) + 5.0f;
+
+        // Render Blue score
+        glm::vec3 blue_score_color = (blue_score > red_score) ? glm::vec3(1.0f, 0.84f, 0.0f) : glm::vec3(1.0f, 1.0f, 1.0f); // Gold if winning
+        renderText(std::to_string(blue_score), record_x_offset, y_offset, record_font_scale, blue_score_color, font_trans);
+        record_x_offset += getTextWidth(std::to_string(blue_score), record_font_scale) + 10.0f;
+
+        // Render "-" in white
+        renderText(dash, record_x_offset, y_offset, record_font_scale, font_color, font_trans);
+        record_x_offset += getTextWidth(dash, record_font_scale) + 10.0f;
+
+        // Render "Red" label in red
+        glm::vec3 red_color = {1.0f, 0.0f, 0.0f};
+        renderText(red_label, record_x_offset, y_offset, record_font_scale, red_color, font_trans);
+        record_x_offset += getTextWidth(red_label, record_font_scale) + 5.0f;
+
+        // Render Red score
+        glm::vec3 red_score_color = (red_score > blue_score) ? glm::vec3(1.0f, 0.84f, 0.0f) : glm::vec3(1.0f, 1.0f, 1.0f); // Gold if winning
+        renderText(std::to_string(red_score), record_x_offset, y_offset, record_font_scale, red_score_color, font_trans);
+
+        y_offset -= line_height;
+    }
+}

@@ -8,6 +8,8 @@
 #include <cassert>
 #include <sstream>
 #include <iostream>
+#include <deque>
+#include <fstream>
 
 #include "physics_system.hpp"
 
@@ -160,6 +162,9 @@ GLFWwindow *WorldSystem::create_window()
 void WorldSystem::init(RenderSystem *renderer_arg)
 {
 	this->renderer = renderer_arg;
+
+	// Load high score from file
+	loadMatchRecords();
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
@@ -181,7 +186,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	toogle_life_timer -= elapsed_ms_since_last_update;
 
     if (total_time > 1000.0f) {
-        float fps = frame_count / (total_time / 1000.0f);
+        fps = frame_count / (total_time / 1000.0f);
 		std::stringstream title_ss;
         title_ss << "Game Screen - FPS: " << static_cast<int>(fps);
         glfwSetWindowTitle(window, title_ss.str().c_str());
@@ -306,6 +311,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				std::cout << "Red Player Wins" << std::endl; // Red Wins
 			else
 				std::cout << "Blue Player Wins" << std::endl; // Blue Wins
+
+			recordMatchResult();
 
 			registry.deathTimers.remove(entity);
 			screen.darken_screen_factor = 0;
@@ -799,7 +806,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		// for toogling +3 lives
 
-		if (key == GLFW_KEY_T)
+		if (key == GLFW_KEY_T && action == GLFW_PRESS)
 		{
 			toogle_life = 1;
 			// printing the text for 3s.
@@ -845,6 +852,13 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			debugging.in_debug_mode = false;
 		else
 			debugging.in_debug_mode = true;
+	}
+
+	if (key == GLFW_KEY_TAB ) {
+		if (action == GLFW_RELEASE)
+			showMatchRecords = false;
+		else
+			showMatchRecords = true;
 	}
 }
 
@@ -1073,4 +1087,49 @@ void WorldSystem::handleEntityClick(Entity entity) {
 		restart_game();
 	}
     std::cout << "Entity clicked: " << entity << std::endl;
+}
+
+void WorldSystem::loadMatchRecords() {
+	std::ifstream record_file("BattleRecord.txt");
+    if (record_file.is_open()) {
+        std::string line;
+        while (std::getline(record_file, line)) {
+            if (!line.empty()) {
+                match_records.push_back(line);
+            }
+        }
+        record_file.close();
+    }
+
+	// Keep only recent 10 battles
+    while (match_records.size() > 10) {
+        match_records.pop_front();
+    }
+}
+
+void WorldSystem::recordMatchResult() {
+	Player& player1Component = registry.players.get(player1);
+    Player& player2Component = registry.players.get(player2);
+
+	int player1hp = player1Component.health <= 0? 0: player1Component.health;
+	int player2hp =  player2Component.health <= 0? 0: player2Component.health;
+	
+    std::ostringstream result;
+    result << "Blue: " << 3 - player2hp << " - Red: " << 3 - player1hp;
+    match_records.push_back(result.str());
+
+    // 确保只保存最近10次战绩
+    if (match_records.size() > 10) {
+        match_records.pop_front();
+    }
+
+    std::ofstream record_file("BattleRecord.txt");
+    if (record_file.is_open()) {
+        for (const auto& record : match_records) {
+            record_file << record << std::endl;
+        }
+        record_file.close();
+    } else {
+        std::cerr << "fail to BattleRecord.txt" << std::endl;
+    }
 }

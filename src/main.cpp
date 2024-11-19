@@ -51,18 +51,62 @@ int main()
 
 		renderer.draw();
 
-		if (world.toogle_life_timer > 0 && world.toogle_life > 0)
-		{
-				// Display high score achievement message
-				printf("!");
-				std::string new_high_score_text = "New High Score Achieved!";
-				float new_high_score_text_width = renderer.getTextWidth(new_high_score_text, 1.5f);
-				glm::mat4 font_trans = glm::mat4(1.0f);
-				renderer.renderText(new_high_score_text, (window_width_px - new_high_score_text_width) / 2.0f, window_height_px / 2.0f, 1.5f, glm::vec3(1.0f, 0.0f, 0.0f), font_trans);
+		float text_height = 50.0f;
+
+		// In both fontInit and draw
+    	glm::mat4 font_trans = glm::mat4(1.0f);
+    	glm::vec3 font_color = glm::vec3(1.0, 1.0, 1.0);
+
+		// Render the game score
+		std::string score_text = "FPS: " + std::to_string(world.fps);
+		renderer.renderText(score_text, 10.0f, window_height_px - text_height, 0.8f, font_color, font_trans);
+
+		// Render dynamic HP text for players
+		for (Entity player_entity : registry.players.entities) {
+			Player& player = registry.players.get(player_entity);
+			Motion& motion = registry.motions.get(player_entity);
+
+			// Adjust for top-left origin of player and bottom-left origin of renderText
+			float hp_x = motion.position.x - renderer.getTextWidth("HP: 3", 1.0f) / 2; // Center horizontally
+			float hp_y = motion.position.y - motion.scale.y; // Adjust Y for bottom-left origin
+
+			std::string hp_text = "HP: " + std::to_string(player.health);
+
+			renderer.renderText(hp_text, hp_x, window_height_px - hp_y + 10.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f), glm::mat4(1.0f));
 		}
+
+		if (world.toogle_life_timer > 0 && world.toogle_life > 0)
+        {
+            for (size_t i = 0; i < registry.players.size(); i++)
+            {
+                auto &player = registry.players.entities[i];
+                Motion &player_motion = registry.motions.get(player);
+
+                // Prepare text
+                    std::string text = "health + 3";
+                    glm::vec3 text_color = glm::vec3(0.f, 1.0f, 0.f);
+                    glm::mat4 font_trans = glm::mat4(1.0f);
+
+                    // Calculate text position (above the fish)
+                    float scale = .5f; // Adjust as needed
+                    float text_x = player_motion.position.x - 10;
+                    float text_y = player_motion.position.y - 30.f;
+
+                    // Render the text
+                    renderer.renderText(text, text_x, window_height_px - text_y + 10.0f, scale, text_color, font_trans);
+            }
+
+        }
+
+		if (world.showMatchRecords) {
+			renderer.renderMatchRecords(world.match_records);
+		}
+
+		// flicker-free display with a double buffer
+		glfwSwapBuffers(window);
+		gl_has_errors();
 	}
 
-	glfwSwapBuffers(window);
 
 	return EXIT_SUCCESS;
 }
