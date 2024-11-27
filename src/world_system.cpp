@@ -572,8 +572,7 @@ void WorldSystem::handle_collisions()
 			} else if (direction == 2) { // bot collision
 				
 				// player.jumpable = false;
-				motion.velocity[1] = 0.0f;
-				motion.position[1] = block.y + abs(motion.scale[1] / 2) + block.height;
+				//
 			} else if (direction == 3) { // left collision
 				
 				motion.velocity[0] = 0.0f;
@@ -1405,11 +1404,11 @@ void WorldSystem::createStage(int currentStage) {
 
 	// Create portal 1
     portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
-    registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
+    registry.colors.insert(portal1, {0.0f, 1.0f, 0.0f});
 
     // Create portal 2
     portal2 = createPortal(renderer, {portal2Pos.x, portal2Pos.y - 10}, 50, 100);
-    registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
+    registry.colors.insert(portal2, {0.0f, 1.0f, 0.0f});
 
 	// Additional stage-specific logic (e.g., lasers)
     createLaser(renderer);
