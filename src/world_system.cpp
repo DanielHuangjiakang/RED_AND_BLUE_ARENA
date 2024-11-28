@@ -1,6 +1,7 @@
 // Header
 #include "world_system.hpp"
 #include "GLFW/glfw3.h"
+#include "SDL_mixer.h"
 #include "common.hpp"
 #include "world_init.hpp"
 
@@ -59,8 +60,6 @@ WorldSystem::~WorldSystem()
 {
 
 	// destroy music components
-	if (background_music != nullptr)
-		Mix_FreeMusic(background_music);
 	if (salmon_dead_sound != nullptr)
 		Mix_FreeChunk(salmon_dead_sound);
 	if (salmon_eat_sound != nullptr)
@@ -142,7 +141,11 @@ GLFWwindow *WorldSystem::create_window()
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
+	snow_music = Mix_LoadMUS(audio_path("music.wav").c_str());
+	city_music = Mix_LoadMUS(audio_path("city.wav").c_str());
+	desert_music = Mix_LoadMUS(audio_path("desert.wav").c_str());
+	mapselections_music = Mix_LoadMUS(audio_path("mapselection.wav").c_str());
+
 	end_music = Mix_LoadWAV(audio_path("end_music.wav").c_str());
 	hit_sound = Mix_LoadWAV(audio_path("hit_sound.wav").c_str());
 	shoot_sound = Mix_LoadWAV(audio_path("shoot.wav").c_str());
@@ -156,11 +159,15 @@ GLFWwindow *WorldSystem::create_window()
 	laser2_sound = Mix_LoadWAV(audio_path("laser2.wav").c_str());
 	healthpickup_sound = Mix_LoadWAV(audio_path("healthpickup.wav").c_str());
 	explosion_sound = Mix_LoadWAV(audio_path("explosion.wav").c_str());
+	select_music = Mix_LoadWAV(audio_path("select.wav").c_str());
 
-	if (background_music == nullptr || salmon_dead_sound == nullptr || salmon_eat_sound == nullptr)
+	if (salmon_dead_sound == nullptr || salmon_eat_sound == nullptr)
 	{
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 				audio_path("music.wav").c_str(),
+				audio_path("city.wav").c_str(),
+				audio_path("desert.wav").c_str(),
+				audio_path("mapselection.wav").c_str(),
 				audio_path("death_sound.wav").c_str(),
 				audio_path("eat_sound.wav").c_str(),
 				audio_path("shoot.wav").c_str(),
@@ -171,16 +178,18 @@ GLFWwindow *WorldSystem::create_window()
 				audio_path("laser2.wav").c_str(),
 				audio_path("healthpickup.wav").c_str(),
 				audio_path("explosion.wav").c_str(),
+				audio_path("select.wav").c_str(),
 				audio_path("laser.wav").c_str());
 		return nullptr;
 	}
 
-	// Adjust the volume for the background music
-	Mix_VolumeMusic(2);
 
 	// Adjust the volume for the sound effects
-	Mix_VolumeChunk(hit_sound, 6);
-	Mix_VolumeChunk(shoot_sound, 6);
+	Mix_VolumeChunk(hit_sound, 30);
+	Mix_VolumeChunk(shoot_sound, 30);
+	Mix_VolumeChunk(buck_shot_sound, 30);
+	Mix_VolumeChunk(laser_sound, 30);
+	Mix_VolumeChunk(select_music, 50);
 	Mix_VolumeChunk(end_music, 10);
 
 	glfwSetMouseButtonCallback(window, [](GLFWwindow* wnd, int button, int action, int mods) {
@@ -197,7 +206,7 @@ void WorldSystem::init(RenderSystem *renderer_arg)
 	// Load high score from file
 	loadMatchRecords();
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
+	// Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default
@@ -448,6 +457,20 @@ void WorldSystem::restart_game() {
 		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px / 4-100, window_height_px / 2, 400, 200, 3);
 	}
 
+	if (registry.stageSelection == 1) {
+		Mix_PlayMusic(city_music, -1); // Play city music
+		Mix_VolumeMusic(10);
+	} else if (registry.stageSelection == 2) {
+		Mix_PlayMusic(desert_music, -1); // Play desert music
+		Mix_VolumeMusic(10);
+	} else if (registry.stageSelection == 3) {
+		Mix_PlayMusic(snow_music, -1); // Play snow music
+			Mix_VolumeMusic(10);
+	} else if (registry.stageSelection == 0 && !registry.intro) {
+		Mix_PlayMusic(mapselections_music, -1);
+		Mix_VolumeMusic(15);
+	}
+
 
 	if (!registry.intro && registry.stageSelection) {
 	movable = true;
@@ -592,27 +615,30 @@ void WorldSystem::handle_collisions()
 		
 
 		if (registry.players.has(entity) && registry.bullets.has(entity_other))
-		{
+		{	
 			Player &player = registry.players.get(entity);
 			if (player.side != registry.bullets.get(entity_other).side)
 			{
-				player.health -= 1;
-
-				// hit sound
-				Mix_PlayChannel(-1, hit_sound, 0);
-				if (player.health <= 0)
-				{
-					if (!registry.deathTimers.has(entity))
-						registry.deathTimers.emplace(entity);
-					// end music
-					Mix_PlayChannel(-1, end_music, 0);
-					Motion &motion = registry.motions.get(entity);
-					motion.angle = M_PI / 2;
-					motion.scale.y = motion.scale.y / 2;
-					movable = false;
-					registry.winner = player.side == 1 ? 2 : 1;
+				if (player.health != 0) {
+					player.health -= 1;
+			
+					// hit sound
+					Mix_PlayChannel(-1, hit_sound, 0);
+					if (player.health <= 0)
+					{
+						player.health = 0;
+						if (!registry.deathTimers.has(entity))
+							registry.deathTimers.emplace(entity);
+						// end music
+						Mix_PlayChannel(-1, end_music, 0);
+						Motion &motion = registry.motions.get(entity);
+						motion.angle = M_PI / 2;
+						motion.scale.y = motion.scale.y / 2;
+						movable = false;
+						registry.winner = player.side == 1 ? 2 : 1;
+					}
+					registry.remove_all_components_of(entity_other);
 				}
-				registry.remove_all_components_of(entity_other);
 			}
 		}
 
@@ -867,6 +893,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 					p1.items.pop();
 					if (item.id == 0) {
 						p1.health += 3;
+						
 						Mix_PlayChannel(-1, healthpickup_sound, 0);
 					} else if (item.id == 1) {
 						createGrenade(renderer, motion1.position, p1.direction, p1.side);
@@ -1173,16 +1200,20 @@ void WorldSystem::handleLaserCollisions() {
             Motion& playerMotion = registry.motions.get(playerEntity);
 
             // Check if player is in laser path using a helper function
-            if (isLaserInRange(laserMotion.position, playerMotion.position)) {
-
+            if (isLaserInRange(laserMotion.position, playerMotion.position) & movable) {
                 // Reduce player health by 1 on laser hit
-                player.health -= 1;
-                Mix_PlayChannel(-1, laser_sound, 0);
-                if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
-                    registry.deathTimers.emplace(playerEntity);
-                    Mix_PlayChannel(-1, end_music, 0);
-                    playerMotion.angle = M_PI / 4;
-                }
+				if (player.health != 0) {
+					player.health -= 1;
+					Mix_PlayChannel(-1, laser_sound, 0);
+					if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
+						player.health = 0;
+						registry.deathTimers.emplace(playerEntity);
+						Mix_PlayChannel(-1, end_music, 0);
+						playerMotion.angle = M_PI / 2;
+						playerMotion.scale.y = playerMotion.scale.y / 2;
+						movable = false;
+					}
+				}
             }
         }
     }
@@ -1247,7 +1278,7 @@ void WorldSystem::on_mouse_button(int button, int action, int mods) {
         vec2 mouse_position = {static_cast<float>(xpos), static_cast<float>(ypos)};
         
         for (Entity entity : registry.stages.entities) {
-            if (isMouseOverEntity(mouse_position, entity)) {
+            if (isMouseOverEntity(mouse_position, entity) && registry.stageSelection == 0) {
                 handleEntityClick(entity);
                 break; // Exit after the first entity is clicked
             }
@@ -1257,6 +1288,7 @@ void WorldSystem::on_mouse_button(int button, int action, int mods) {
 
 // Function to check if the mouse is over the entity
 bool WorldSystem::isMouseOverEntity(vec2 mouse_position, Entity entity) {
+	if (registry.stageSelection != 0) return false;
     Motion& motion = registry.motions.get(entity);
 
     return (mouse_position.x >= motion.position.x - motion.scale.x / 2 &&
@@ -1270,6 +1302,7 @@ void WorldSystem::handleEntityClick(Entity entity) {
 	if (registry.stages.has(entity)) {
 		StageChoice& s = registry.stages.get(entity);
 		registry.stageSelection = s.stage;
+		Mix_PlayChannel(-1, select_music, 0);
 		restart_game();
 	}
     std::cout << "Entity clicked: " << entity << std::endl;

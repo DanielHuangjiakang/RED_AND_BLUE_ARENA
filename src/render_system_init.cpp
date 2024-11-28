@@ -300,29 +300,29 @@ void RenderSystem::initializeGlMeshes()
 void RenderSystem::initializeGlGeometryBuffers()
 {
 	// Vertex Buffer creation.
-	glGenBuffers((GLsizei)vertex_buffers.size(), vertex_buffers.data());
-	// Index Buffer creation.
-	glGenBuffers((GLsizei)index_buffers.size(), index_buffers.data());
+    glGenBuffers((GLsizei)vertex_buffers.size(), vertex_buffers.data());
+    // Index Buffer creation.
+    glGenBuffers((GLsizei)index_buffers.size(), index_buffers.data());
 
-	// Index and Vertex buffer data initialization.
-	initializeGlMeshes();
+    // Index and Vertex buffer data initialization.
+    initializeGlMeshes();
 
-	//////////////////////////
-	// Initialize sprite
-	// The position corresponds to the center of the texture.
-	std::vector<TexturedVertex> textured_vertices(4);
-	textured_vertices[0].position = { -1.f/2, +1.f/2, 0.f };
-	textured_vertices[1].position = { +1.f/2, +1.f/2, 0.f };
-	textured_vertices[2].position = { +1.f/2, -1.f/2, 0.f };
-	textured_vertices[3].position = { -1.f/2, -1.f/2, 0.f };
-	textured_vertices[0].texcoord = { 0.f, 1.f };
-	textured_vertices[1].texcoord = { 1.f, 1.f };
-	textured_vertices[2].texcoord = { 1.f, 0.f };
-	textured_vertices[3].texcoord = { 0.f, 0.f };
+    //////////////////////////
+    // Initialize sprite
+    // The position corresponds to the center of the texture.
+    std::vector<TexturedVertex> textured_vertices(4);
+    textured_vertices[0].position = { -1.f/2, +1.f/2, 0.f };
+    textured_vertices[1].position = { +1.f/2, +1.f/2, 0.f };
+    textured_vertices[2].position = { +1.f/2, -1.f/2, 0.f };
+    textured_vertices[3].position = { -1.f/2, -1.f/2, 0.f };
+    textured_vertices[0].texcoord = { 0.f, 1.f };
+    textured_vertices[1].texcoord = { 1.f, 1.f };
+    textured_vertices[2].texcoord = { 1.f, 0.f };
+    textured_vertices[3].texcoord = { 0.f, 0.f };
 
-	// Counterclockwise as it's the default opengl front winding direction.
-	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
-	bindVBOandIBO(GEOMETRY_BUFFER_ID::SPRITE, textured_vertices, textured_indices);
+    // Counterclockwise as it's the default OpenGL front winding direction.
+    const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
+    bindVBOandIBO(GEOMETRY_BUFFER_ID::SPRITE, textured_vertices, textured_indices);
 
 	////////////////////////
 	// Initialize Egg
@@ -384,6 +384,31 @@ void RenderSystem::initializeGlGeometryBuffers()
 	// Counterclockwise as it's the default opengl front winding direction.
 	const std::vector<uint16_t> screen_indices = { 0, 1, 2 };
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE, screen_vertices, screen_indices);
+
+	// Initialize health bar geometry
+    {
+        std::vector<ColoredVertex> hb_vertices;
+        std::vector<uint16_t> hb_indices;
+
+        constexpr float hb_depth = 0.0f;
+        vec3 hb_color = {1.0f, 1.0f, 1.0f}; // Placeholder color (will be overridden during rendering)
+
+        // Define a simple quad from (0,0) to (1,1)
+        hb_vertices = {
+            {{0.0f, 0.0f, hb_depth}, hb_color},
+            {{1.0f, 0.0f, hb_depth}, hb_color},
+            {{1.0f, 1.0f, hb_depth}, hb_color},
+            {{0.0f, 1.0f, hb_depth}, hb_color},
+        };
+
+        // Two triangles to form a quad
+        hb_indices = {0, 1, 2, 0, 2, 3};
+
+        int geom_index = (int)GEOMETRY_BUFFER_ID::HEALTH_BAR;
+        meshes[geom_index].vertices = hb_vertices;
+        meshes[geom_index].vertex_indices = hb_indices;
+        bindVBOandIBO(GEOMETRY_BUFFER_ID::HEALTH_BAR, hb_vertices, hb_indices);
+    }
 }
 
 RenderSystem::~RenderSystem()

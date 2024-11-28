@@ -20,6 +20,7 @@ struct Player
 	bool is_moving = false;
 	float jump_accel = -550.f;
 	float lr_accel = 1200.f;
+	
 	std::queue<Item> items;
 };
 
@@ -221,16 +222,20 @@ enum class EFFECT_ASSET_ID {
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	SALMON = 0,
-	SPRITE = SALMON + 1,
-	EGG = SPRITE + 1,
-	SQUARE = EGG + 1,
-	DEBUG_LINE = SQUARE + 1,
-	SCREEN_TRIANGLE = DEBUG_LINE + 1,
-	PORTAL = SCREEN_TRIANGLE + 1,
-	GEOMETRY_COUNT = PORTAL + 1
+    SALMON = 0,
+    SPRITE = SALMON + 1,
+    EGG = SPRITE + 1,
+    SQUARE = EGG + 1,
+    DEBUG_LINE = SQUARE + 1,
+    SCREEN_TRIANGLE = DEBUG_LINE + 1,
+    PORTAL = SCREEN_TRIANGLE + 1,
+    HEALTH_BAR = PORTAL + 1,    
+    GEOMETRY_COUNT = HEALTH_BAR + 1 
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+
+
+
 
 struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
