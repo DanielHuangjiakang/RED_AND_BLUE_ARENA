@@ -109,7 +109,11 @@ private:
 	Entity portal2;
 
 	// music references
-	Mix_Music* background_music;
+	Mix_Music* snow_music;
+	Mix_Music* city_music;
+	Mix_Music* desert_music;
+	Mix_Music* mapselections_music;
+	
 
 	Mix_Chunk* end_music;
 	Mix_Chunk* hit_sound;
@@ -119,6 +123,7 @@ private:
 	Mix_Chunk* salmon_eat_sound;
 	Mix_Chunk* portal_sound;
 	Mix_Chunk* buck_shot_sound;
+	Mix_Chunk* select_music;
 	
 	Mix_Chunk* laser2_sound;
 	Mix_Chunk* healthpickup_sound;

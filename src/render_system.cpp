@@ -413,3 +413,64 @@ std::vector<std::string> RenderSystem::wrapText(const std::string& text, float m
 
     return lines;
 }
+
+// render_system.cpp
+void RenderSystem::renderHealthBar(vec2 position, vec2 size, vec3 color)
+{
+    // Use the SALMON effect for colored geometry without textures
+    const GLuint used_effect_enum = (GLuint)EFFECT_ASSET_ID::SALMON;
+    const GLuint program = (GLuint)effects[used_effect_enum];
+
+    // Set shaders
+    glUseProgram(program);
+    gl_has_errors();
+
+    const GLuint vbo = vertex_buffers[(GLuint)GEOMETRY_BUFFER_ID::HEALTH_BAR];
+    const GLuint ibo = index_buffers[(GLuint)GEOMETRY_BUFFER_ID::HEALTH_BAR];
+
+    // Bind buffers
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    gl_has_errors();
+
+    GLint in_position_loc = glGetAttribLocation(program, "in_position");
+    GLint in_color_loc = glGetAttribLocation(program, "in_color");
+    gl_has_errors();
+
+    glEnableVertexAttribArray(in_position_loc);
+    glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(ColoredVertex), (void *)0);
+    gl_has_errors();
+
+    glEnableVertexAttribArray(in_color_loc);
+    glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE, sizeof(ColoredVertex), (void *)sizeof(vec3));
+    gl_has_errors();
+
+    // Transformation
+    Transform transform;
+    transform.translate(position);
+    transform.scale(size);
+
+    // Set color uniform
+    GLint color_uloc = glGetUniformLocation(program, "fcolor");
+    glUniform3fv(color_uloc, 1, (float *)&color);
+    gl_has_errors();
+
+    // Set transformation matrices
+    GLuint transform_loc = glGetUniformLocation(program, "transform");
+    mat3 projection = createProjectionMatrix();
+    glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
+    GLuint projection_loc = glGetUniformLocation(program, "projection");
+    glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+    gl_has_errors();
+
+    // Draw the health bar
+    GLint size_of_indices = 0;
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size_of_indices);
+    gl_has_errors();
+
+    GLsizei num_indices = size_of_indices / sizeof(uint16_t);
+
+    glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+    gl_has_errors();
+}
+
