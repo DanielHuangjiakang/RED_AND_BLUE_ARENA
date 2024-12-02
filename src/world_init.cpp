@@ -382,23 +382,23 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
 	int dir = 0;
 	if (direction == 0) dir = -1;
 	else dir = 1;
- 	motion.velocity = { 500 * dir, -30 }; 
- 	motion.position = {position.x, position.y - 30.0f};;;
+ 	motion.velocity = { 500 * dir, -120 }; 
+ 	motion.position = {position.x, position.y};;;
 	motion.scale = { 15, 6 }; // width * height
 
 	auto& motion2 = registry.motions.emplace(entity2);
- 	motion2.velocity = { 500 * dir, -20 }; 
- 	motion2.position = {position.x, position.y - 20.0f};;
+ 	motion2.velocity = { 500 * dir, -40 }; 
+ 	motion2.position = {position.x, position.y};;
 	motion2.scale = { 15, 6 }; // width * height
 
 	auto& motion3 = registry.motions.emplace(entity3);
- 	motion3.velocity = { 500 * dir, 20 }; 
- 	motion3.position = {position.x, position.y + 20.0f};;
+ 	motion3.velocity = { 500 * dir, 40 }; 
+ 	motion3.position = {position.x, position.y};;
 	motion3.scale = { 15, 6 }; // width * height
 
 	auto& motion4 = registry.motions.emplace(entity4);
- 	motion4.velocity = { 500 * dir, 30 }; 
- 	motion4.position = {position.x, position.y + 30.0f};;
+ 	motion4.velocity = { 500 * dir, 120 }; 
+ 	motion4.position = {position.x, position.y};;
 	motion4.scale = { 15, 6 }; // width * height
 
 	registry.renderRequests.insert(
@@ -431,27 +431,29 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
 
 Entity createLaser(RenderSystem* renderer) {
     auto entity = Entity();
-    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-    registry.meshPtrs.emplace(entity, &mesh);
+
+    // Assign the laser texture
+    registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::LASER2, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+
     registry.lasers.emplace(entity);
 
+    // Randomize initial laser position
     std::random_device rd;
     std::default_random_engine rng(rd());
     std::uniform_real_distribution<float> distX(0.f, static_cast<float>(window_width_px));
     std::uniform_real_distribution<float> distY(0.f, static_cast<float>(window_height_px));
     vec2 position = {distX(rng), distY(rng)};
 
+    // Set the motion properties
     auto& motion = registry.motions.emplace(entity);
     motion.position = position;
-    motion.scale = {8,8};
-
-    registry.renderRequests.insert(
-        entity,
-        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE});
-    registry.colors.insert(entity, {0.0f, 1.0f, 0.0f});
+    motion.scale = {128,128}; // Scale the laser appropriately
 
     return entity;
 }
+
 
 Entity createLaserBeam(vec2 start, vec2 target) {
     auto beam = Entity();
@@ -543,7 +545,7 @@ Entity createExplosion(vec2 position) {
 
 	auto& motion = registry.motions.emplace(entity);
  	motion.position = position;
-	motion.scale = { 200, 165 }; // width * height
+	motion.scale = { 300, 248 }; // width * height
 
 	registry.renderRequests.insert(
         entity,
