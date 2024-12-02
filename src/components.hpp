@@ -41,7 +41,8 @@ struct Grenade {
 };
 
 struct Explosion {
-	bool damagable = true;
+	bool damagable1 = true;
+	bool damagable2 = true;
 };
 
 // Weapon component

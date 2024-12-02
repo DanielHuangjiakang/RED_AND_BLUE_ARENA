@@ -37,14 +37,14 @@ std::vector<Stage> stagesArray = {
     },
     // Stage 2
     {
-        {0, window_height_px - 70}, {window_width_px, 70}, 
+        {0, window_height_px - 50}, {window_width_px, 50}, 
         {{window_width_px / 4, window_height_px - 450}, {window_width_px / 2, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
         {{250, 10}, {250, 10}, {250, 10}}  // Platform sizes
     },
     // Stage 3
     {
-        {0, window_height_px - 100}, {window_width_px, 50}, 
-        {{window_width_px / 4, window_height_px - 250},{3 * window_width_px / 4, window_height_px - 250},{window_width_px / 4, window_height_px - 450},{3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
+        {0, window_height_px - 50}, {window_width_px, 50}, 
+        {{window_width_px / 4, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 250},{window_width_px / 4, window_height_px - 450},{3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
         {{300, 10}, {300, 10}, {200, 10}, {200, 10}}  // Platform sizes
     }
 };
@@ -666,8 +666,13 @@ void WorldSystem::handle_collisions()
         if (registry.players.has(entity) && registry.explosions.has(entity_other))
         {	
             Explosion& explosion = registry.explosions.get(entity_other);
-            if (explosion.damagable) {
-                Player& player = registry.players.get(entity);
+			Player& player = registry.players.get(entity);
+			int side = player.side;
+			bool player_damagable;
+			if (side == 1) player_damagable = explosion.damagable1;
+			else player_damagable = explosion.damagable2;
+
+            if (player_damagable) {
                 player.health -= 3;
 
 				if (player.health <= 0)
@@ -680,14 +685,10 @@ void WorldSystem::handle_collisions()
                     motion.angle = M_PI / 2;
                     motion.scale.y = motion.scale.y / 2;
                     movable = false;
-
-					// registry.stageSelection =0;
-					// registry.winner = 0;
-					// registry.stages.clear();
-					// restart_game();
                 }
 
-                explosion.damagable = false;
+				if (side == 1) explosion.damagable1 = false;
+				else explosion.damagable2 = false;
             }
 
         }
