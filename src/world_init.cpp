@@ -398,27 +398,29 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
 
 Entity createLaser(RenderSystem* renderer) {
     auto entity = Entity();
-    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-    registry.meshPtrs.emplace(entity, &mesh);
+
+    // Assign the laser texture
+    registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::LASER2, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+
     registry.lasers.emplace(entity);
 
+    // Randomize initial laser position
     std::random_device rd;
     std::default_random_engine rng(rd());
     std::uniform_real_distribution<float> distX(0.f, static_cast<float>(window_width_px));
     std::uniform_real_distribution<float> distY(0.f, static_cast<float>(window_height_px));
     vec2 position = {distX(rng), distY(rng)};
 
+    // Set the motion properties
     auto& motion = registry.motions.emplace(entity);
     motion.position = position;
-    motion.scale = {8,8};
-
-    registry.renderRequests.insert(
-        entity,
-        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE});
-    registry.colors.insert(entity, {0.0f, 1.0f, 0.0f});
+    motion.scale = {128,128}; // Scale the laser appropriately
 
     return entity;
 }
+
 
 Entity createLaserBeam(vec2 start, vec2 target) {
     auto beam = Entity();

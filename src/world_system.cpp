@@ -224,6 +224,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	// updating the timer for printing text.
 	toogle_life_timer -= elapsed_ms_since_last_update;
+	time_since_last_frame = elapsed_ms_since_last_update;
 
     if (total_time > 1000.0f) {
         fps = frame_count / (total_time / 1000.0f);
@@ -234,6 +235,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         total_time = 0.0f;
         frame_count = 0;
     }
+
+	if (isLaserFiring) {
+    laserFireCounter += elapsed_ms_since_last_update;
+
+    // Check if 0.25 seconds have passed
+    if (laserFireCounter >= 500.0f) {
+        // Create the laser beam
+        createLaserBeam({window_width_px / 2, 0}, target);
+		handleLaserCollisions();
+
+        // Reset the counter and the firing flag
+        laserFireCounter = 0.0f;
+        isLaserFiring = false;
+    }
+}
 
 
 
@@ -983,7 +999,7 @@ void WorldSystem::updateLaserVelocity(Entity laserEntity, Motion& player1Motion,
 
     vec2 targetPosition = (distToPlayer1 < distToPlayer2) ? player1Pos : player2Pos;
     vec2 direction = normalize(targetPosition - laserMotion.position);
-    laserMotion.velocity = direction * 100.f;
+    laserMotion.velocity = direction * 70.f;
 }
 
 float WorldSystem::calculateDistance(vec2 pos1, vec2 pos2) {
@@ -1008,7 +1024,7 @@ void WorldSystem::initializeLaserAI() {
                               player1Motion.position : player2Motion.position;
 
         vec2 direction = normalize(targetPosition - laserMotion.position);
-        laserMotion.velocity = direction * 100.0f;
+        laserMotion.velocity = direction * 70.0f;
     } };
     auto attackPlayerAction = [this]() {
     if (registry.lasers.entities.empty()) return;
@@ -1019,19 +1035,15 @@ void WorldSystem::initializeLaserAI() {
     // Determine the nearest player’s position as the laser target
     Motion& player1Motion = registry.motions.get(player1);
     Motion& player2Motion = registry.motions.get(player2);
-    vec2 targetPosition = (calculateDistance(laserMotion.position, player1Motion.position) <
-                           calculateDistance(laserMotion.position, player2Motion.position)) ?
-                          player1Motion.position : player2Motion.position;
+    target = (calculateDistance(laserMotion.position, player1Motion.position) <
+                      calculateDistance(laserMotion.position, player2Motion.position))
+                         ? player1Motion.position
+                         : player2Motion.position;
 
-    // Spawn a new laser beam entity from the top-center toward target position
-    Entity laserBeam = createLaserBeam({window_width_px / 2, 0}, targetPosition);
-
-    // Check for any players in the path and handle them
-    handleLaserCollisions();
-
-    // Reset cooldown timer after the attack
-    laserCoolDownTimer = 3000;  // 3 seconds cooldown
+    // Set the laser firing flag
+    isLaserFiring = true;
 };
+
 
 
     // Create action nodes using lambdas
@@ -1046,6 +1058,7 @@ void WorldSystem::initializeLaserAI() {
         Motion& laserMotion = registry.motions.get(laserEntity);
         Motion& playerMotion1 = registry.motions.get(player1);
         Motion& playerMotion2 = registry.motions.get(player2);
+		currentDelay = 0.0f;
 
         float distanceToPlayer1 = calculateDistance(laserMotion.position, playerMotion1.position);
         float distanceToPlayer2 = calculateDistance(laserMotion.position, playerMotion2.position);
@@ -1072,6 +1085,7 @@ bool WorldSystem::isPlayerInRange() {
 
 	float distanceToPlayer1 = calculateDistance(laserMotion.position, playerMotion1.position);
 	float distanceToPlayer2 = calculateDistance(laserMotion.position, playerMotion2.position);
+	currentDelay = 0.0f;
 
 	return distanceToPlayer1 <= laserRange || distanceToPlayer2 <= laserRange;
 }
