@@ -317,7 +317,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     }
 
 
-	// Remove entities that leave the screen on the left side
+	// Remove entities that leave the screen on the left/right side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
 	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i)
@@ -325,7 +325,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		Motion &motion = motions_registry.components[i];
 		if (motion.position.x + abs(motion.scale.x) < 0.f || motion.position.x - abs(motion.scale.x) > window_width_px)
 		{
-			if (!registry.players.has(motions_registry.entities[i])) {// don't remove the player
+			if (!registry.players.has(motions_registry.entities[i])) {
+				if (registry.grenades.has(motions_registry.entities[i])) {
+					createExplosion(motion.position);
+					Mix_PlayChannel(-1, explosion_sound, 0);
+				}
 				registry.remove_all_components_of(motions_registry.entities[i]);
 			}
 		}
@@ -552,12 +556,12 @@ void WorldSystem::handle_collisions()
 
 				if (player.direction == 1)
 				{
-					motion_player.position =  {motion_portal2.position.x + 65, motion_portal2.position.y};
+					motion_player.position = {motion_portal2.position.x + 65, motion_portal2.position.y};
 				}
 
 				else 
 				{
-					motion_player.position =  {motion_portal2.position.x - 65, motion_portal2.position.y};
+					motion_player.position = {motion_portal2.position.x - 65, motion_portal2.position.y};
 				}
 				
 			}

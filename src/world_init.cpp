@@ -510,7 +510,7 @@ Entity createExplosion(vec2 position) {
 
 	auto& motion = registry.motions.emplace(entity);
  	motion.position = position;
-	motion.scale = { 200, 165 }; // width * height
+	motion.scale = { 300, 248 }; // width * height
 
 	registry.renderRequests.insert(
         entity,
