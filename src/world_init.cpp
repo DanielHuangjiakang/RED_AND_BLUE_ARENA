@@ -34,6 +34,7 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
             TEXTURE_ASSET_ID::BLUE_RUN_1,
             TEXTURE_ASSET_ID::BLUE_RUN_2,
             TEXTURE_ASSET_ID::BLUE_RUN_3,
+
         };
         motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
     }
@@ -229,11 +230,27 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
  	motion.position = {x + (width / 2), y + (height / 2)};
 	motion.scale = {width, height};
 
+	if (registry.stageSelection==1) {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::SCIFI, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	}else if (registry.stageSelection ==2) {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	} else {
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 		{ TEXTURE_ASSET_ID::ICEPAD, // TEXTURE_COUNT indicates that no texture is needed
  			EFFECT_ASSET_ID::TEXTURED,
  			GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
  	return entity;
 }
@@ -259,11 +276,26 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 	block.height = height;
 	block.moving = moving;
 
-	registry.renderRequests.insert(
-		entity,
- 		{ TEXTURE_ASSET_ID::BLOCK, // TEXTURE_COUNT indicates that no texture is needed
+	if (registry.stageSelection ==1) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::SCIFI, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	} else if (registry.stageSelection ==2) {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
  			EFFECT_ASSET_ID::TEXTURED,
- 			GEOMETRY_BUFFER_ID::SPRITE });
+ 			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	} else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::ICEPAD, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
  	return entity;
 }
@@ -402,27 +434,29 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
 
 Entity createLaser(RenderSystem* renderer) {
     auto entity = Entity();
-    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-    registry.meshPtrs.emplace(entity, &mesh);
+
+    // Assign the laser texture
+    registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::LASER2, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+
     registry.lasers.emplace(entity);
 
+    // Randomize initial laser position
     std::random_device rd;
     std::default_random_engine rng(rd());
     std::uniform_real_distribution<float> distX(0.f, static_cast<float>(window_width_px));
     std::uniform_real_distribution<float> distY(0.f, static_cast<float>(window_height_px));
     vec2 position = {distX(rng), distY(rng)};
 
+    // Set the motion properties
     auto& motion = registry.motions.emplace(entity);
     motion.position = position;
-    motion.scale = {8,8};
-
-    registry.renderRequests.insert(
-        entity,
-        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE});
-    registry.colors.insert(entity, {0.0f, 1.0f, 0.0f});
+    motion.scale = {128,128}; // Scale the laser appropriately
 
     return entity;
 }
+
 
 Entity createLaserBeam(vec2 start, vec2 target) {
     auto beam = Entity();
