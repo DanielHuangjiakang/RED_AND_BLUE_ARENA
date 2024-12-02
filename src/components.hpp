@@ -71,6 +71,8 @@ struct Block {
 	int y;
 	int width;
 	int height;
+	int moving; // 0 = no moving, 1 = horizontal movement, 2 = vertical movement
+	vec2 travelled_dist = {0, 0};
 };
 
 struct StageChoice {
@@ -154,6 +156,7 @@ struct Stage {
     vec2 groundSize;
     std::vector<vec2> platformPositions;
     std::vector<vec2> platformSizes;
+	std::vector<int> moving;
 };
 
 /**

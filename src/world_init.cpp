@@ -1,6 +1,7 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 #include <random>
+#include <iostream>
 #include "decisionTree.hpp"
 
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction) {
@@ -256,13 +257,15 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
 
 
 // create a block based on its center (position), and its width and height
-Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height) {
+Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height, int moving) {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	auto& motion = registry.motions.emplace(entity);
- 	motion.velocity = { 0, 0 };
+	if (moving == 1) motion.velocity = { 80.f, 0.f };
+	else if (moving == 2) motion.velocity = { 0.f, 80.f };
+	else motion.velocity = { 0, 0 };
  	motion.position = position;
 	motion.scale = {width, height};
 
@@ -271,9 +274,9 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 	block.y = int(position[1] - (height / 2));
 	block.width = width;
 	block.height = height;
-	
-	if (registry.stageSelection ==1) {
+	block.moving = moving;
 
+	if (registry.stageSelection ==1) {
 		registry.renderRequests.insert(
 			entity,
 			{ TEXTURE_ASSET_ID::SCIFI, // TEXTURE_COUNT indicates that no texture is needed
@@ -286,7 +289,7 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
  			EFFECT_ASSET_ID::TEXTURED,
  			GEOMETRY_BUFFER_ID::SPRITE}
 		);
-	}else {
+	} else {
 		registry.renderRequests.insert(
 			entity,
 			{ TEXTURE_ASSET_ID::ICEPAD, // TEXTURE_COUNT indicates that no texture is needed

@@ -33,19 +33,22 @@ std::vector<Stage> stagesArray = {
     {
         {0, window_height_px - 50}, {window_width_px, 50}, 
         {{window_width_px / 4, window_height_px - 250}, {window_width_px / 2, window_height_px - 450}, {3 * window_width_px / 4, window_height_px - 250}}, // Platform positions
-        {{250, 10}, {250, 10}, {250, 10}}  // Platform sizes
+        {{250, 10}, {250, 10}, {250, 10}},  // Platform sizes
+		{0, 0, 0}  // No moving
     },
     // Stage 2
     {
         {0, window_height_px - 50}, {window_width_px, 50}, 
         {{window_width_px / 4, window_height_px - 450}, {window_width_px / 2, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
-        {{250, 10}, {250, 10}, {250, 10}}  // Platform sizes
+        {{250, 10}, {250, 10}, {250, 10}},  // Platform sizes
+		{0, 1, 0}  // Bottom moves
     },
     // Stage 3
     {
         {0, window_height_px - 50}, {window_width_px, 50}, 
         {{window_width_px / 4, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 250},{window_width_px / 4, window_height_px - 450},{3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
-        {{300, 10}, {300, 10}, {200, 10}, {200, 10}}  // Platform sizes
+        {{300, 10}, {300, 10}, {200, 10}, {200, 10}},  // Platform sizes
+		{0, 0, 0, 0}  // No moving
     }
 };
 
@@ -503,32 +506,28 @@ void WorldSystem::handle_collisions()
 		Entity entity_other = collisionsRegistry.components[i].other;
 		int direction = collisionsRegistry.components[i].direction;
 
-
 		if (registry.players.has(entity) && registry.blocks.has(entity_other)) {
 			Motion& motion = registry.motions.get(entity);
 			Block& block = registry.blocks.get(entity_other);
 			Player& player = registry.players.get(entity);
 			if (direction == 1) { // top collision
-				if (motion.velocity[1] > 0.0f) {
+				if (motion.velocity[1] >= 0.0f) {
 					motion.velocity[1] = 0.0f;
-					motion.position[1] = block.y - abs(motion.scale[1] / 2);
+					motion.position[1] = block.y - abs(motion.scale[1] / 2) + 1;
+					motion.position += block.travelled_dist;
 					player.jumpable = true;
 				}
-			} else if (direction == 2) { // bot collision
+			} // else if (direction == 2) { // bot collision
 
-			} else if (direction == 3) { // left collision
+			// } else if (direction == 3) { // left collision
 
-			} else if (direction == 4) { // right collision
+			// } else if (direction == 4) { // right collision
 
-			}
+			// }
 		}
 
 		// add collision between blocks & bullets such that bullets should disappear when colliding with the block
-		if ( registry.blocks.has(entity) && registry.bullets.has(entity_other))
-		{
-			registry.remove_all_components_of(entity_other);
-		}
-		
+		if (registry.blocks.has(entity) && registry.bullets.has(entity_other)) registry.remove_all_components_of(entity_other);
 
 		if (registry.players.has(entity) && registry.bullets.has(entity_other))
 		{	
@@ -570,31 +569,16 @@ void WorldSystem::handle_collisions()
 				Motion &motion_portal2 = registry.motions.get(portal2);
 				Motion &motion_player = registry.motions.get(entity);
 
-				if (player.direction == 1)
-				{
-					motion_player.position = {motion_portal2.position.x + 65, motion_portal2.position.y};
-				}
-
-				else 
-				{
-					motion_player.position = {motion_portal2.position.x - 65, motion_portal2.position.y};
-				}
-				
+				if (player.direction == 1) motion_player.position = {motion_portal2.position.x + 65, motion_portal2.position.y};
+				else motion_player.position = {motion_portal2.position.x - 65, motion_portal2.position.y};
 			}
 			else
 			{
 				Motion &motion_portal1 = registry.motions.get(portal1);
 				Motion &motion_player = registry.motions.get(entity);
 
-				if (player.direction == 1)
-				{
-					motion_player.position =  {motion_portal1.position.x + 65, motion_portal1.position.y};
-				}
-
-				else 
-				{
-					motion_player.position =  {motion_portal1.position.x - 65, motion_portal1.position.y};
-				}
+				if (player.direction == 1) motion_player.position =  {motion_portal1.position.x + 65, motion_portal1.position.y};
+				else motion_player.position =  {motion_portal1.position.x - 65, motion_portal1.position.y};
 			}
 			
 		}
@@ -606,43 +590,21 @@ void WorldSystem::handle_collisions()
 			Motion &motion_bullet = registry.motions.get(entity_other);
 			Motion &motion_portal2 = registry.motions.get(portal2);
 			float offset;
-			if (registry.bullets.has(entity_other)) {
-				offset = 35;
-			} else {
-				offset = 50;
-			}
+			if (registry.bullets.has(entity_other)) offset = 35;
+			else offset = 50;
 
 			// since there are just 2 portals
 			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
 			{
 				// teleport player to the pos of portal2
-				if (motion_bullet.velocity.x >= 0)
-				{
-					motion_bullet.position =  {motion_portal2.position.x + offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
-				}
-
-				else 
-				{
-					motion_bullet.position =  {motion_portal2.position.x - offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
-				}
-				
+				if (motion_bullet.velocity.x >= 0) motion_bullet.position =  {motion_portal2.position.x + offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
+				else motion_bullet.position =  {motion_portal2.position.x - offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
 			}
 			else
 			{
-
-				if (motion_bullet.velocity.x >= 0)
-				{
-					motion_bullet.position = {motion_portal1.position.x + offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
-				}
-
-				else 
-				{
-					motion_bullet.position = {motion_portal1.position.x - offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
-				}
+				if (motion_bullet.velocity.x >= 0) motion_bullet.position = {motion_portal1.position.x + offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
+				else motion_bullet.position = {motion_portal1.position.x - offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
 			}
-
-			
-
 		}
 
 		if (registry.bullets.has(entity) && registry.bullets.has(entity_other))
@@ -731,7 +693,7 @@ void WorldSystem::handle_collisions()
                 laser2.damagable = false;
             }
         }
-	}
+	}	
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
 }
@@ -1275,32 +1237,40 @@ void WorldSystem::createStage(int currentStage) {
     for (size_t i = 0; i < stage.platformPositions.size(); i++) {
         vec2 pos = stage.platformPositions[i];
         vec2 size = stage.platformSizes[i];
-        createBlock2(renderer, pos, size.x, size.y);
+        createBlock2(renderer, pos, size.x, size.y, stage.moving[i]);
     }
 
-    // Generate portal positions based on random numbers
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_int_distribution<int> dist(0, stage.platformPositions.size() - 1);
+	vec2 portal1Pos;
+    vec2 portal2Pos;
 
-    int rand1 = dist(generator);
-    int rand2 = dist(generator);
+	if (currentStage == 1) {
+		portal1Pos = stage.platformPositions[0];
+		portal2Pos = stage.platformPositions[2];
+	} else {
+		// Generate portal positions based on random numbers
+    	std::random_device rd;
+    	std::mt19937 generator(rd());
+    	std::uniform_int_distribution<int> dist(0, stage.platformPositions.size() - 1);
 
-    // Avoid placing both portals on the same platform
-    while (rand1 == rand2) {
-        rand2 = dist(generator);
-    }
+    	int rand1 = dist(generator);
+    	int rand2 = dist(generator);
 
-    // Use random platform positions for portals
-    vec2 portal1Pos = stage.platformPositions[rand1];
-    vec2 portal2Pos = stage.platformPositions[rand2];
+    	// Avoid placing both portals on the same platform
+    	while (rand1 == rand2) {
+        	rand2 = dist(generator);
+    	}
+
+    	// Use random platform positions for portals
+    	portal1Pos = stage.platformPositions[rand1];
+    	portal2Pos = stage.platformPositions[rand2];
+	}
 
 	// Create portal 1
-    portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
+    portal1 = createPortal(renderer, {portal1Pos.x + 25, portal1Pos.y - 10}, 50, 100);
     registry.colors.insert(portal1, {0.0f, 1.0f, 0.0f});
 
     // Create portal 2
-    portal2 = createPortal(renderer, {portal2Pos.x, portal2Pos.y - 10}, 50, 100);
+    portal2 = createPortal(renderer, {portal2Pos.x + 25, portal2Pos.y - 10}, 50, 100);
     registry.colors.insert(portal2, {0.0f, 1.0f, 0.0f});
 
 	// Additional stage-specific logic (e.g., lasers)
