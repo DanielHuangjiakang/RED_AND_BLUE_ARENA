@@ -18,14 +18,14 @@ struct Player
 	bool direction;  // 0 for left, 1 for right
 	int health = 10;
 	bool is_moving = false;
-	float jump_accel = -550.f;
+	float jump_accel = -600.f;
 	float lr_accel = 1200.f;
 	
 	std::queue<Item> items;
 };
 
 struct GunTimer {
-	float counter_ms = 300;
+	float counter_ms = 600;
 };
 
 struct Bullet {
