@@ -31,24 +31,35 @@ size_t ITEM_SPAWN_DELAY_MS = 8000;
 std::vector<Stage> stagesArray = {
     // Stage 1
     {
-        {0, window_height_px - 50}, {window_width_px, 50}, 
+        {{0, window_height_px - 50}}, 
+		{{window_width_px, 50}}, 
         {{window_width_px / 4, window_height_px - 250}, {window_width_px / 2, window_height_px - 450}, {3 * window_width_px / 4, window_height_px - 250}}, // Platform positions
         {{250, 10}, {250, 10}, {250, 10}},  // Platform sizes
 		{0, 0, 0}  // No moving
     },
     // Stage 2
     {
-        {0, window_height_px - 50}, {window_width_px, 50}, 
+		{{0, window_height_px - 50}}, 
+		{{window_width_px, 50}},
         {{window_width_px / 4, window_height_px - 450}, {window_width_px / 2, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
         {{250, 10}, {250, 10}, {250, 10}},  // Platform sizes
 		{0, 1, 0}  // Bottom moves
     },
     // Stage 3
     {
-        {0, window_height_px - 50}, {window_width_px, 50}, 
-        {{window_width_px / 4, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 250},{window_width_px / 4, window_height_px - 450},{3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
+        {{0, window_height_px - 50}, {window_width_px / 2, window_height_px - 50}}, 
+		{{window_width_px / 2, 50}, {window_width_px / 2, 50}}, 
+        {{window_width_px / 4, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 250}, {window_width_px / 4, window_height_px - 450}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
         {{300, 10}, {300, 10}, {200, 10}, {200, 10}},  // Platform sizes
 		{0, 0, 0, 0}  // No moving
+    },
+	// Stage 4
+    {
+        {{0, window_height_px - 50}, {window_width_px / 3 + 250, window_height_px - 50}}, 
+		{{window_width_px / 3, 50}, {2 * window_width_px / 3 - 200, 50}}, 
+        {{window_width_px / 3, window_height_px / 2 + 100}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
+        {{200, 10}, {480, 10}},  // Platform sizes
+		{2, 0}  // Smaller platform moves
     }
 };
 
@@ -240,32 +251,29 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     }
 
 	if (isLaserFiring) {
-    laserFireCounter += elapsed_ms_since_last_update;
+    	laserFireCounter += elapsed_ms_since_last_update;
 
-    // Check if 0.25 seconds have passed
-    if (laserFireCounter >= 500.0f) {
-        // Create the laser beam
-        createLaserBeam({window_width_px / 2, 0}, target);
-		handleLaserCollisions();
+    	// Check if 0.25 seconds have passed
+    	if (laserFireCounter >= 500.0f) {
+        	// Create the laser beam
+        	createLaserBeam({window_width_px / 2, 0}, target);
+			handleLaserCollisions();
 
-        // Reset the counter and the firing flag
-        laserFireCounter = 0.0f;
-        isLaserFiring = false;
-    }
-}
-
-
+        	// Reset the counter and the firing flag
+        	laserFireCounter = 0.0f;
+        	isLaserFiring = false;
+    	}
+	}
 
 	if (!registry.intro && registry.stageSelection) {
 	
 	// Remove debug info from the last step
-	while (registry.debugComponents.entities.size() > 0)
-		registry.remove_all_components_of(registry.debugComponents.entities.back());
+	while (registry.debugComponents.entities.size() > 0) registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	// Removing out of screen entities
 	auto &motions_registry = registry.motions;
   
-   // Decrease cooldown timer each frame
+   	// Decrease cooldown timer each frame
     if (laserCoolDownTimer > 0) {
         laserCoolDownTimer -= elapsed_ms_since_last_update;
     }
@@ -342,15 +350,30 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i)
 	{
 		Motion &motion = motions_registry.components[i];
+		Entity entity = motions_registry.entities[i];
 		if (motion.position.x + abs(motion.scale.x) < 0.f || motion.position.x - abs(motion.scale.x) > window_width_px)
 		{
-			if (!registry.players.has(motions_registry.entities[i])) {
-				if (registry.grenades.has(motions_registry.entities[i])) {
+			if (!registry.players.has(entity)) {
+				if (registry.grenades.has(entity)) {
 					createExplosion(motion.position);
 					Mix_PlayChannel(-1, explosion_sound, 0);
 				}
-				registry.remove_all_components_of(motions_registry.entities[i]);
+				registry.remove_all_components_of(entity);
 			}
+		}
+
+		if (motion.position.y - abs(motion.scale.y) > window_height_px)
+		{
+			if (registry.players.has(entity)) {
+				Player& player = registry.players.get(entity);
+				player.health = 0;
+				if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
+            	// end music
+            	Mix_PlayChannel(-1, end_music, 0);
+				movable = false;
+				// registry.remove_all_components_of(motions_registry.entities[i]);	
+			}
+
 		}
 	}
 
@@ -509,11 +532,12 @@ void WorldSystem::handle_collisions()
 		if (registry.players.has(entity) && registry.blocks.has(entity_other)) {
 			Motion& motion = registry.motions.get(entity);
 			Block& block = registry.blocks.get(entity_other);
+			Motion& motion_block = registry.motions.get(entity_other);
 			Player& player = registry.players.get(entity);
 			if (direction == 1) { // top collision
 				if (motion.velocity[1] >= 0.0f) {
 					motion.velocity[1] = 0.0f;
-					motion.position[1] = block.y - abs(motion.scale[1] / 2) + 1;
+					motion.position[1] = motion_block.position.y - (motion_block.scale.y / 2) +  - abs(motion.scale[1] / 2) + 1;
 					motion.position += block.travelled_dist;
 					player.jumpable = true;
 				}
@@ -668,7 +692,6 @@ void WorldSystem::handle_collisions()
 				if (side == 1) explosion.damagable1 = false;
 				else explosion.damagable2 = false;
             }
-
         }
 
         if (registry.players.has(entity) && registry.lasers2.has(entity_other))
@@ -714,7 +737,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
-		registry.stageSelection =0;
+		registry.stageSelection = 0;
 		registry.winner = 0;
 		registry.stages.clear();
 		restart_game();
@@ -1222,16 +1245,20 @@ void WorldSystem::createStage(int currentStage) {
     const Stage& stage = stagesArray[currentStage];
     
     // Create players
-    player1 = createPlayer(renderer, 1, {200, stage.groundPosition.y}, 1);
+    player1 = createPlayer(renderer, 1, {200, stage.groundPositions[0].y}, 1);
     Motion& player1Motion = registry.motions.get(player1);
-    gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.groundPosition.y - 50});
+    gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.groundPositions[0].y - 50});
 
-    player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.groundPosition.y}, 0);
+    player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.groundPositions[0].y}, 0);
     Motion& player2Motion = registry.motions.get(player2);
-    gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.groundPosition.y - 50});
+    gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.groundPositions[0].y - 50});
 
-    // Create ground
-    ground = createBlock1(renderer, stage.groundPosition.x, stage.groundPosition.y, stage.groundSize.x, stage.groundSize.y);
+    // Create grounds
+	for (size_t i = 0; i < stage.groundPositions.size(); i++) {
+        vec2 pos = stage.groundPositions[i];
+        vec2 size = stage.groundSizes[i];
+        createBlock1(renderer, pos.x, pos.y, size.x, size.y);
+    }
     
     // Create platforms
     for (size_t i = 0; i < stage.platformPositions.size(); i++) {
@@ -1246,6 +1273,9 @@ void WorldSystem::createStage(int currentStage) {
 	if (currentStage == 1) {
 		portal1Pos = stage.platformPositions[0];
 		portal2Pos = stage.platformPositions[2];
+	} else if (currentStage == 3) {
+		portal1Pos = {stage.platformPositions[1].x, stage.groundPositions[1].y};
+		portal2Pos = stage.platformPositions[1];
 	} else {
 		// Generate portal positions based on random numbers
     	std::random_device rd;
