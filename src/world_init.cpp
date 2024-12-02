@@ -33,6 +33,7 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
             TEXTURE_ASSET_ID::BLUE_RUN_1,
             TEXTURE_ASSET_ID::BLUE_RUN_2,
             TEXTURE_ASSET_ID::BLUE_RUN_3,
+
         };
         motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
     }
@@ -228,11 +229,27 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
  	motion.position = {x + (width / 2), y + (height / 2)};
 	motion.scale = {width, height};
 
+	if (registry.stageSelection==1) {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::SCIFI, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	}else if (registry.stageSelection ==2) {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	} else {
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 		{ TEXTURE_ASSET_ID::ICEPAD, // TEXTURE_COUNT indicates that no texture is needed
  			EFFECT_ASSET_ID::TEXTURED,
  			GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
  	return entity;
 }
@@ -254,12 +271,28 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 	block.y = int(position[1] - (height / 2));
 	block.width = width;
 	block.height = height;
+	
+	if (registry.stageSelection ==1) {
 
-	registry.renderRequests.insert(
-		entity,
- 		{ TEXTURE_ASSET_ID::BLOCK, // TEXTURE_COUNT indicates that no texture is needed
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::SCIFI, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	} else if (registry.stageSelection ==2) {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
  			EFFECT_ASSET_ID::TEXTURED,
- 			GEOMETRY_BUFFER_ID::SPRITE });
+ 			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	}else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::ICEPAD, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
  	return entity;
 }
