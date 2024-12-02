@@ -317,7 +317,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     }
 
 
-	// Remove entities that leave the screen on the left side
+	// Remove entities that leave the screen on the left/right side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
 	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i)
@@ -325,7 +325,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		Motion &motion = motions_registry.components[i];
 		if (motion.position.x + abs(motion.scale.x) < 0.f || motion.position.x - abs(motion.scale.x) > window_width_px)
 		{
-			if (!registry.players.has(motions_registry.entities[i])) {// don't remove the player
+			if (!registry.players.has(motions_registry.entities[i])) {
+				if (registry.grenades.has(motions_registry.entities[i])) {
+					createExplosion(motion.position);
+					Mix_PlayChannel(-1, explosion_sound, 0);
+				}
 				registry.remove_all_components_of(motions_registry.entities[i]);
 			}
 		}
@@ -421,29 +425,6 @@ void WorldSystem::restart_game() {
 	if (registry.intro) {
 		// Create intro entities
 		Entity introBackground = createIntro(renderer, window_width_px, window_height_px);
-
-		// Create stage selection button entities
-		// Entity stageButton1 = createBlock2(renderer, {window_width_px / 4, window_height_px / 2}, 200, 50);
-		// Entity stageButton2 = createBlock2(renderer, {window_width_px / 2, window_height_px / 2}, 200, 50);
-		// Entity stageButton3 = createBlock2(renderer, {3 * window_width_px / 4, window_height_px / 2}, 200, 50);
-
-		// // Handle stage button clicks
-		// if (registry.mouseButtons.has(stageButton1)) {
-		// 	// Select stage 1
-		// 	registry.stageSelection = false;
-		// 	registry.intro = false;
-		// 	// Load stage 1
-		// } else if (registry.mouseButtons.has(stageButton2)) {
-		// 	// Select stage 2
-		// 	registry.stageSelection = false;
-		// 	registry.intro = false;
-		// 	// Load stage 2
-		// } else if (registry.mouseButtons.has(stageButton3)) {
-		// 	// Select stage 3
-		// 	registry.stageSelection = false;
-		// 	registry.intro = false;
-		// 	// Load stage 3
-		// }
 	}
 
 	// Create a Stage Selection screen when a key is pressed
@@ -488,80 +469,7 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// create a new Salmon
-
     background = createBackground(renderer, window_width_px, window_height_px);
-
-	// player1 = createPlayer(renderer, 1, {200, window_height_px - 50}, 1);
-	// Motion& player1Motion = registry.motions.get(player1);
-	// gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, window_height_px - 100});
-	
-	// //red player
-	// player2 = createPlayer(renderer, 2, {window_width_px - 200, window_height_px - 50}, 0);
-	// Motion& player2Motion = registry.motions.get(player2);
-	// gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, window_height_px - 200});
-
-	// ground = createBlock1(renderer, 0, window_height_px - 50, window_width_px, 50);
-	
-	// platform1 = createBlock2(renderer, {window_width_px/4, window_height_px - 220}, 250, 20);
-	// platform2 = createBlock2(renderer, {3 * window_width_px/4, window_height_px - 220}, 250, 20);
-	// platform3 = createBlock2(renderer, {window_width_px/2, window_height_px - 390}, 250, 20);
-
-	// //generate portal position based on rand num generated
-	// random_device rd;                        
-    // mt19937 generator(rd());                 
-    // uniform_int_distribution<int> dist(0, 2);
-
-	// int rand1 = dist(generator);
-
-	// int rand2 = dist(generator);
-
-	// // Avoid hash collision
-	// while (rand1 == rand2)
-	// {
-	// 	rand2 = dist(generator);
-	// }
-	
-	// if (rand1 == 0)
-	// {
-	// 	// use platform 1 for portal 1
-	// 	portal1 = createPortal(renderer, {window_width_px/4, window_height_px - 220 - 10}, 50, 100);
-	//     registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-	// }
-	// else if (rand1 == 1)
-	// {
-	// 	// use platform 2 for portal 1
-	// 	portal1 = createPortal(renderer, {3 * window_width_px/4, window_height_px - 220 - 10}, 50, 100);
-	//     registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-	// }
-	// else if (rand1 == 2)
-	// {
-	// 	//use platform 3 for portal 1
-	// 	portal1 = createPortal(renderer, {window_width_px/2, window_height_px - 390 - 10}, 50, 100);
-	//     registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-	// }
-
-	// if (rand2 == 0)
-	// {
-	// 	// use platform 1 for portal 2
-	// 	portal2 = createPortal(renderer, {window_width_px/4, window_height_px - 220 - 10}, 50, 100);
-	//     registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-	// }
-	// else if (rand2 == 1)
-	// {
-	// 	// use platform 2 for portal 2
-	// 	portal2 = createPortal(renderer, {3 * window_width_px/4, window_height_px - 220 - 10}, 50, 100);
-	//     registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-	// }
-	// else if (rand2 == 2)
-	// {
-	// 	//use platform 3 for portal 2
-	// 	portal2 = createPortal(renderer, {window_width_px/2, window_height_px - 390 - 10}, 50, 100);
-	//     registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-	// }
-	
-  	// createLaser(renderer);
-    // initializeLaserAI();
 
 	createStage(registry.stageSelection - 1);
 	}
@@ -583,27 +491,19 @@ void WorldSystem::handle_collisions()
 		if (registry.players.has(entity) && registry.blocks.has(entity_other)) {
 			Motion& motion = registry.motions.get(entity);
 			Block& block = registry.blocks.get(entity_other);
-
-				Player& player = registry.players.get(entity);
+			Player& player = registry.players.get(entity);
 			if (direction == 1) { // top collision
-				
-				motion.velocity[1] = 0.0f;
-				
-				motion.position[1] = block.y - abs(motion.scale[1] / 2);
-				player.jumpable = true;
-        
+				if (motion.velocity[1] > 0.0f) {
+					motion.velocity[1] = 0.0f;
+					motion.position[1] = block.y - abs(motion.scale[1] / 2);
+					player.jumpable = true;
+				}
 			} else if (direction == 2) { // bot collision
-				
-				// player.jumpable = false;
-				//
+
 			} else if (direction == 3) { // left collision
-				
-				motion.velocity[0] = 0.0f;
-				motion.position[0] = block.x - (abs(motion.scale[0]) / 2);
+
 			} else if (direction == 4) { // right collision
-				
-				motion.velocity[0] = 0.0f;
-				motion.position[0] = block.x + block.width + (abs(motion.scale[0]) / 2);
+
 			}
 		}
 
@@ -656,12 +556,12 @@ void WorldSystem::handle_collisions()
 
 				if (player.direction == 1)
 				{
-					motion_player.position =  {motion_portal2.position.x + 65, motion_portal2.position.y};
+					motion_player.position = {motion_portal2.position.x + 65, motion_portal2.position.y};
 				}
 
 				else 
 				{
-					motion_player.position =  {motion_portal2.position.x - 65, motion_portal2.position.y};
+					motion_player.position = {motion_portal2.position.x - 65, motion_portal2.position.y};
 				}
 				
 			}
@@ -682,29 +582,32 @@ void WorldSystem::handle_collisions()
 			}
 			
 		}
-		if (registry.portals.has(entity) && registry.bullets.has(entity_other))
+		if (registry.portals.has(entity) && (registry.bullets.has(entity_other) || registry.grenades.has(entity_other)))
 		{
 			// updated behaviour such that bullets can be teleported too
 			Portal &portal = registry.portals.get(entity);
 			Motion &motion_portal1 = registry.motions.get(portal1);
 			Motion &motion_bullet = registry.motions.get(entity_other);
 			Motion &motion_portal2 = registry.motions.get(portal2);
+			float offset;
+			if (registry.bullets.has(entity_other)) {
+				offset = 35;
+			} else {
+				offset = 50;
+			}
 
 			// since there are just 2 portals
 			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
 			{
 				// teleport player to the pos of portal2
-
-				
-
 				if (motion_bullet.velocity.x >= 0)
 				{
-					motion_bullet.position =  {motion_portal2.position.x + 65, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
+					motion_bullet.position =  {motion_portal2.position.x + offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
 				}
 
 				else 
 				{
-					motion_bullet.position =  {motion_portal2.position.x - 65, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
+					motion_bullet.position =  {motion_portal2.position.x - offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
 				}
 				
 			}
@@ -713,12 +616,12 @@ void WorldSystem::handle_collisions()
 
 				if (motion_bullet.velocity.x >= 0)
 				{
-					motion_bullet.position =  {motion_portal1.position.x + 65, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
+					motion_bullet.position = {motion_portal1.position.x + offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
 				}
 
 				else 
 				{
-					motion_bullet.position =  {motion_portal1.position.x - 65, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
+					motion_bullet.position = {motion_portal1.position.x - offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
 				}
 			}
 
@@ -728,8 +631,10 @@ void WorldSystem::handle_collisions()
 
 		if (registry.bullets.has(entity) && registry.bullets.has(entity_other))
 		{
-			registry.remove_all_components_of(entity);
-			registry.remove_all_components_of(entity_other);
+			if (registry.bullets.get(entity).side != registry.bullets.get(entity_other).side) {
+				registry.remove_all_components_of(entity);
+				registry.remove_all_components_of(entity_other);
+			}
 		}
 
 		
@@ -934,7 +839,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		if (key == GLFW_KEY_A) {
 		if (action == GLFW_PRESS) {
-				gravity1.g[0] = -1000.f;
+				gravity1.g[0] = -p1.lr_accel;
 				p1.direction = 0; // Facing left
 				player1_left_button = true;
 				p1.is_moving = true;
@@ -950,7 +855,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		if (key == GLFW_KEY_D) {
 			if (action == GLFW_PRESS) {
-				gravity1.g[0] = +1000.f;
+				gravity1.g[0] = +p1.lr_accel;
 				p1.direction = 1; // Facing right
 				player1_right_button = true;
 				p1.is_moving = true;
@@ -967,12 +872,10 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		if (key == GLFW_KEY_W) {
 			if (action == GLFW_PRESS && p1.jumpable == true) {
-				motion1.velocity[1] += -600;
+				motion1.velocity[1] += p1.jump_accel;
 				p1.jumpable = false;
 			}
 		}
-
-		
 
 		if (key == GLFW_KEY_Q) {
 			if (action == GLFW_PRESS) player1_shooting = 1;
@@ -1001,7 +904,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		if (key == GLFW_KEY_LEFT) {
 			if (action == GLFW_PRESS) {
-				gravity2.g[0] = -1000.f;
+				gravity2.g[0] = -p2.lr_accel;
 				p2.direction = 0; // Facing left
 				if (motion2.scale.x > 0) motion2.scale.x *= -1;
 				player2_left_button = true;
@@ -1015,25 +918,9 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 			}
 		}
 
-		// for toogling +3 lives
-
-		if (key == GLFW_KEY_T && action == GLFW_PRESS)
-		{
-			toogle_life = 1;
-			// printing the text for 3s.
-			toogle_life_timer = 3000.f;
-
-			Player &player1_e = registry.players.get(player1);
-			Player &player2_e = registry.players.get(player2);
-
-			player1_e.health += 3;
-			player2_e.health += 3;
-		}
-		
-
 		if (key == GLFW_KEY_RIGHT) {
 			if (action == GLFW_PRESS) {
-				gravity2.g[0] = +1000.f;
+				gravity2.g[0] = +p1.lr_accel;
 				p2.direction = 1; // Facing right
 				player2_right_button = true;
 				p2.is_moving = true;
@@ -1050,7 +937,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 
 		if (key == GLFW_KEY_UP) {
 			if (action == GLFW_PRESS && p2.jumpable == true) {
-				motion2.velocity[1] += -600;
+				motion2.velocity[1] += p2.jump_accel;
 				
 				p2.jumpable = false;
 			}
@@ -1058,7 +945,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	}
 
 	// Debugging
-	if (key == GLFW_KEY_G ) {
+	if (key == GLFW_KEY_G) {
 		if (action == GLFW_RELEASE)
 			debugging.in_debug_mode = false;
 		else
@@ -1392,48 +1279,6 @@ void WorldSystem::createStage(int currentStage) {
     // Use random platform positions for portals
     vec2 portal1Pos = stage.platformPositions[rand1];
     vec2 portal2Pos = stage.platformPositions[rand2];
-
-	// if (currentStage == 0) {
-	// // // Create portal 1
-    // // portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
-    // // registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-
-    // // // Create portal 2
-    // // portal2 = createPortal(renderer, {portal2Pos.x, portal2Pos.y - 10}, 50, 100);
-    // // registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-
-	// //  // Additional stage-specific logic (e.g., lasers)
-    // // createLaser(renderer);
-    // // initializeLaserAI();
-	// } 
-
-	// if (currentStage == 1) {
-	// // Create portal 1
-    // portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
-    // registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-
-    // // Create portal 2
-    // portal2 = createPortal(renderer, {portal2Pos.x, portal2Pos.y - 10}, 50, 100);
-    // registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-
-	// // Additional stage-specific logic (e.g., lasers)
-    // // createLaser(renderer);
-    // // initializeLaserAI();
-	// }
-
-	// if (currentStage == 2) {
-	// // Create portal 1
-    // portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
-    // registry.colors.insert(portal1, {1.0f, 0.5f, 0.3f});
-
-    // // Create portal 2
-    // portal2 = createPortal(renderer, {portal2Pos.x, portal2Pos.y - 10}, 50, 100);
-    // registry.colors.insert(portal2, {1.0f, 0.5f, 0.3f});
-
-	// // Additional stage-specific logic (e.g., lasers)
-    // createLaser(renderer);
-    // initializeLaserAI();
-	// }
 
 	// Create portal 1
     portal1 = createPortal(renderer, {portal1Pos.x, portal1Pos.y - 10}, 50, 100);
