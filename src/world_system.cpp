@@ -578,29 +578,32 @@ void WorldSystem::handle_collisions()
 			}
 			
 		}
-		if (registry.portals.has(entity) && registry.bullets.has(entity_other))
+		if (registry.portals.has(entity) && (registry.bullets.has(entity_other) || registry.grenades.has(entity_other)))
 		{
 			// updated behaviour such that bullets can be teleported too
 			Portal &portal = registry.portals.get(entity);
 			Motion &motion_portal1 = registry.motions.get(portal1);
 			Motion &motion_bullet = registry.motions.get(entity_other);
 			Motion &motion_portal2 = registry.motions.get(portal2);
+			float offset;
+			if (registry.bullets.has(entity_other)) {
+				offset = 35;
+			} else {
+				offset = 50;
+			}
 
 			// since there are just 2 portals
 			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
 			{
 				// teleport player to the pos of portal2
-
-				
-
 				if (motion_bullet.velocity.x >= 0)
 				{
-					motion_bullet.position =  {motion_portal2.position.x + 65, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
+					motion_bullet.position =  {motion_portal2.position.x + offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
 				}
 
 				else 
 				{
-					motion_bullet.position =  {motion_portal2.position.x - 65, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
+					motion_bullet.position =  {motion_portal2.position.x - offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
 				}
 				
 			}
@@ -609,12 +612,12 @@ void WorldSystem::handle_collisions()
 
 				if (motion_bullet.velocity.x >= 0)
 				{
-					motion_bullet.position =  {motion_portal1.position.x + 65, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
+					motion_bullet.position = {motion_portal1.position.x + offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
 				}
 
 				else 
 				{
-					motion_bullet.position =  {motion_portal1.position.x - 65, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
+					motion_bullet.position = {motion_portal1.position.x - offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
 				}
 			}
 
