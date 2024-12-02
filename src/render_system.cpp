@@ -352,7 +352,7 @@ void RenderSystem::draw()
 	}
 
 	if (!registry.stageSelection && !registry.intro) {
-		renderText("SELECT STAGE", window_width_px/2-200, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+		renderText("SELECT STAGE", window_width_px/2-150, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
 	}
 
 	// Truely render to the screen
