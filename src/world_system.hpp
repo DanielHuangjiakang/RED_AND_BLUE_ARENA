@@ -146,5 +146,9 @@ private:
 	bool isMouseOverEntity(vec2 mouse_position, Entity entity);
 	void handleEntityClick(Entity entity);
 	void on_mouse_button(int button, int action, int mods);
-
+	int time_since_last_frame = 0;
+	int currentDelay = 0;
+	bool isLaserFiring = false;
+	float laserFireCounter = 0.0f; 
+	vec2 target;
 };
