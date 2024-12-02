@@ -123,16 +123,16 @@ if (registry.stageSelection != 0) {
         // Render the actual health bar (colored bar representing current health)
         renderer.renderHealthBar(hb_position, hb_size, hb_color);
 
-        // Render the HP text to the left of the health bar
-        std::string hp_text = "HP: " + std::to_string(player.health);
-        float hp_text_width = renderer.getTextWidth(hp_text, 1.0f);
-        vec2 hp_text_position = {
-            hb_position.x - hp_text_width - 5.0f, // Align text left of the health bar with some spacing
-            hb_position.y + (health_bar_size.y / 2) - 10.0f // Center the text vertically with the health bar
-        };
+        // // Render the HP text to the left of the health bar
+        // std::string hp_text = "HP: " + std::to_string(player.health);
+        // float hp_text_width = renderer.getTextWidth(hp_text, 1.0f);
+        // vec2 hp_text_position = {
+        //     hb_position.x - hp_text_width - 5.0f, // Align text left of the health bar with some spacing
+        //     hb_position.y + (health_bar_size.y / 2) - 10.0f // Center the text vertically with the health bar
+        // };
 
-        // Render the HP text with the same color as the health bar
-        renderer.renderText(hp_text, hp_text_position.x, window_height_px - hp_text_position.y, 1.0f, hb_color, glm::mat4(1.0f));
+        // // Render the HP text with the same color as the health bar
+        // renderer.renderText(hp_text, hp_text_position.x, window_height_px - hp_text_position.y, 1.0f, hb_color, glm::mat4(1.0f));
     }
 }
 
