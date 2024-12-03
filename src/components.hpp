@@ -25,7 +25,7 @@ struct Player
 };
 
 struct GunTimer {
-	float counter_ms = 800;
+	float counter_ms = 600;
 };
 
 struct Bullet {
@@ -218,6 +218,7 @@ enum class TEXTURE_ASSET_ID {
 	SCIFI = ICEPAD + 1,
 	LASER2 = SCIFI + 1,
 	JUNGLE = LASER2 + 1,
+
 	RAINBOW = JUNGLE +1,
 	SPACE= RAINBOW +1,
 	//GRASS = SPACE +1,
@@ -225,6 +226,7 @@ enum class TEXTURE_ASSET_ID {
 	BLUEWIN = SPACE +1,
 	REDWIN = BLUEWIN +1,
 	TEXTURE_COUNT = REDWIN + 1
+
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -235,7 +237,8 @@ enum class EFFECT_ASSET_ID {
 	SALMON = FONT + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1,
+	LASER_BEAM = WATER + 1,
+	EFFECT_COUNT = LASER_BEAM + 1
 };
 
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;

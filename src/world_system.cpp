@@ -167,7 +167,6 @@ GLFWwindow *WorldSystem::create_window()
 	city_music = Mix_LoadMUS(audio_path("city.wav").c_str());
 	desert_music = Mix_LoadMUS(audio_path("desert.wav").c_str());
 	mapselections_music = Mix_LoadMUS(audio_path("mapselection.wav").c_str());
-
 	end_music = Mix_LoadWAV(audio_path("end_music.wav").c_str());
 	hit_sound = Mix_LoadWAV(audio_path("hit_sound.wav").c_str());
 	shoot_sound = Mix_LoadWAV(audio_path("shoot.wav").c_str());
@@ -175,9 +174,10 @@ GLFWwindow *WorldSystem::create_window()
 	portal_sound = Mix_LoadWAV(audio_path("portal.wav").c_str());
 	buck_shot_sound = Mix_LoadWAV(audio_path("buck_shot.wav").c_str());
 
+
 	salmon_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	salmon_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
-
+	reload_sound = Mix_LoadWAV(audio_path("reload.wav").c_str());
 	laser2_sound = Mix_LoadWAV(audio_path("laser2.wav").c_str());
 	healthpickup_sound = Mix_LoadWAV(audio_path("healthpickup.wav").c_str());
 	explosion_sound = Mix_LoadWAV(audio_path("explosion.wav").c_str());
@@ -247,6 +247,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// updating the timer for printing text.
 	toogle_life_timer -= elapsed_ms_since_last_update;
 	time_since_last_frame = elapsed_ms_since_last_update;
+	// std::cout << std::to_string(rounds) << std::endl;
+	// std::cout << std::to_string(num_p1_wins) << std::endl;
 
     if (total_time > 1000.0f) {
         fps = frame_count / (total_time / 1000.0f);
@@ -258,19 +260,57 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         frame_count = 0;
     }
 
-	if (isLaserFiring) {
-    	laserFireCounter += elapsed_ms_since_last_update;
+	if (isLaserFiring) 
+	{
+		laserFireCounter += elapsed_ms_since_last_update;
 
-    	// Check if 0.25 seconds have passed
-    	if (laserFireCounter >= 500.0f) {
-        	// Create the laser beam
-        	createLaserBeam({window_width_px / 2, 0}, target);
+		// Check if 0.25 seconds have passed
+		if (laserFireCounter >= 500.0f)
+		{
+			// Create the laser beam
+			createLaserBeam({window_width_px / 2, 0}, target);
 			handleLaserCollisions();
 
-        	// Reset the counter and the firing flag
-        	laserFireCounter = 0.0f;
-        	isLaserFiring = false;
-    	}
+			// Reset the counter and the firing flag
+			laserFireCounter = 0.0f;
+			isLaserFiring = false;
+		}
+	}
+
+	// handling reload
+	if (reloading_time_p1 > 0)
+	{
+		reloading_time_p1 = std::max(reloading_time_p1 - elapsed_ms_since_last_update, 0.0f);
+
+		if (reloading_time_p1 == 0)
+		{
+			// refill the shots
+			remaining_buck_p1 = 3;
+			remaining_bullet_shots_p1 = 10;
+		}
+		
+	}
+
+	if (reloading_time_p2 > 0)
+	{
+		reloading_time_p2 = std::max(reloading_time_p2 - elapsed_ms_since_last_update, 0.0f);
+		if (reloading_time_p2 == 0)
+		{
+			// refill the shots
+			remaining_buck_p2 = 3;
+			remaining_bullet_shots_p2 = 10;
+		}
+	}
+	
+	// Check if 0.25 seconds have passed
+	if (laserFireCounter >= 500.0f) {
+		// Create the laser beam
+		createLaserBeam({window_width_px / 2, 0}, target);
+		handleLaserCollisions();
+
+		// Reset the counter and the firing flag
+		laserFireCounter = 0.0f;
+		isLaserFiring = false;
 	}
 
 	if (!registry.intro && registry.stageSelection) {
@@ -401,8 +441,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 
+	
+
 	next_item_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.items.components.size() < MAX_NUM_ITEMS && next_item_spawn < 0.f) {
+	if (registry.items.components.size() < MAX_NUM_ITEMS && next_item_spawn < 0.f && item_toogle == 1 && item_toogle == true) {
 		next_item_spawn = (3 * ITEM_SPAWN_DELAY_MS / 4) + uniform_dist(rng) * (ITEM_SPAWN_DELAY_MS / 4);
 
 		// do rejection sampling on a circle with a hole in the center
@@ -486,8 +528,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 // Reset the world state to its initial state
 
 void WorldSystem::restart_game() {
-	toogle_life = 0;
-	toogle_life_timer = 0;
+	remaining_bullet_shots_p1 = 10;
+	remaining_bullet_shots_p2 = 10;
+	remaining_buck_p1 = 3;
+	remaining_buck_p2 = 3;
+
+	num_p1_wins = 0;
+	num_p2_wins = 0;
+
+	if (rounds <= 6)
+	{
+		laser_toogle = true;
+	}
+
+	if (rounds <= 3)
+	{
+		item_toogle = true;
+	}
+	
+	// resetting rounds per map
+
 	// Create an intro screen
 	if (registry.intro) {
 		// Create intro entities
@@ -507,6 +567,20 @@ void WorldSystem::restart_game() {
 		Entity stageButton5 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2+120, 400, 200, 5);
 		//Entity stageButton6 = createStageChoice(renderer, 3 * window_width_px/4-100, window_height_px / 2+120, 400, 200, 6);
 
+	}
+
+	if (registry.stageSelection == 1) {
+		Mix_PlayMusic(city_music, -1); // Play city music
+		Mix_VolumeMusic(10);
+	} else if (registry.stageSelection == 2) {
+		Mix_PlayMusic(desert_music, -1); // Play desert music
+		Mix_VolumeMusic(10);
+	} else if (registry.stageSelection == 3) {
+		Mix_PlayMusic(snow_music, -1); // Play snow music
+			Mix_VolumeMusic(10);
+	} else if (registry.stageSelection == 0 && !registry.intro) {
+		Mix_PlayMusic(mapselections_music, -1);
+		Mix_VolumeMusic(15);
 	}
 
 	if (registry.stageSelection == 1) {
@@ -603,13 +677,33 @@ void WorldSystem::handle_collisions()
 						motion.angle = M_PI / 2;
 						motion.scale.y = motion.scale.y / 2;
 						movable = false;
-						registry.winner = player.side == 1 ? 2 : 1;
-						createBackground(renderer, 	window_width_px, window_height_px);
+						
+						rounds -= 1;
+
+						if (entity != player1) 
+						{
+							// player 1 wins
+							num_p1_wins += 1;
+						}
+						else 
+						{
+							num_p2_wins += 1;
+						}
+            
+            if (rounds ==0) {
+               registry.winner = (num_p1_wins > num_p2_wins) ?  1 : 2;
+              createBackground(renderer, 	window_width_px, window_height_px);
+          
+            }
+						// write something to handle the events where rounds == 0 & display the victory screen, victory conditions: over 9 rounds (has to play 9 rounds),
+						// the player won wins more rounds will be the victor: num_p2_wins = rounds - num_p1_wins;
+
 					}
 					registry.remove_all_components_of(entity_other);
 				}
 			}
 		}
+
 
 		if (registry.portals.has(entity) && (registry.bullets.has(entity_other) || registry.grenades.has(entity_other) || registry.players.has(entity_other)))
 		{
@@ -691,8 +785,9 @@ void WorldSystem::handle_collisions()
 
 				if (player.health <= 0)
                 {
-					registry.winner = player.side == 1 ? 2 : 1;
-					createBackground(renderer, 	window_width_px, window_height_px);
+          
+// 					registry.winner = player.side == 1 ? 2 : 1;
+// 					createBackground(renderer, 	window_width_px, window_height_px);
 
 					player.health = 0;
                     if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
@@ -704,7 +799,6 @@ void WorldSystem::handle_collisions()
                     movable = false;
 
                 }
-
 				if (side == 1) explosion.damagable1 = false;
 				else explosion.damagable2 = false;
             }
@@ -719,8 +813,8 @@ void WorldSystem::handle_collisions()
 		
 				if (player.health <= 0)
                 {
-					registry.winner = player.side == 1 ? 2 : 1;
-					createBackground(renderer, 	window_width_px, window_height_px);
+// 					registry.winner = player.side == 1 ? 2 : 1;
+// 					createBackground(renderer, 	window_width_px, window_height_px);
 
 					player.health = 0;
                     if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
@@ -759,6 +853,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		registry.stageSelection = 0;
 		registry.winner = 0;
 		registry.stages.clear();
+		rounds = 9;
 		ScreenState &screen = registry.screenStates.components[0];
 		screen.darken_screen_factor = 0;
 		restart_game();
@@ -1114,8 +1209,8 @@ void WorldSystem::handleLaserCollisions() {
 					player.health -= 1;
 					Mix_PlayChannel(-1, laser_sound, 0);
 					if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
-						registry.winner = player.side == 1 ? 2 : 1;
-						createBackground(renderer, window_width_px, window_height_px);
+// 						registry.winner = player.side == 1 ? 2 : 1;
+// 						createBackground(renderer, window_width_px, window_height_px);
 						player.health = 0;
 						registry.deathTimers.emplace(playerEntity);
 						Mix_PlayChannel(-1, end_music, 0);
@@ -1143,18 +1238,42 @@ void WorldSystem::on_shoot() {
         if (p1.direction == 0) dir = -1;
         else dir = 1;
         vec2 bullet_position = motion1.position + vec2({abs(motion1.scale.x / 2) * dir, 0.f});
-        if (player1_shooting == 1) {
+        if (player1_shooting == 1 && remaining_bullet_shots_p1 >= 1 && reloading_time_p1 == 0) 
+		{
             Entity bullet = createBullet(renderer, 1, bullet_position, p1.direction);
             registry.colors.insert(bullet, {0.6f, 1.0f, 0.6f});
 			Mix_PlayChannel(-1, shoot_sound, 0);
-        } else {
-            auto bullets = createBuckshot(renderer, 1, bullet_position, p1.direction);
+			remaining_bullet_shots_p1 -= 1;
+        } 
+		else if (remaining_bullet_shots_p1 < 1 && player1_shooting == 1)
+		{
+			// time to reload
+			// check for reload timer
+			if (reloading_time_p1 <= 0)
+			{
+				reloading_time_p1 = 6.0f;
+			}
+			Mix_PlayChannel(-1, reload_sound,0);
+		}
+		else if (player1_shooting == 2 && remaining_buck_p1 >= 1 && reloading_time_p1 == 0) 
+		{
+			auto bullets = createBuckshot(renderer, 1, bullet_position, p1.direction);
             for (size_t i = 0; i < bullets.size(); i++)
             {
                 registry.colors.insert(bullets[i], {0.6f, 1.0f, 0.6f});
             }
 			Mix_PlayChannel(-1, buck_shot_sound, 0);
-        }
+			remaining_buck_p1 -= 1;
+		}
+		else 
+		{
+			// reloading the buck shots
+			if (reloading_time_p1 <= 0)
+			{
+				reloading_time_p1 = 6.0f;
+			}
+			Mix_PlayChannel(-1, reload_sound,0);
+		}
         registry.gunTimers.emplace(player1);
     }
     if (!registry.gunTimers.has(player2) && player2_shooting) {
@@ -1164,18 +1283,42 @@ void WorldSystem::on_shoot() {
         if (p2.direction == 0) dir = -1;
         else dir = 1;
         vec2 bullet_position = motion2.position + vec2({abs(motion2.scale.x / 2) * dir, 0.f});
-        if (player2_shooting == 1) {
+        if (player2_shooting == 1 && remaining_bullet_shots_p2 >= 1 && reloading_time_p2 == 0) 
+		{
             Entity bullet = createBullet(renderer, 2, bullet_position, p2.direction);
             registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
 			Mix_PlayChannel(-1, shoot_sound, 0);
-        } else {
-            auto bullets = createBuckshot(renderer, 2, bullet_position, p2.direction);
+			remaining_bullet_shots_p2 -= 1;
+        } 
+		else if (remaining_bullet_shots_p2 < 1 && player2_shooting == 1)
+		{
+			// time to reload
+			// check for reload timer
+			if (reloading_time_p2 <= 0)
+			{
+				reloading_time_p2 = 6.0f;
+			}
+			Mix_PlayChannel(-1, reload_sound,0);
+		}
+		else if (player2_shooting == 2 && remaining_buck_p2 >= 1 && reloading_time_p2 == 0) 
+		{
+			auto bullets = createBuckshot(renderer, 2, bullet_position, p2.direction);
             for (size_t i = 0; i < bullets.size(); i++)
             {
                 registry.colors.insert(bullets[i], {1.0f, 0.84f, 0.0f});
             }
 			Mix_PlayChannel(-1, buck_shot_sound, 0);
-        }
+			remaining_buck_p2 -= 1;
+		}
+		else 
+		{
+			// reloading the buck shots
+			if (reloading_time_p2 <= 0)
+			{
+				reloading_time_p2 = 6.0f;
+			}
+			Mix_PlayChannel(-1, reload_sound,0);
+		}
         registry.gunTimers.emplace(player2);
     }
 }
@@ -1340,7 +1483,11 @@ void WorldSystem::createStage(int currentStage) {
 	}
 
 	// Additional stage-specific logic (e.g., lasers)
-    createLaser(renderer);
+
+	if (rounds <= 6)
+	{
+		createLaser(renderer);
+	}
     initializeLaserAI();
 }
 
