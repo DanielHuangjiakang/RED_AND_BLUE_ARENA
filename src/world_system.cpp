@@ -533,8 +533,6 @@ void WorldSystem::restart_game() {
 	remaining_buck_p1 = 3;
 	remaining_buck_p2 = 3;
 
-	num_p1_wins = 0;
-	num_p2_wins = 0;
 
 	if (rounds <= 6)
 	{
