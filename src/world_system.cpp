@@ -392,6 +392,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
             	// end music
             	Mix_PlayChannel(-1, end_music, 0);
 				movable = false;
+				registry.winner = player.side == 1 ? 2 : 1;
+				createBackground(renderer, window_width_px, window_height_px);
+
 				// registry.remove_all_components_of(motions_registry.entities[i]);	
 			}
 
@@ -453,6 +456,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 			registry.deathTimers.remove(entity);
 			screen.darken_screen_factor = 0;
+			registry.winner =0;
 			restart_game();
 			return true;
 		}
@@ -491,7 +495,7 @@ void WorldSystem::restart_game() {
 	}
 
 	// Create a Stage Selection screen when a key is pressed
-	if (!registry.intro && !registry.stageSelection) {
+	if (!registry.intro && !registry.stageSelection && !registry.winner) {
 		// Create stage selection entities
 		Entity stageSelectionBackground = createBackground(renderer, window_width_px, window_height_px);
 
@@ -500,8 +504,8 @@ void WorldSystem::restart_game() {
 		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2-100, 400, 200, 2);
 		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px/4-100, window_height_px / 2-100, 400, 200, 3);
 		Entity stageButton4 = createStageChoice(renderer, 10, window_height_px / 2+120, 400, 200, 4);
-		//Entity stageButton5 = createStageChoice(renderer, 3 * window_width_px / 4+100, window_height_px / 2, 300, 150, 5);
-		//Entity stageButton6 = createStageChoice(renderer, 3 * window_width_px / 4+100, window_height_px / 2, 300, 150, 6);
+		Entity stageButton5 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2+120, 400, 200, 5);
+		//Entity stageButton6 = createStageChoice(renderer, 3 * window_width_px/4-100, window_height_px / 2+120, 400, 200, 6);
 
 	}
 
@@ -600,6 +604,7 @@ void WorldSystem::handle_collisions()
 						motion.scale.y = motion.scale.y / 2;
 						movable = false;
 						registry.winner = player.side == 1 ? 2 : 1;
+						createBackground(renderer, 	window_width_px, window_height_px);
 					}
 					registry.remove_all_components_of(entity_other);
 				}
@@ -686,6 +691,9 @@ void WorldSystem::handle_collisions()
 
 				if (player.health <= 0)
                 {
+					registry.winner = player.side == 1 ? 2 : 1;
+					createBackground(renderer, 	window_width_px, window_height_px);
+
 					player.health = 0;
                     if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
                     // end music
@@ -694,6 +702,7 @@ void WorldSystem::handle_collisions()
                     motion.angle = M_PI / 2;
                     motion.scale.y = motion.scale.y / 2;
                     movable = false;
+
                 }
 
 				if (side == 1) explosion.damagable1 = false;
@@ -710,6 +719,9 @@ void WorldSystem::handle_collisions()
 		
 				if (player.health <= 0)
                 {
+					registry.winner = player.side == 1 ? 2 : 1;
+					createBackground(renderer, 	window_width_px, window_height_px);
+
 					player.health = 0;
                     if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
                     // end music
@@ -1102,6 +1114,8 @@ void WorldSystem::handleLaserCollisions() {
 					player.health -= 1;
 					Mix_PlayChannel(-1, laser_sound, 0);
 					if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
+						registry.winner = player.side == 1 ? 2 : 1;
+						createBackground(renderer, window_width_px, window_height_px);
 						player.health = 0;
 						registry.deathTimers.emplace(playerEntity);
 						Mix_PlayChannel(-1, end_music, 0);
