@@ -378,6 +378,63 @@ void RenderSystem::draw()
 		renderText("SELECT STAGE", window_width_px/2-150, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
 	}
 
+
+	if (registry.stageSelection == 6) {
+		
+		// Display item descriptions above each item
+		{
+			// Item positions
+			vec2 item1_position = vec2(170.0f, window_height_px/2 - 80.0f);
+			vec2 item2_position = vec2(490.0f, window_height_px/2 + 20.0f);
+			vec2 item3_position = vec2(850.0f, window_height_px/2 - 80.0f);
+
+			// Item 1 Description
+			{
+				std::string item_description = "Health Potion: Restore Health (+ 3)";
+				float text_scale = 0.8f;
+				glm::vec3 text_color = {1.0f, 1.0f, 0.0f};
+				renderText(item_description, item1_position.x, item1_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
+
+			// Item 2 Description
+			{
+				std::string item_description = "Grenade: Causes Explosion (- 3)";
+				float text_scale = 0.8f;
+				glm::vec3 text_color = {1.0f, 1.0f, 0.0f};
+				renderText(item_description, item2_position.x, item2_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
+
+			// Item 3 Description
+			{
+				std::string item_description = "Laser: Powerful Beam (- 3)";
+				float text_scale = 0.8f;
+				glm::vec3 text_color = {1.0f, 1.0f, 0.0f};
+				renderText(item_description, item3_position.x, item3_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
+		}
+
+		// Display "Can Teleport" above portals
+		{
+			// Portal positions
+			vec2 portal1_position = vec2(5.0f, 150.0f);
+			vec2 portal2_position = vec2(window_width_px - 200.0f, 150.0f);
+
+			std::string portal_text = "Portal: Can Teleport";
+			float text_scale = 0.8f;
+			glm::vec3 text_color = {0.0f, 1.0f, 1.0f}; 
+
+			// Portal 1 Text
+			{
+				renderText(portal_text, portal1_position.x, portal1_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
+
+			// Portal 2 Text
+			{
+				renderText(portal_text, portal2_position.x, portal2_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
+		}
+	}
+
 	// Truely render to the screen
 	drawToScreen();
 

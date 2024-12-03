@@ -31,6 +31,7 @@ Entity createBullet(RenderSystem* renderer, int side, vec2 position, int directi
 Entity createRandomItem(RenderSystem* renderer, Motion motion);
 Entity createGrenade(RenderSystem* renderer, vec2 position, int direction, int side);
 Entity createExplosion(vec2 position);
+Entity createSpecificItem(RenderSystem* renderer, Motion motion, int itemID);
 
 
 // the arrow
