@@ -294,11 +294,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 	
-	
-	
-
-
-
 	// Check if 0.25 seconds have passed
 	if (laserFireCounter >= 500.0f) {
 		// Create the laser beam
