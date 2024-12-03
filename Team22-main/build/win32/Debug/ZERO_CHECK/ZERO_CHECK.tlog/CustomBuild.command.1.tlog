@@ -1,0 +1,10 @@
+^C:\USERS\EDWARD\DESKTOP\TEAM22-MAIN\BUILD\CMAKEFILES\F7ECB530F969C0A468B3F0BDE608A044\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Edward/Desktop/Team22-main -BC:/Users/Edward/Desktop/Team22-main/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Edward/Desktop/Team22-main/build/salmon.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

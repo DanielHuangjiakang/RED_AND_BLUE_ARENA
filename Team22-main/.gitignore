@@ -1,0 +1,10 @@
+out
+.vs
+CMakeFiles
+salmon
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+.idea
+cmake-build-debug
+CMakeLists.txt

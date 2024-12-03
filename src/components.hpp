@@ -25,7 +25,7 @@ struct Player
 };
 
 struct GunTimer {
-	float counter_ms = 800;
+	float counter_ms = 600;
 };
 
 struct Bullet {
@@ -219,6 +219,7 @@ enum class TEXTURE_ASSET_ID {
 	LASER2 = SCIFI + 1,
 	JUNGLE = LASER2 + 1,
 	TEXTURE_COUNT = JUNGLE + 1
+
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

@@ -484,7 +484,6 @@ Entity createLaser(RenderSystem* renderer) {
 }
 
 
-
 Entity createLaserBeam(vec2 start, vec2 target) {
     auto beam = Entity();
 
