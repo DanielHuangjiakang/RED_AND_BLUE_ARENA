@@ -187,6 +187,13 @@ Entity createBackground(RenderSystem* renderer, int width, int height) {
             EFFECT_ASSET_ID::TEXTURED,
             GEOMETRY_BUFFER_ID::SPRITE}
         );
+	} else if (registry.stageSelection == 6) {
+		registry.renderRequests.insert(
+            entity,
+            {TEXTURE_ASSET_ID::TUTORIAL,
+            EFFECT_ASSET_ID::TEXTURED,
+            GEOMETRY_BUFFER_ID::SPRITE}
+        );
 	} else {
 		registry.renderRequests.insert(
             entity,
@@ -244,7 +251,14 @@ Entity createStageChoice(RenderSystem* renderer, int x, int y, int width, int he
                 EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE}
         );
-    } else {
+    } else if (stage == 6) {
+		registry.renderRequests.insert(
+                entity,
+                {TEXTURE_ASSET_ID::BLACK,
+                EFFECT_ASSET_ID::TEXTURED,
+                GEOMETRY_BUFFER_ID::SPRITE}
+            );
+	} else {
 		registry.renderRequests.insert(
                 entity,
                 {TEXTURE_ASSET_ID::SPACE,
@@ -658,4 +672,36 @@ Entity createLaserBeam2(vec2 start, int direction, int side) {
 	auto& lifetime = registry.lifetimes.emplace(beam);
     lifetime.counter_ms = 300; // Laser beam lasts for 1000 milliseconds (1 second)
     return beam;
+}
+
+Entity createSpecificItem(RenderSystem* renderer, Motion motion, int itemID) {
+    auto entity = Entity();
+    Item& item = registry.items.emplace(entity);
+    item.id = itemID;
+
+    Motion& item_motion = registry.motions.emplace(entity);
+    item_motion = motion;
+
+    if (item.id == 0) {
+        registry.renderRequests.insert(
+            entity,
+            {TEXTURE_ASSET_ID::POTION, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+        );  
+    }
+    else if (item.id == 1) {
+        registry.renderRequests.insert(
+            entity,
+            {TEXTURE_ASSET_ID::GRENADE, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+        );
+    }
+    else if (item.id == 2) {
+        item_motion.scale = {45, 20};
+        item_motion.angle = 3 * M_PI / 4;
+        registry.renderRequests.insert(
+            entity,
+            {TEXTURE_ASSET_ID::LASER, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE}
+        );
+    }
+
+    return entity;
 }

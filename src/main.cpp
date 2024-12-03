@@ -90,7 +90,7 @@ int main()
 
 		// Render health bars and HP text for players
 // Render health bars and HP text for players
-if (registry.stageSelection != 0) {
+if (registry.stageSelection != 0 && registry.stageSelection != 6) {
     for (Entity player_entity : registry.players.entities) {
         Player& player = registry.players.get(player_entity);
         Motion& motion = registry.motions.get(player_entity);

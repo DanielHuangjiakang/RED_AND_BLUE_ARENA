@@ -22,6 +22,14 @@
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
+struct ItemSpawnInfo {
+    vec2 position;
+    int itemType;
+    Entity entity; // The item entity
+    float respawnTimer;
+};
+
+
 class WorldSystem
 {
 public:
@@ -70,7 +78,12 @@ public:
 	int num_p2_wins = 0; // keeping track of p2 wins
 
 	int rounds = 9; // changing the maps will reset rounds
+
 	std::deque<std::string> match_records;
+    std::vector<std::pair<vec2, int>> itemSpawnPositions; // Stores the positions and types of items for respawning
+    std::vector<float> itemRespawnTimers;                 // Timers for each item respawn
+	std::vector<ItemSpawnInfo> itemSpawnInfos;
+    const float ITEM_RESPAWN_DELAY_MS = 1000.0f;          // 5 seconds delay
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
@@ -113,6 +126,8 @@ private:
 	bool player2_left_button = false;
 	int player2_shooting = 0;
 	bool player2_item = true;
+	bool player1_fall = false;
+	bool player2_fall = false;
 
 	float next_item_spawn;
 
@@ -134,6 +149,7 @@ private:
 	Mix_Music* city_music;
 	Mix_Music* desert_music;
 	Mix_Music* mapselections_music;
+	Mix_Music* tutorial_music;
 	
 
 	Mix_Chunk* end_music;
@@ -173,4 +189,5 @@ private:
 	bool isLaserFiring = false;
 	float laserFireCounter = 0.0f; 
 	vec2 target;
+
 };

@@ -68,7 +68,18 @@ std::vector<Stage> stagesArray = {
         {{200, window_height_px / 2 + 100}, {window_width_px - 200, window_height_px / 2 + 100}, {window_width_px / 2, window_height_px - 450}, {window_width_px / 2, window_height_px - 50}}, // Platform positions
         {{150, 10}, {150, 10}, {150, 10}, {150, 10}},  // Platform sizes
 		{2, 2, 1, 3}  // All platforms move
-    }
+    },
+	// Tutorial Stage 6
+	{
+    {{0, window_height_px - 50}}, {{window_width_px, 50}},
+    {
+        {window_width_px / 4, window_height_px - 200},
+        {window_width_px / 2, window_height_px - 300},
+        {3 * window_width_px / 4, window_height_px - 200}
+    }, // Platform positions
+    {{200, 10}, {200, 10}, {200, 10}},  // Platform sizes
+    {0, 0, 0}
+	}
 };
 
 // create the underwater world
@@ -167,6 +178,7 @@ GLFWwindow *WorldSystem::create_window()
 	city_music = Mix_LoadMUS(audio_path("city.wav").c_str());
 	desert_music = Mix_LoadMUS(audio_path("desert.wav").c_str());
 	mapselections_music = Mix_LoadMUS(audio_path("mapselection.wav").c_str());
+	tutorial_music = Mix_LoadMUS(audio_path("tutorial.wav").c_str());
 	end_music = Mix_LoadWAV(audio_path("end_music.wav").c_str());
 	hit_sound = Mix_LoadWAV(audio_path("hit_sound.wav").c_str());
 	shoot_sound = Mix_LoadWAV(audio_path("shoot.wav").c_str());
@@ -201,6 +213,7 @@ GLFWwindow *WorldSystem::create_window()
 				audio_path("healthpickup.wav").c_str(),
 				audio_path("explosion.wav").c_str(),
 				audio_path("select.wav").c_str(),
+				audio_path("tutorial.wav").c_str(),
 				audio_path("laser.wav").c_str());
 		return nullptr;
 	}
@@ -259,6 +272,27 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         total_time = 0.0f;
         frame_count = 0;
     }
+
+	// Only execute this logic in Stage 6 (Tutorial Mode)
+	if (registry.stageSelection == 6) {
+		for (size_t i = 0; i < itemSpawnInfos.size(); ++i) {
+			// Check if the item entity no longer has an Item component
+			if (!registry.items.has(itemSpawnInfos[i].entity)) {
+				if (itemSpawnInfos[i].respawnTimer > 0.0f) {
+					// Decrease the respawn timer
+					itemSpawnInfos[i].respawnTimer -= elapsed_ms_since_last_update;
+					if (itemSpawnInfos[i].respawnTimer <= 0.0f) {
+						// Respawn the item
+						Motion item_motion;
+						item_motion.position = itemSpawnInfos[i].position;
+						item_motion.scale = {30, 45};
+						Entity itemEntity = createSpecificItem(renderer, item_motion, itemSpawnInfos[i].itemType);
+						itemSpawnInfos[i].entity = itemEntity;
+					}
+				}
+			}
+		}
+	}
 
 	if (isLaserFiring) 
 	{
@@ -427,13 +461,29 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		{
 			if (registry.players.has(entity)) {
 				Player& player = registry.players.get(entity);
-				player.health = 0;
-				if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
-            	// end music
-            	Mix_PlayChannel(-1, end_music, 0);
-				movable = false;
-				registry.winner = player.side == 1 ? 2 : 1;
-				createBackground(renderer, window_width_px, window_height_px);
+				if (player.side == 1 && !player1_fall) {
+					player.health = 0;
+					if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
+					// end music
+					Mix_PlayChannel(-1, end_music, 0);
+					movable = false;
+					rounds--;
+					num_p2_wins++;
+					player1_fall = true;
+				}
+
+				if (player.side == 2 && !player2_fall) {
+					player.health = 0;
+					if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
+					// end music
+					Mix_PlayChannel(-1, end_music, 0);
+					movable = false;
+					rounds--;
+					num_p1_wins++;
+					player2_fall = true;
+				}
+				// registry.winner = player.side == 1 ? 2 : 1;
+				// createBackground(renderer, window_width_px, window_height_px);
 
 				// registry.remove_all_components_of(motions_registry.entities[i]);	
 			}
@@ -444,7 +494,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	
 
 	next_item_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.items.components.size() < MAX_NUM_ITEMS && next_item_spawn < 0.f && item_toogle == 1 && item_toogle == true) {
+	if (registry.items.components.size() < MAX_NUM_ITEMS && next_item_spawn < 0.f && registry.stageSelection != 6 && item_toogle == true) {
 		next_item_spawn = (3 * ITEM_SPAWN_DELAY_MS / 4) + uniform_dist(rng) * (ITEM_SPAWN_DELAY_MS / 4);
 
 		// do rejection sampling on a circle with a hole in the center
@@ -532,14 +582,14 @@ void WorldSystem::restart_game() {
 	remaining_bullet_shots_p2 = 10;
 	remaining_buck_p1 = 3;
 	remaining_buck_p2 = 3;
-
-
-	if (rounds <= 6)
+	player1_fall = false;
+	player2_fall = false;
+	if (rounds <= 7)
 	{
 		laser_toogle = true;
 	}
 
-	if (rounds <= 3)
+	if (rounds <= 5)
 	{
 		item_toogle = true;
 	}
@@ -563,8 +613,8 @@ void WorldSystem::restart_game() {
 		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px/4-100, window_height_px / 2-100, 400, 200, 3);
 		Entity stageButton4 = createStageChoice(renderer, 10, window_height_px / 2+120, 400, 200, 4);
 		Entity stageButton5 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2+120, 400, 200, 5);
-		//Entity stageButton6 = createStageChoice(renderer, 3 * window_width_px/4-100, window_height_px / 2+120, 400, 200, 6);
-
+		// Tutorial Stage Button
+    	Entity tutorialButton = createStageChoice(renderer, 3 * window_width_px/4-100, window_height_px / 2+120, 400, 200, 6);
 	}
 
 	if (registry.stageSelection == 1) {
@@ -579,22 +629,13 @@ void WorldSystem::restart_game() {
 	} else if (registry.stageSelection == 0 && !registry.intro) {
 		Mix_PlayMusic(mapselections_music, -1);
 		Mix_VolumeMusic(15);
-	}
-
-	if (registry.stageSelection == 1) {
+	} else if (registry.stageSelection == 6) { // Tutorial Stage
+    	Mix_PlayMusic(tutorial_music, -1); 
+    	Mix_VolumeMusic(15);
+	} else if (registry.stageSelection == 5 && registry.stageSelection == 4) {
 		Mix_PlayMusic(city_music, -1); // Play city music
 		Mix_VolumeMusic(10);
-	} else if (registry.stageSelection == 2) {
-		Mix_PlayMusic(desert_music, -1); // Play desert music
-		Mix_VolumeMusic(10);
-	} else if (registry.stageSelection == 3) {
-		Mix_PlayMusic(snow_music, -1); // Play snow music
-			Mix_VolumeMusic(10);
-	} else if (registry.stageSelection == 0 && !registry.intro) {
-		Mix_PlayMusic(mapselections_music, -1);
-		Mix_VolumeMusic(15);
 	}
-
 
 	if (!registry.intro && registry.stageSelection) {
 	movable = true;
@@ -660,7 +701,9 @@ void WorldSystem::handle_collisions()
 			if (player.side != registry.bullets.get(entity_other).side)
 			{
 				if (player.health != 0) {
-					player.health -= 1;
+					if (registry.stageSelection != 6) {
+						player.health -= 1;
+					}
 			
 					// hit sound
 					Mix_PlayChannel(-1, hit_sound, 0);
@@ -689,7 +732,7 @@ void WorldSystem::handle_collisions()
 						}
             
             if (rounds ==0) {
-               registry.winner = (num_p1_wins > num_p2_wins) ?  1 : 2;
+            	registry.winner = (num_p1_wins > num_p2_wins) ?  1 : 2;
               createBackground(renderer, 	window_width_px, window_height_px);
           
             }
@@ -714,7 +757,7 @@ void WorldSystem::handle_collisions()
 			if (registry.bullets.has(entity_other)) offset = 35;
 			else if (registry.grenades.has(entity_other)) offset = 50;
 			else offset = 65;
-
+			Mix_PlayChannel(-1, portal_sound, 0);
 			// since there are just 2 portals
 			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
 			{
@@ -748,14 +791,31 @@ void WorldSystem::handle_collisions()
 		{
 			Player &player = registry.players.get(entity);
 			Item item = registry.items.get(entity_other);
+
+			// Allow the player to pick up the item
 			if (player.items.size() == 3) {
 				player.items.pop();
 			}
 			player.items.push(item);
+
+			// Remove the item from the registry
 			registry.items.remove(entity_other);
 			registry.remove_all_components_of(entity_other);
-			if (next_item_spawn < 5000.0f) {
-				next_item_spawn = 5000.0f;
+
+			// If we're in Stage 4, update the ItemSpawnInfo
+			if (registry.stageSelection == 6) {
+				for (size_t i = 0; i < itemSpawnInfos.size(); ++i) {
+					if (itemSpawnInfos[i].entity == entity_other) {
+						itemSpawnInfos[i].entity = Entity(); // Invalidate the entity
+						itemSpawnInfos[i].respawnTimer = ITEM_RESPAWN_DELAY_MS; // Set the respawn timer
+						break;
+					}
+				}
+			} else {
+				// For other stages, you might have different logic
+				if (next_item_spawn < 5000.0f) {
+					next_item_spawn = 5000.0f;
+				}
 			}
 		}
 
@@ -779,7 +839,9 @@ void WorldSystem::handle_collisions()
 			else player_damagable = explosion.damagable2;
 
             if (player_damagable) {
-                player.health -= 3;
+                if (registry.stageSelection != 6) {
+					 player.health -= 3;
+				}
 
 				if (player.health <= 0)
                 {
@@ -807,7 +869,9 @@ void WorldSystem::handle_collisions()
             Laser2& laser2 = registry.lasers2.get(entity_other);
             if (registry.players.get(entity).side != registry.lasers2.get(entity_other).side && laser2.damagable) {
                 Player& player = registry.players.get(entity);
-                player.health -= 3;
+                if (registry.stageSelection != 6) {
+					 player.health -= 3;
+				}
 		
 				if (player.health <= 0)
                 {
@@ -854,6 +918,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		rounds = 9;
 		ScreenState &screen = registry.screenStates.components[0];
 		screen.darken_screen_factor = 0;
+		num_p1_wins = 0;
+		num_p2_wins = 0;
 		restart_game();
 	}
 
@@ -1204,7 +1270,9 @@ void WorldSystem::handleLaserCollisions() {
             if (isLaserInRange(laserMotion.position, playerMotion.position) & movable) {
                 // Reduce player health by 1 on laser hit
 				if (player.health != 0) {
-					player.health -= 1;
+					if (registry.stageSelection != 6) {
+						player.health -= 1;
+					}
 					Mix_PlayChannel(-1, laser_sound, 0);
 					if (player.health <= 0 && !registry.deathTimers.has(playerEntity)) {
 // 						registry.winner = player.side == 1 ? 2 : 1;
@@ -1388,7 +1456,6 @@ void WorldSystem::recordMatchResult() {
     result << "Blue: " << 3 - player2hp << " - Red: " << 3 - player1hp;
     match_records.push_back(result.str());
 
-    // 确保只保存最近10次战绩
     if (match_records.size() > 10) {
         match_records.pop_front();
     }
@@ -1446,11 +1513,14 @@ void WorldSystem::createStage(int currentStage) {
 	if (currentStage == 1) {
 		portal1Pos = stage.platformPositions[0];
 		portal2Pos = stage.platformPositions[2];
-	} else if (currentStage == 2) {
+	} else if (currentStage == 3) {
 		portal1Pos = {stage.platformPositions[1].x, stage.groundPositions[1].y};
 		portal2Pos = stage.platformPositions[1];
 	} else if (currentStage == 4) {
-
+		
+	} else if (currentStage == 5) {
+		portal1Pos = vec2(50.0f, stage.groundPositions[0].y); // Left side
+        portal2Pos = vec2(window_width_px - 50.0f, stage.groundPositions[0].y); // Right side
 	} else {
 		// Generate portal positions based on random numbers
     	std::random_device rd;
@@ -1468,7 +1538,7 @@ void WorldSystem::createStage(int currentStage) {
     	// Use random platform positions for portals
     	portal1Pos = stage.platformPositions[rand1];
     	portal2Pos = stage.platformPositions[rand2];
-	}
+	} 
 
 	if (currentStage != 4) {
 		// Create portal 1
@@ -1480,12 +1550,34 @@ void WorldSystem::createStage(int currentStage) {
     	registry.colors.insert(portal2, {0.0f, 1.0f, 0.0f});
 	}
 
+	// Initialize item spawn infos
+    itemSpawnInfos.clear();
+
+	if (registry.stageSelection == 6) {
+		for (size_t i = 0; i < stage.platformPositions.size(); ++i) {
+			vec2 pos = stage.platformPositions[i];
+			// Place the item slightly above the platform position
+			vec2 itemPos = pos + vec2(0, -50); // Adjust the offset as needed
+			int itemType = i % 3; // Assign item types 0, 1, 2
+			ItemSpawnInfo spawnInfo;
+			spawnInfo.position = itemPos;
+			spawnInfo.itemType = itemType;
+			spawnInfo.respawnTimer = 0.0f; // Items are spawned immediately
+			Motion item_motion;
+			item_motion.position = itemPos;
+			item_motion.scale = {30, 45};
+			Entity itemEntity = createSpecificItem(renderer, item_motion, itemType);
+			spawnInfo.entity = itemEntity;
+			itemSpawnInfos.push_back(spawnInfo);
+		}
+	}
 	// Additional stage-specific logic (e.g., lasers)
 
-	if (rounds <= 6)
+	if (rounds <= 6 || registry.stageSelection == 6)
 	{
 		createLaser(renderer);
 	}
     initializeLaserAI();
 }
+
 
