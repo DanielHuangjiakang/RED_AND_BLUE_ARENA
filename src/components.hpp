@@ -25,7 +25,7 @@ struct Player
 };
 
 struct GunTimer {
-	float counter_ms = 600;
+	float counter_ms = 800;
 };
 
 struct Bullet {
@@ -94,6 +94,11 @@ struct Gravity {
 	bool drag = false;
 };
 
+struct LightUp
+{
+	float counter_ms = 100;
+};
+
 // Stucture to store collision information
 struct Collision
 {
@@ -152,8 +157,8 @@ struct Mesh
 };
 
 struct Stage {
-    vec2 groundPosition;
-    vec2 groundSize;
+    std::vector<vec2> groundPositions;
+    std::vector<vec2> groundSizes;
     std::vector<vec2> platformPositions;
     std::vector<vec2> platformSizes;
 	std::vector<int> moving;
@@ -212,8 +217,8 @@ enum class TEXTURE_ASSET_ID {
 	ICEPAD = ICEMOUNTAIN +1,
 	SCIFI = ICEPAD + 1,
 	LASER2 = SCIFI + 1,
-	TEXTURE_COUNT = LASER2 + 1
-
+	JUNGLE = LASER2 + 1,
+	TEXTURE_COUNT = JUNGLE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -224,7 +229,7 @@ enum class EFFECT_ASSET_ID {
 	SALMON = FONT + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1
+	EFFECT_COUNT = WATER + 1,
 };
 
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;

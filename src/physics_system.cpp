@@ -155,6 +155,13 @@ void PhysicsSystem::step(float elapsed_ms)
 				motion.velocity.x = abs(motion.velocity.x);
 			}
 		}
+		else if (block.moving == 2) {
+			if (motion.position.y > window_height_px - 200) {
+				motion.velocity.y = -abs(motion.velocity.y);
+			} else if (motion.position.y < 200) {
+				motion.velocity.y = abs(motion.velocity.y);
+			}
+		}
 	}
 
 	// Check for collisions between all moving entities
