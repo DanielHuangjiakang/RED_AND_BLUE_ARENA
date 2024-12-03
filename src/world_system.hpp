@@ -22,15 +22,6 @@
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
-
-struct ItemSpawnInfo {
-    vec2 position;
-    int itemType;
-    Entity entity; // The item entity
-    float respawnTimer;
-};
-
-
 class WorldSystem
 {
 public:
@@ -52,6 +43,12 @@ public:
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
 
+	// for keeping track of remaining shots
+	int remaining_bullet_shots_p1 = 10;
+	int remaining_bullet_shots_p2 = 10;
+	int remaining_buck_p1 = 3;
+	int remaining_buck_p2 = 3;
+
 	// Check for collisions
 	void handle_collisions();
 
@@ -68,18 +65,27 @@ public:
 
 	bool showMatchRecords = false; 
 
-	std::deque<std::string> match_records;
+	int num_p1_wins = 0; // keeping track of p1 wins
 
-	// Member variables for item respawn logic
-    std::vector<std::pair<vec2, int>> itemSpawnPositions; // Stores the positions and types of items for respawning
-    std::vector<float> itemRespawnTimers;                 // Timers for each item respawn
-	std::vector<ItemSpawnInfo> itemSpawnInfos;
-    const float ITEM_RESPAWN_DELAY_MS = 1000.0f;          // 5 seconds delay
+	int num_p2_wins = 0; // keeping track of p2 wins
+
+	int rounds = 9; // changing the maps will reset rounds
+	std::deque<std::string> match_records;
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
 	void on_shoot();
+
+	// For handling reload
+	bool on_reload_p1 = 0;
+	bool on_reload_p2 = 0;
+	float reloading_time_p1 = 0.0f;
+	float reloading_time_p2 = 0.0f;
+
+	// For counting rounds and introducing new features
+	bool laser_toogle = 0; // start having lasers on 4th round
+	bool item_toogle = 0; // start having items on 7th round
 
 	// restart level
 	void restart_game();
@@ -128,7 +134,7 @@ private:
 	Mix_Music* city_music;
 	Mix_Music* desert_music;
 	Mix_Music* mapselections_music;
-	Mix_Music* tutorial_music;
+	
 
 	Mix_Chunk* end_music;
 	Mix_Chunk* hit_sound;
@@ -143,6 +149,7 @@ private:
 	Mix_Chunk* laser2_sound;
 	Mix_Chunk* healthpickup_sound;
 	Mix_Chunk* explosion_sound;
+	Mix_Chunk* reload_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
