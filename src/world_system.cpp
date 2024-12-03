@@ -1259,7 +1259,7 @@ void WorldSystem::on_shoot() {
             Entity bullet = createBullet(renderer, 2, bullet_position, p2.direction);
             registry.colors.insert(bullet, {1.0f, 0.84f, 0.0f});
 			Mix_PlayChannel(-1, shoot_sound, 0);
-			remaining_buck_p2 -= 1;
+			remaining_bullet_shots_p2 -= 1;
         } 
 		else if (remaining_bullet_shots_p2 < 1 && player2_shooting == 1)
 		{
@@ -1267,7 +1267,7 @@ void WorldSystem::on_shoot() {
 			// check for reload timer
 			if (reloading_time_p2 <= 0)
 			{
-				reloading_time_p1 = 6.0f;
+				reloading_time_p2 = 6.0f;
 			}
 			Mix_PlayChannel(-1, reload_sound,0);
 		}
