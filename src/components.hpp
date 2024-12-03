@@ -94,6 +94,11 @@ struct Gravity {
 	bool drag = false;
 };
 
+struct LightUp
+{
+	float counter_ms = 100;
+};
+
 // Stucture to store collision information
 struct Collision
 {
@@ -224,7 +229,7 @@ enum class EFFECT_ASSET_ID {
 	SALMON = FONT + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1
+	EFFECT_COUNT = WATER + 1,
 };
 
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;

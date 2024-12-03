@@ -299,6 +299,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
     }
     }
 
+	for (Entity entity : registry.lightUps.entities) {
+		// progress timer
+		if (registry.lightUps.has(entity)) {
+			LightUp& counter = registry.lightUps.get(entity);
+			counter.counter_ms -= elapsed_ms_since_last_update;
+
+			// remove the light up effect once the timer expired
+			if (counter.counter_ms < 0) {
+				registry.lightUps.remove(entity);
+			}
+		} 
+	}
+
 	// Update player1's position and enforce boundaries
     Motion& motion1 = registry.motions.get(player1);
 	Motion& gunMotion1 = registry.motions.get(gun1);
@@ -581,32 +594,7 @@ void WorldSystem::handle_collisions()
 			}
 		}
 
-		if (registry.players.has(entity) && registry.portals.has(entity_other))
-		{
-			Player &player = registry.players.get(entity);
-			Portal &portal = registry.portals.get(entity_other);
-			Mix_PlayChannel(-1, portal_sound, 0);
-			// since there are just 2 portals
-			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
-			{
-				// teleport player to the pos of portal2
-				Motion &motion_portal2 = registry.motions.get(portal2);
-				Motion &motion_player = registry.motions.get(entity);
-
-				if (player.direction == 1) motion_player.position = {motion_portal2.position.x + 65, motion_portal2.position.y};
-				else motion_player.position = {motion_portal2.position.x - 65, motion_portal2.position.y};
-			}
-			else
-			{
-				Motion &motion_portal1 = registry.motions.get(portal1);
-				Motion &motion_player = registry.motions.get(entity);
-
-				if (player.direction == 1) motion_player.position =  {motion_portal1.position.x + 65, motion_portal1.position.y};
-				else motion_player.position =  {motion_portal1.position.x - 65, motion_portal1.position.y};
-			}
-			
-		}
-		if (registry.portals.has(entity) && (registry.bullets.has(entity_other) || registry.grenades.has(entity_other)))
+		if (registry.portals.has(entity) && (registry.bullets.has(entity_other) || registry.grenades.has(entity_other) || registry.players.has(entity_other)))
 		{
 			// updated behaviour such that bullets can be teleported too
 			Portal &portal = registry.portals.get(entity);
@@ -615,19 +603,26 @@ void WorldSystem::handle_collisions()
 			Motion &motion_portal2 = registry.motions.get(portal2);
 			float offset;
 			if (registry.bullets.has(entity_other)) offset = 35;
-			else offset = 50;
+			else if (registry.grenades.has(entity_other)) offset = 50;
+			else offset = 65;
 
 			// since there are just 2 portals
 			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
 			{
 				// teleport player to the pos of portal2
-				if (motion_bullet.velocity.x >= 0) motion_bullet.position =  {motion_portal2.position.x + offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
+				if (motion_bullet.velocity.x >= 0) motion_bullet.position = {motion_portal2.position.x + offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
 				else motion_bullet.position =  {motion_portal2.position.x - offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
 			}
 			else
 			{
 				if (motion_bullet.velocity.x >= 0) motion_bullet.position = {motion_portal1.position.x + offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
 				else motion_bullet.position = {motion_portal1.position.x - offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
+			}
+
+			for(uint j = 0; j < registry.portals.size(); j++)
+			{
+				Entity entity_portal = registry.portals.entities[j];
+				registry.lightUps.emplace_with_duplicates(entity_portal);
 			}
 		}
 
