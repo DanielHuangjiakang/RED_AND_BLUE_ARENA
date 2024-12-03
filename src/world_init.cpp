@@ -484,6 +484,7 @@ Entity createLaser(RenderSystem* renderer) {
 }
 
 
+
 Entity createLaserBeam(vec2 start, vec2 target) {
     auto beam = Entity();
 
@@ -495,18 +496,22 @@ Entity createLaserBeam(vec2 start, vec2 target) {
     // Set up the beam's motion properties
     Motion& motion = registry.motions.emplace(beam);
     motion.position = midpoint;
-    motion.scale = {25.f, beamLength};
-    motion.angle = -atan2(direction.x, direction.y);
-    registry.colors.insert(beam, {1.0f, 1.0f, 0.0f});
+    motion.scale = {25.f, beamLength};  // Width = 25.f, Length = beamLength
+    motion.angle = -atan2(direction.x, direction.y); // Rotate to align with direction
+
+    // Assign render properties with the custom shader
     registry.renderRequests.insert(
         beam,
-        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE}
+        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::LASER_BEAM, GEOMETRY_BUFFER_ID::SPRITE}
     );
-	
-	auto& lifetime = registry.lifetimes.emplace(beam);
+
+    // Set lifetime for the beam (e.g., 1 second)
+    auto& lifetime = registry.lifetimes.emplace(beam);
     lifetime.counter_ms = 1000; // Laser beam lasts for 1000 milliseconds (1 second)
+
     return beam;
 }
+
 
 Entity createRandomItem(RenderSystem* renderer, Motion motion) {
 	auto entity = Entity();

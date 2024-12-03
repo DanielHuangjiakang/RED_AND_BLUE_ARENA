@@ -80,7 +80,8 @@ const std::array<std::string, texture_count> texture_paths = {
 		shader_path("font"),
 		shader_path("salmon"),
 		shader_path("textured"),
-		shader_path("water") };
+		shader_path("water"),
+		shader_path("laser_beam")};
 
 		// font character structure
 struct Character {
