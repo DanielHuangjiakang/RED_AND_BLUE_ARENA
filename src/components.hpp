@@ -229,12 +229,7 @@ enum class EFFECT_ASSET_ID {
 	SALMON = FONT + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
-<<<<<<< Updated upstream
 	EFFECT_COUNT = WATER + 1,
-=======
-	LASER_BEAM = WATER + 1,
-	EFFECT_COUNT = LASER_BEAM + 1
->>>>>>> Stashed changes
 };
 
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
