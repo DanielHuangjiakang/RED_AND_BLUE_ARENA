@@ -2,6 +2,7 @@
 #include "render_system.hpp"
 #include <SDL.h>
 
+#include "common.hpp"
 #include "tiny_ecs_registry.hpp"
 
 
@@ -102,30 +103,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
 		{
+			// Light up?
 			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
+			assert(light_up_uloc >= 0);
 
-			// assert(light_up_uloc >= 0);
-			glUniform1i(light_up_uloc, registry.lightUps.has(entity) ? 1 : 0);
+			// !!! TODO A1: set the light_up shader variable using glUniform1i,
+			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
 			gl_has_errors();
 		}
-	}else if (render_request.used_effect == EFFECT_ASSET_ID::LASER_BEAM) {
-    GLint in_position_loc = glGetAttribLocation(program, "in_position");
-    GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
-    gl_has_errors();
-
-    glEnableVertexAttribArray(in_position_loc);
-    glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-                          sizeof(TexturedVertex), (void *)0);
-
-    glEnableVertexAttribArray(in_texcoord_loc);
-    glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
-                          (void *)sizeof(vec3));
-
-    // Pass the current time to the shader
-    GLint time_loc = glGetUniformLocation(program, "time");
-    glUniform1f(time_loc, glfwGetTime()); // Use glfwGetTime() to get elapsed time
-}
-
+	}
 	else
 	{
 		assert(false && "Type of render request not supported");
@@ -310,7 +296,7 @@ void RenderSystem::draw()
 	}
 	
 	if (registry.intro) {
-		float max_line_width = window_width_px * 0.7f; // 80% of screen width
+		float max_line_width = window_width_px * 0.7f; // 80% of screen with
 		float scale = 1.0f;
 		std::string story_text =
 			"In a fantasy world, the red and blue nations are locked in a century's old rivalry. "
@@ -366,17 +352,67 @@ void RenderSystem::draw()
 		renderText(instruction_text, instruction_x, window_height_px / 2 - 200.0f, instruction_scale, {1.0f, 1.0f, 1.0f}, glm::mat4(1.0f));
 	}
 
-	if (registry.winner) {
-		if (registry.winner ==1) {
-			renderText("BLUE WINS", window_width_px/2+250, window_height_px/2 - 150.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
-		} else {
-			renderText("RED WINS", window_width_px/2-300, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+	if (!registry.stageSelection && !registry.intro) {
+		renderText("SELECT STAGE", window_width_px/2-200, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+	}
+
+	if (registry.stageSelection == 4) {
+		
+		// Display item descriptions above each item
+		{
+			// Item positions
+			vec2 item1_position = vec2(170.0f, window_height_px/2 - 80.0f);
+			vec2 item2_position = vec2(490.0f, window_height_px/2 + 20.0f);
+			vec2 item3_position = vec2(850.0f, window_height_px/2 - 80.0f);
+
+			// Item 1 Description
+			{
+				std::string item_description = "Health Potion: Restore Health (+ 3)";
+				float text_scale = 0.8f;
+				glm::vec3 text_color = {1.0f, 1.0f, 0.0f};
+				renderText(item_description, item1_position.x, item1_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
+
+			// Item 2 Description
+			{
+				std::string item_description = "Grenade: Causes Explosion (- 3)";
+				float text_scale = 0.8f;
+				glm::vec3 text_color = {1.0f, 1.0f, 0.0f};
+				renderText(item_description, item2_position.x, item2_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
+
+			// Item 3 Description
+			{
+				std::string item_description = "Laser: Powerful Beam (- 3)";
+				float text_scale = 0.8f;
+				glm::vec3 text_color = {1.0f, 1.0f, 0.0f};
+				renderText(item_description, item3_position.x, item3_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
+		}
+
+		// Display "Can Teleport" above portals
+		{
+			// Portal positions
+			vec2 portal1_position = vec2(5.0f, 150.0f);
+			vec2 portal2_position = vec2(window_width_px - 200.0f, 150.0f);
+
+			std::string portal_text = "Portal: Can Teleport";
+			float text_scale = 0.8f;
+			glm::vec3 text_color = {0.0f, 1.0f, 1.0f}; 
+
+			// Portal 1 Text
+			{
+				renderText(portal_text, portal1_position.x, portal1_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
+
+			// Portal 2 Text
+			{
+				renderText(portal_text, portal2_position.x, portal2_position.y, text_scale, text_color, glm::mat4(1.0f));
+			}
 		}
 	}
 
-	if (!registry.stageSelection && !registry.intro) {
-		renderText("SELECT STAGE", window_width_px/2-150, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
-	}
+
 
 	// Truely render to the screen
 	drawToScreen();

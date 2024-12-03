@@ -55,6 +55,26 @@ void compute_transformed_vertices(const Mesh& mesh, const Motion& motion, std::v
     }
 }
 
+
+
+// bool mesh_collides(Entity entity_i, Entity entity_j)
+// {
+//     Motion& motion_j = registry.motions.get(entity_j);
+// 	Motion& motion_i = registry.motions.get(entity_i);
+// 	Mesh* mesh1 = registry.meshPtrs.get(entity_j);
+
+//     std::vector<vec2> transformed_vertices;
+//     compute_transformed_vertices(*mesh1, motion_j, transformed_vertices);
+
+//     for (size_t i = 0; i < mesh1->vertex_indices.size(); i += 1)
+//     {
+//         vec2& v1 = transformed_vertices[mesh1->vertex_indices[i]];
+// 		if()
+//     }
+
+//     return false; // no collision
+// }
+
 bool mesh_collides(Entity entity_i, Entity entity_j)
 {
     Motion& motion_j = registry.motions.get(entity_j);
@@ -128,18 +148,11 @@ void PhysicsSystem::step(float elapsed_ms)
 		Block& block = block_registry.components[i];
 		Entity entity = block_registry.entities[i];
 		Motion& motion = registry.motions.get(entity);
-		if (block.moving == 1 || block.moving == 3) {
+		if (block.moving == 1) {
 			if (motion.position.x > window_width_px - 200) {
 				motion.velocity.x = -abs(motion.velocity.x);
 			} else if (motion.position.x < 200) {
 				motion.velocity.x = abs(motion.velocity.x);
-			}
-		}
-		else if (block.moving == 2) {
-			if (motion.position.y > window_height_px - 200) {
-				motion.velocity.y = -abs(motion.velocity.y);
-			} else if (motion.position.y < 200) {
-				motion.velocity.y = abs(motion.velocity.y);
 			}
 		}
 	}
