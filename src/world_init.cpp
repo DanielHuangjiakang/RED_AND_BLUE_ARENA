@@ -135,6 +135,24 @@ Entity createBackground(RenderSystem* renderer, int width, int height) {
      motion.position = {width / 2, height / 2};
     motion.scale = {width, height};
 
+	if (registry.winner) {
+		if (registry.winner ==1) {
+			registry.renderRequests.insert(
+            entity,
+            { TEXTURE_ASSET_ID::BLUEWIN,
+            EFFECT_ASSET_ID::TEXTURED,
+            GEOMETRY_BUFFER_ID::SPRITE });
+		} else {
+		registry.renderRequests.insert(
+            entity,
+            { TEXTURE_ASSET_ID::REDWIN,
+            EFFECT_ASSET_ID::TEXTURED,
+            GEOMETRY_BUFFER_ID::SPRITE });
+		}
+	registry.backgrounds.emplace(entity);
+    return entity;
+	}
+
     if (!registry.stageSelection) {
         registry.renderRequests.insert(
             entity,
@@ -162,10 +180,17 @@ Entity createBackground(RenderSystem* renderer, int width, int height) {
             EFFECT_ASSET_ID::TEXTURED,
             GEOMETRY_BUFFER_ID::SPRITE}
         );
-    } else {
+    } else if (registry.stageSelection ==4) {
 		registry.renderRequests.insert(
             entity,
             {TEXTURE_ASSET_ID::JUNGLE,
+            EFFECT_ASSET_ID::TEXTURED,
+            GEOMETRY_BUFFER_ID::SPRITE}
+        );
+	} else {
+		registry.renderRequests.insert(
+            entity,
+            {TEXTURE_ASSET_ID::SPACE,
             EFFECT_ASSET_ID::TEXTURED,
             GEOMETRY_BUFFER_ID::SPRITE}
         );
@@ -212,14 +237,21 @@ Entity createStageChoice(RenderSystem* renderer, int x, int y, int width, int he
                 EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE}
         	);
-    } else {
+    } else if (stage ==4) {
         registry.renderRequests.insert(
                 entity,
                 {TEXTURE_ASSET_ID::JUNGLE,
                 EFFECT_ASSET_ID::TEXTURED,
                 GEOMETRY_BUFFER_ID::SPRITE}
         );
-    }
+    } else {
+		registry.renderRequests.insert(
+                entity,
+                {TEXTURE_ASSET_ID::SPACE,
+                EFFECT_ASSET_ID::TEXTURED,
+                GEOMETRY_BUFFER_ID::SPRITE}
+        );
+	}
      return entity;
     
 
@@ -264,10 +296,16 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
  			{ TEXTURE_ASSET_ID::ICEPAD, // TEXTURE_COUNT indicates that no texture is needed
  			EFFECT_ASSET_ID::TEXTURED,
  			GEOMETRY_BUFFER_ID::SPRITE});
-	} else {
+	} else if (registry.stageSelection ==4) {
 		registry.renderRequests.insert(
 			entity,
  			{ TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE});
+	} else {
+		registry.renderRequests.insert(
+			entity,
+ 			{ TEXTURE_ASSET_ID::RAINBOW, // TEXTURE_COUNT indicates that no texture is needed
  			EFFECT_ASSET_ID::TEXTURED,
  			GEOMETRY_BUFFER_ID::SPRITE});
 	}
@@ -285,6 +323,7 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 	auto& motion = registry.motions.emplace(entity);
 	if (moving == 1) motion.velocity = { 80.f, 0.f };
 	else if (moving == 2) motion.velocity = { 0.f, 80.f };
+	else if (moving == 3) motion.velocity = { -80.f, 0.f };
 	else motion.velocity = { 0, 0 };
  	motion.position = position;
 	motion.scale = {width, height};
@@ -315,10 +354,16 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 			{ TEXTURE_ASSET_ID::ICEPAD, // TEXTURE_COUNT indicates that no texture is needed
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE });
-	} else {
+	} else if (registry.stageSelection ==4) {
 		registry.renderRequests.insert(
 			entity,
 			{ TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	} else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::RAINBOW, // TEXTURE_COUNT indicates that no texture is needed
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE });
 	}
@@ -611,6 +656,6 @@ Entity createLaserBeam2(vec2 start, int direction, int side) {
     );
 	
 	auto& lifetime = registry.lifetimes.emplace(beam);
-    lifetime.counter_ms = 150; // Laser beam lasts for 1000 milliseconds (1 second)
+    lifetime.counter_ms = 300; // Laser beam lasts for 1000 milliseconds (1 second)
     return beam;
 }

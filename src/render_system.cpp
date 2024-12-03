@@ -366,6 +366,14 @@ void RenderSystem::draw()
 		renderText(instruction_text, instruction_x, window_height_px / 2 - 200.0f, instruction_scale, {1.0f, 1.0f, 1.0f}, glm::mat4(1.0f));
 	}
 
+	if (registry.winner) {
+		if (registry.winner ==1) {
+			renderText("BLUE WINS", window_width_px/2+250, window_height_px/2 - 150.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+		} else {
+			renderText("RED WINS", window_width_px/2-300, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+		}
+	}
+
 	if (!registry.stageSelection && !registry.intro) {
 		renderText("SELECT STAGE", window_width_px/2-150, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
 	}
