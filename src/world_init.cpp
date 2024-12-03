@@ -285,6 +285,7 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 	auto& motion = registry.motions.emplace(entity);
 	if (moving == 1) motion.velocity = { 80.f, 0.f };
 	else if (moving == 2) motion.velocity = { 0.f, 80.f };
+	else if (moving == 3) motion.velocity = { -80.f, 0.f };
 	else motion.velocity = { 0, 0 };
  	motion.position = position;
 	motion.scale = {width, height};
@@ -607,6 +608,6 @@ Entity createLaserBeam2(vec2 start, int direction, int side) {
     );
 	
 	auto& lifetime = registry.lifetimes.emplace(beam);
-    lifetime.counter_ms = 150; // Laser beam lasts for 1000 milliseconds (1 second)
+    lifetime.counter_ms = 300; // Laser beam lasts for 1000 milliseconds (1 second)
     return beam;
 }

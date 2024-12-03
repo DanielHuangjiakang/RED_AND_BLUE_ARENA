@@ -60,6 +60,14 @@ std::vector<Stage> stagesArray = {
         {{window_width_px / 3, window_height_px / 2 + 100}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
         {{200, 10}, {480, 10}},  // Platform sizes
 		{2, 0}  // Smaller platform moves
+    },
+	// Stage 5
+    {
+        {}, 
+		{}, 
+        {{200, window_height_px / 2 + 100}, {window_width_px - 200, window_height_px / 2 + 100}, {window_width_px / 2, window_height_px - 450}, {window_width_px / 2, window_height_px - 50}}, // Platform positions
+        {{150, 10}, {150, 10}, {150, 10}, {150, 10}},  // Platform sizes
+		{2, 2, 1, 3}  // All platforms move
     }
 };
 
@@ -490,7 +498,7 @@ void WorldSystem::restart_game() {
 		// Create stage button entities
 		Entity stageButton1 = createStageChoice(renderer, 10, window_height_px / 2-100, 400, 200, 1);
 		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2-100, 400, 200, 2);
-		Entity stageButton3 = createStageChoice(renderer, 3*window_width_px/4-100, window_height_px / 2-100, 400, 200, 3);
+		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px/4-100, window_height_px / 2-100, 400, 200, 3);
 		Entity stageButton4 = createStageChoice(renderer, 10, window_height_px / 2+120, 400, 200, 4);
 		//Entity stageButton5 = createStageChoice(renderer, 3 * window_width_px / 4+100, window_height_px / 2, 300, 150, 5);
 		//Entity stageButton6 = createStageChoice(renderer, 3 * window_width_px / 4+100, window_height_px / 2, 300, 150, 6);
@@ -1246,13 +1254,22 @@ void WorldSystem::createStage(int currentStage) {
     const Stage& stage = stagesArray[currentStage];
     
     // Create players
-    player1 = createPlayer(renderer, 1, {200, stage.groundPositions[0].y}, 1);
-    Motion& player1Motion = registry.motions.get(player1);
-    gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.groundPositions[0].y - 50});
+	if (currentStage != 4) {
+		player1 = createPlayer(renderer, 1, {200, stage.groundPositions[0].y}, 1);
+		player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.groundPositions[0].y}, 0);
+		Motion& player1Motion = registry.motions.get(player1);
+		Motion& player2Motion = registry.motions.get(player2);
+		gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.groundPositions[0].y - 50});
+		gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.groundPositions[0].y - 50});
+	} else {
+		player1 = createPlayer(renderer, 1, {200, stage.platformPositions[0].y}, 1);
+		player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.platformPositions[0].y}, 0);
+		Motion& player1Motion = registry.motions.get(player1);
+		Motion& player2Motion = registry.motions.get(player2);
+		gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.platformPositions[0].y - 50});
+		gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.platformPositions[0].y - 50});
+	}
 
-    player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.groundPositions[0].y}, 0);
-    Motion& player2Motion = registry.motions.get(player2);
-    gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.groundPositions[0].y - 50});
 
     // Create grounds
 	for (size_t i = 0; i < stage.groundPositions.size(); i++) {
@@ -1274,9 +1291,11 @@ void WorldSystem::createStage(int currentStage) {
 	if (currentStage == 1) {
 		portal1Pos = stage.platformPositions[0];
 		portal2Pos = stage.platformPositions[2];
-	} else if (currentStage == 3) {
+	} else if (currentStage == 2) {
 		portal1Pos = {stage.platformPositions[1].x, stage.groundPositions[1].y};
 		portal2Pos = stage.platformPositions[1];
+	} else if (currentStage == 4) {
+
 	} else {
 		// Generate portal positions based on random numbers
     	std::random_device rd;
@@ -1296,13 +1315,15 @@ void WorldSystem::createStage(int currentStage) {
     	portal2Pos = stage.platformPositions[rand2];
 	}
 
-	// Create portal 1
-    portal1 = createPortal(renderer, {portal1Pos.x + 25, portal1Pos.y - 10}, 50, 100);
-    registry.colors.insert(portal1, {0.0f, 1.0f, 0.0f});
+	if (currentStage != 4) {
+		// Create portal 1
+    	portal1 = createPortal(renderer, {portal1Pos.x + 25, portal1Pos.y - 10}, 50, 100);
+    	registry.colors.insert(portal1, {0.0f, 1.0f, 0.0f});
 
-    // Create portal 2
-    portal2 = createPortal(renderer, {portal2Pos.x + 25, portal2Pos.y - 10}, 50, 100);
-    registry.colors.insert(portal2, {0.0f, 1.0f, 0.0f});
+    	// Create portal 2
+    	portal2 = createPortal(renderer, {portal2Pos.x + 25, portal2Pos.y - 10}, 50, 100);
+    	registry.colors.insert(portal2, {0.0f, 1.0f, 0.0f});
+	}
 
 	// Additional stage-specific logic (e.g., lasers)
     createLaser(renderer);
