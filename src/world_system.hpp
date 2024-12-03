@@ -43,6 +43,12 @@ public:
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
 
+	// for keeping track of remaining shots
+	int remaining_bullet_shots_p1 = 10;
+	int remaining_bullet_shots_p2 = 10;
+	int remaining_buck_p1 = 3;
+	int remaining_buck_p2 = 3;
+
 	// Check for collisions
 	void handle_collisions();
 
@@ -59,12 +65,27 @@ public:
 
 	bool showMatchRecords = false; 
 
+	int num_p1_wins = 0; // keeping track of p1 wins
+
+	int num_p2_wins = 0; // keeping track of p2 wins
+
+	int rounds = 9; // changing the maps will reset rounds
 	std::deque<std::string> match_records;
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
 	void on_shoot();
+
+	// For handling reload
+	bool on_reload_p1 = 0;
+	bool on_reload_p2 = 0;
+	float reloading_time_p1 = 0.0f;
+	float reloading_time_p2 = 0.0f;
+
+	// For counting rounds and introducing new features
+	bool laser_toogle = 0; // start having lasers on 4th round
+	bool item_toogle = 0; // start having items on 7th round
 
 	// restart level
 	void restart_game();
@@ -109,7 +130,11 @@ private:
 	Entity portal2;
 
 	// music references
-	Mix_Music* background_music;
+	Mix_Music* snow_music;
+	Mix_Music* city_music;
+	Mix_Music* desert_music;
+	Mix_Music* mapselections_music;
+	
 
 	Mix_Chunk* end_music;
 	Mix_Chunk* hit_sound;
@@ -119,10 +144,12 @@ private:
 	Mix_Chunk* salmon_eat_sound;
 	Mix_Chunk* portal_sound;
 	Mix_Chunk* buck_shot_sound;
+	Mix_Chunk* select_music;
 	
 	Mix_Chunk* laser2_sound;
 	Mix_Chunk* healthpickup_sound;
 	Mix_Chunk* explosion_sound;
+	Mix_Chunk* reload_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
@@ -141,5 +168,9 @@ private:
 	bool isMouseOverEntity(vec2 mouse_position, Entity entity);
 	void handleEntityClick(Entity entity);
 	void on_mouse_button(int button, int action, int mods);
-
+	int time_since_last_frame = 0;
+	int currentDelay = 0;
+	bool isLaserFiring = false;
+	float laserFireCounter = 0.0f; 
+	vec2 target;
 };

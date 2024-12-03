@@ -18,13 +18,14 @@ struct Player
 	bool direction;  // 0 for left, 1 for right
 	int health = 10;
 	bool is_moving = false;
-	float jump_accel = -550.f;
+	float jump_accel = -600.f;
 	float lr_accel = 1200.f;
+	
 	std::queue<Item> items;
 };
 
 struct GunTimer {
-	float counter_ms = 300;
+	float counter_ms = 600;
 };
 
 struct Bullet {
@@ -40,7 +41,8 @@ struct Grenade {
 };
 
 struct Explosion {
-	bool damagable = true;
+	bool damagable1 = true;
+	bool damagable2 = true;
 };
 
 // Weapon component
@@ -69,6 +71,8 @@ struct Block {
 	int y;
 	int width;
 	int height;
+	int moving; // 0 = no moving, 1 = horizontal movement, 2 = vertical movement
+	vec2 travelled_dist = {0, 0};
 };
 
 struct StageChoice {
@@ -152,6 +156,7 @@ struct Stage {
     vec2 groundSize;
     std::vector<vec2> platformPositions;
     std::vector<vec2> platformSizes;
+	std::vector<int> moving;
 };
 
 /**
@@ -204,7 +209,11 @@ enum class TEXTURE_ASSET_ID {
 	LONG_LASER = LASER + 1,
 	EXPLOSION = LONG_LASER + 1,
 	ICEMOUNTAIN = EXPLOSION + 1,
-	TEXTURE_COUNT = ICEMOUNTAIN + 1,
+	ICEPAD = ICEMOUNTAIN +1,
+	SCIFI = ICEPAD + 1,
+	LASER2 = SCIFI + 1,
+	TEXTURE_COUNT = LASER2 + 1
+
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -221,16 +230,20 @@ enum class EFFECT_ASSET_ID {
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	SALMON = 0,
-	SPRITE = SALMON + 1,
-	EGG = SPRITE + 1,
-	SQUARE = EGG + 1,
-	DEBUG_LINE = SQUARE + 1,
-	SCREEN_TRIANGLE = DEBUG_LINE + 1,
-	PORTAL = SCREEN_TRIANGLE + 1,
-	GEOMETRY_COUNT = PORTAL + 1
+    SALMON = 0,
+    SPRITE = SALMON + 1,
+    EGG = SPRITE + 1,
+    SQUARE = EGG + 1,
+    DEBUG_LINE = SQUARE + 1,
+    SCREEN_TRIANGLE = DEBUG_LINE + 1,
+    PORTAL = SCREEN_TRIANGLE + 1,
+    HEALTH_BAR = PORTAL + 1,    
+    GEOMETRY_COUNT = HEALTH_BAR + 1 
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+
+
+
 
 struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;

@@ -61,21 +61,8 @@ int main()
 		// Render the game score
 		std::string score_text = "FPS: " + std::to_string(world.fps);
 		renderer.renderText(score_text, 10.0f, window_height_px - text_height, 0.8f, font_color, font_trans);
-		// Render dynamic HP text for players
-		if (registry.stageSelection != 0) {
-			for (Entity player_entity : registry.players.entities) {
-			Player& player = registry.players.get(player_entity);
-			Motion& motion = registry.motions.get(player_entity);
 
-			// Adjust for top-left origin of player and bottom-left origin of renderText
-			float hp_x = motion.position.x - renderer.getTextWidth("HP: 3", 1.0f) / 2; // Center horizontally
-			float hp_y = motion.position.y - motion.scale.y; // Adjust Y for bottom-left origin
 
-			std::string hp_text = "HP: " + std::to_string(player.health);
-
-			renderer.renderText(hp_text, hp_x, window_height_px - hp_y + 10.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f), glm::mat4(1.0f));
-			}
-		}
 		
 		if (world.toogle_life_timer > 0 && world.toogle_life > 0 && registry.stageSelection != 0)
         {
@@ -102,6 +89,90 @@ int main()
 		if (world.showMatchRecords) {
 			renderer.renderMatchRecords(world.match_records);
 		}
+
+		// Render health bars and HP text for players
+// Render health bars and HP text for players
+if (registry.stageSelection != 0) {
+    for (Entity player_entity : registry.players.entities) {
+        Player& player = registry.players.get(player_entity);
+        Motion& motion = registry.motions.get(player_entity);
+
+        // Health bar parameters
+        const float max_health = 10.0f; // Adjust if maximum health differs
+        const vec2 health_bar_size = {50.0f, 5.0f}; // Full health bar size (width, height)
+
+        // Calculate health bar width based on current health
+        float health_ratio = player.health / max_health;
+        if (health_ratio < 0.0f) health_ratio = 0.0f;
+
+        vec2 hb_size = {health_bar_size.x * health_ratio, health_bar_size.y};
+
+        // Position health bar above the player's head
+        vec2 hb_position = {
+            motion.position.x - health_bar_size.x / 2, // Centered horizontally
+            motion.position.y - motion.scale.y / 2 - 15.0f // Adjust vertically above the player
+        };
+
+        // Set health bar color based on player side
+        vec3 hb_color = (player.side == 1) ? vec3(0.0f, 0.0f, 1.0f) : vec3(1.0f, 0.0f, 0.0f);
+
+        // Render the health bar background (gray bar representing missing health)
+        vec2 hb_bg_size = {health_bar_size.x, health_bar_size.y};
+        vec3 hb_bg_color = vec3(0.5f, 0.5f, 0.5f); // Gray color
+
+        renderer.renderHealthBar(hb_position, hb_bg_size, hb_bg_color);
+
+        // Render the actual health bar (colored bar representing current health)
+        renderer.renderHealthBar(hb_position, hb_size, hb_color);
+
+        // // Render the HP text to the left of the health bar
+        // std::string hp_text = "HP: " + std::to_string(player.health);
+        // float hp_text_width = renderer.getTextWidth(hp_text, 1.0f);
+        // vec2 hp_text_position = {
+        //     hb_position.x - hp_text_width - 5.0f, // Align text left of the health bar with some spacing
+        //     hb_position.y + (health_bar_size.y / 2) - 10.0f // Center the text vertically with the health bar
+        // };
+
+        // // Render the HP text with the same color as the health bar
+        // renderer.renderText(hp_text, hp_text_position.x, window_height_px - hp_text_position.y, 1.0f, hb_color, glm::mat4(1.0f));
+
+
+		// render the remaining bullets and buckshots on screen
+		vec3 p1_color =  vec3(0.0f, 0.0f, 1.0f);
+		vec3 p2_color =  vec3(1.0f, 0.0f, 0.0f);
+
+		std::string buck_text_p1 = "buckshots: " + std::to_string(world.remaining_buck_p1);
+		renderer.renderText(buck_text_p1, 10.0f, window_height_px / 2, 0.8f, p1_color, font_trans);
+
+		std::string buck_text_p2 = "buckshots: " + std::to_string(world.remaining_buck_p2);
+		renderer.renderText(buck_text_p2, window_width_px - 150.f, window_height_px / 2, 0.8f, p2_color, font_trans);
+
+		std::string bullet_text_p1 = "bullets: " + std::to_string(world.remaining_bullet_shots_p1);
+		renderer.renderText(bullet_text_p1, 10.0f, window_height_px / 2 - 20, 0.8f, p1_color, font_trans);
+		std::string bullet_text_p2 = "bullets: " + std::to_string(world.remaining_bullet_shots_p2);
+		renderer.renderText(bullet_text_p2, window_width_px - 150.f, window_height_px / 2 - 20, 0.8f, p2_color, font_trans);
+
+
+		// render rounds and each player wins
+		vec3 round_text_color =  vec3(1.0f, 1.0f, 1.0f);
+		vec3 round_header_color = vec3(1.0, 1.0, 0.0);
+
+
+
+		std::string player_win_text = std::to_string(world.num_p1_wins) + " : " + std::to_string(world.num_p2_wins);
+		std::string round_text = std::to_string(world.rounds);
+
+		std::string round_header = "Round";
+		renderer.renderText(round_header, window_width_px / 2, window_height_px - text_height, 1.2f, round_header_color, font_trans);
+		renderer.renderText(round_text, window_width_px / 2 + 35.f, window_height_px - text_height - 25, 1.0f, round_text_color, font_trans);
+
+		renderer.renderText(std::to_string(world.num_p1_wins), window_width_px / 2 - 25, window_height_px - text_height - 50, 1.0f, p1_color, font_trans);
+		renderer.renderText(":", window_width_px / 2 + 35.f, window_height_px - text_height - 50, 1.0f, round_text_color, font_trans);
+		renderer.renderText(std::to_string(world.num_p2_wins), window_width_px / 2 + 95.f, window_height_px - text_height - 50, 1.0f, p2_color, font_trans);
+
+    }
+}
+
 
 		// flicker-free display with a double buffer
 		glfwSwapBuffers(window);

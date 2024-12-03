@@ -6,7 +6,7 @@
 
 // These are hardcoded to the dimensions of the entity texture
 const float PLAYER_WIDTH = 75.0f;
-const float PLAYER_HEIGHT = 90.0f;
+const float PLAYER_HEIGHT = 80.0f;
 
 Entity createBackground(RenderSystem* renderer, int width, int height);
 Entity createIntro(RenderSystem* renderer, int width, int height);
@@ -19,7 +19,7 @@ Entity createGun(RenderSystem* renderer, int side, vec2 position);
 
 // stage blocks
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height);
-Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height);
+Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height, int moving);
 
 
 // Portals

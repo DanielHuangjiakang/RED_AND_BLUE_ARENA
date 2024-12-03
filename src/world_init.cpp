@@ -1,6 +1,7 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 #include <random>
+#include <iostream>
 #include "decisionTree.hpp"
 
 Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direction) {
@@ -33,6 +34,7 @@ Entity createPlayer(RenderSystem* renderer, int side, vec2 position, bool direct
             TEXTURE_ASSET_ID::BLUE_RUN_1,
             TEXTURE_ASSET_ID::BLUE_RUN_2,
             TEXTURE_ASSET_ID::BLUE_RUN_3,
+
         };
         motion.scale = { PLAYER_WIDTH, PLAYER_HEIGHT };
     }
@@ -228,24 +230,42 @@ Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height)
  	motion.position = {x + (width / 2), y + (height / 2)};
 	motion.scale = {width, height};
 
+	if (registry.stageSelection==1) {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::SCIFI, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	}else if (registry.stageSelection ==2) {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 			EFFECT_ASSET_ID::TEXTURED,
+ 			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	} else {
 	registry.renderRequests.insert(
 		entity,
- 		{ TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
+ 		{ TEXTURE_ASSET_ID::ICEPAD, // TEXTURE_COUNT indicates that no texture is needed
  			EFFECT_ASSET_ID::TEXTURED,
  			GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
  	return entity;
 }
 
 
 // create a block based on its center (position), and its width and height
-Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height) {
+Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height, int moving) {
 	auto entity = Entity();
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	auto& motion = registry.motions.emplace(entity);
- 	motion.velocity = { 0, 0 };
+	if (moving == 1) motion.velocity = { 80.f, 0.f };
+	else if (moving == 2) motion.velocity = { 0.f, 80.f };
+	else motion.velocity = { 0, 0 };
  	motion.position = position;
 	motion.scale = {width, height};
 
@@ -254,12 +274,28 @@ Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height
 	block.y = int(position[1] - (height / 2));
 	block.width = width;
 	block.height = height;
+	block.moving = moving;
 
-	registry.renderRequests.insert(
-		entity,
- 		{ TEXTURE_ASSET_ID::BLOCK, // TEXTURE_COUNT indicates that no texture is needed
+	if (registry.stageSelection ==1) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::SCIFI, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	} else if (registry.stageSelection ==2) {
+		registry.renderRequests.insert(
+			entity,
+			{TEXTURE_ASSET_ID::PAD, // TEXTURE_COUNT indicates that no texture is needed
  			EFFECT_ASSET_ID::TEXTURED,
- 			GEOMETRY_BUFFER_ID::SPRITE });
+ 			GEOMETRY_BUFFER_ID::SPRITE}
+		);
+	} else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::ICEPAD, // TEXTURE_COUNT indicates that no texture is needed
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
  	return entity;
 }
@@ -349,23 +385,23 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
 	int dir = 0;
 	if (direction == 0) dir = -1;
 	else dir = 1;
- 	motion.velocity = { 500 * dir, -30 }; 
- 	motion.position = {position.x, position.y - 30.0f};;;
+ 	motion.velocity = { 500 * dir, -120 }; 
+ 	motion.position = {position.x, position.y};;;
 	motion.scale = { 15, 6 }; // width * height
 
 	auto& motion2 = registry.motions.emplace(entity2);
- 	motion2.velocity = { 500 * dir, -20 }; 
- 	motion2.position = {position.x, position.y - 20.0f};;
+ 	motion2.velocity = { 500 * dir, -40 }; 
+ 	motion2.position = {position.x, position.y};;
 	motion2.scale = { 15, 6 }; // width * height
 
 	auto& motion3 = registry.motions.emplace(entity3);
- 	motion3.velocity = { 500 * dir, 20 }; 
- 	motion3.position = {position.x, position.y + 20.0f};;
+ 	motion3.velocity = { 500 * dir, 40 }; 
+ 	motion3.position = {position.x, position.y};;
 	motion3.scale = { 15, 6 }; // width * height
 
 	auto& motion4 = registry.motions.emplace(entity4);
- 	motion4.velocity = { 500 * dir, 30 }; 
- 	motion4.position = {position.x, position.y + 30.0f};;
+ 	motion4.velocity = { 500 * dir, 120 }; 
+ 	motion4.position = {position.x, position.y};;
 	motion4.scale = { 15, 6 }; // width * height
 
 	registry.renderRequests.insert(
@@ -398,27 +434,29 @@ std::vector<Entity> createBuckshot(RenderSystem* renderer, int side, vec2 positi
 
 Entity createLaser(RenderSystem* renderer) {
     auto entity = Entity();
-    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SQUARE);
-    registry.meshPtrs.emplace(entity, &mesh);
+
+    // Assign the laser texture
+    registry.renderRequests.insert(
+        entity,
+        {TEXTURE_ASSET_ID::LASER2, EFFECT_ASSET_ID::TEXTURED, GEOMETRY_BUFFER_ID::SPRITE});
+
     registry.lasers.emplace(entity);
 
+    // Randomize initial laser position
     std::random_device rd;
     std::default_random_engine rng(rd());
     std::uniform_real_distribution<float> distX(0.f, static_cast<float>(window_width_px));
     std::uniform_real_distribution<float> distY(0.f, static_cast<float>(window_height_px));
     vec2 position = {distX(rng), distY(rng)};
 
+    // Set the motion properties
     auto& motion = registry.motions.emplace(entity);
     motion.position = position;
-    motion.scale = {8,8};
-
-    registry.renderRequests.insert(
-        entity,
-        {TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::SALMON, GEOMETRY_BUFFER_ID::SQUARE});
-    registry.colors.insert(entity, {0.0f, 1.0f, 0.0f});
+    motion.scale = {128,128}; // Scale the laser appropriately
 
     return entity;
 }
+
 
 Entity createLaserBeam(vec2 start, vec2 target) {
     auto beam = Entity();
@@ -510,7 +548,7 @@ Entity createExplosion(vec2 position) {
 
 	auto& motion = registry.motions.emplace(entity);
  	motion.position = position;
-	motion.scale = { 200, 165 }; // width * height
+	motion.scale = { 300, 248 }; // width * height
 
 	registry.renderRequests.insert(
         entity,

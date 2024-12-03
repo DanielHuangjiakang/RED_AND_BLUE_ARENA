@@ -112,6 +112,10 @@ void PhysicsSystem::step(float elapsed_ms)
 	{
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
+		if (registry.blocks.has(entity)) {
+			Block& block = registry.blocks.get(entity);
+			block.travelled_dist = motion.velocity * step_seconds;
+		}
 		motion.position += motion.velocity * step_seconds;
 	}
 
@@ -136,8 +140,22 @@ void PhysicsSystem::step(float elapsed_ms)
 			if (abs(motion.velocity[0]) > 350) motion.velocity[0] = signx * 350;
 			if (abs(motion.velocity[1]) > 700) motion.velocity[1] = signy * 700;
 		} 
-
 	}	
+
+	auto& block_registry = registry.blocks;
+	for(uint i = 0; i< block_registry.size(); i++)
+	{
+		Block& block = block_registry.components[i];
+		Entity entity = block_registry.entities[i];
+		Motion& motion = registry.motions.get(entity);
+		if (block.moving == 1) {
+			if (motion.position.x > window_width_px - 200) {
+				motion.velocity.x = -abs(motion.velocity.x);
+			} else if (motion.position.x < 200) {
+				motion.velocity.x = abs(motion.velocity.x);
+			}
+		}
+	}
 
 	// Check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;
