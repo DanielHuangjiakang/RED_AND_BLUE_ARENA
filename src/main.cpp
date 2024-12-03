@@ -61,8 +61,6 @@ int main()
 		// Render the game score
 		std::string score_text = "FPS: " + std::to_string(world.fps);
 		renderer.renderText(score_text, 10.0f, window_height_px - text_height, 0.8f, font_color, font_trans);
-
-
 		
 		if (world.toogle_life_timer > 0 && world.toogle_life > 0 && registry.stageSelection != 0)
         {
@@ -169,7 +167,6 @@ if (registry.stageSelection != 0) {
 		renderer.renderText(std::to_string(world.num_p1_wins), window_width_px / 2 - 25, window_height_px - text_height - 50, 1.0f, p1_color, font_trans);
 		renderer.renderText(":", window_width_px / 2 + 35.f, window_height_px - text_height - 50, 1.0f, round_text_color, font_trans);
 		renderer.renderText(std::to_string(world.num_p2_wins), window_width_px / 2 + 95.f, window_height_px - text_height - 50, 1.0f, p2_color, font_trans);
-
     }
 }
 

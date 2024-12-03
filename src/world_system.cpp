@@ -31,24 +31,35 @@ size_t ITEM_SPAWN_DELAY_MS = 8000;
 std::vector<Stage> stagesArray = {
     // Stage 1
     {
-        {0, window_height_px - 50}, {window_width_px, 50}, 
+        {{0, window_height_px - 50}}, 
+		{{window_width_px, 50}}, 
         {{window_width_px / 4, window_height_px - 250}, {window_width_px / 2, window_height_px - 450}, {3 * window_width_px / 4, window_height_px - 250}}, // Platform positions
         {{250, 10}, {250, 10}, {250, 10}},  // Platform sizes
 		{0, 0, 0}  // No moving
     },
     // Stage 2
     {
-        {0, window_height_px - 50}, {window_width_px, 50}, 
+		{{0, window_height_px - 50}}, 
+		{{window_width_px, 50}},
         {{window_width_px / 4, window_height_px - 450}, {window_width_px / 2, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
         {{250, 10}, {250, 10}, {250, 10}},  // Platform sizes
 		{0, 1, 0}  // Bottom moves
     },
     // Stage 3
     {
-        {0, window_height_px - 50}, {window_width_px, 50}, 
-        {{window_width_px / 4, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 250},{window_width_px / 4, window_height_px - 450},{3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
+        {{0, window_height_px - 50}, {window_width_px / 2, window_height_px - 50}}, 
+		{{window_width_px / 2, 50}, {window_width_px / 2, 50}}, 
+        {{window_width_px / 4, window_height_px - 250}, {3 * window_width_px / 4, window_height_px - 250}, {window_width_px / 4, window_height_px - 450}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
         {{300, 10}, {300, 10}, {200, 10}, {200, 10}},  // Platform sizes
 		{0, 0, 0, 0}  // No moving
+    },
+	// Stage 4
+    {
+        {{0, window_height_px - 50}, {window_width_px / 3 + 250, window_height_px - 50}}, 
+		{{window_width_px / 3, 50}, {2 * window_width_px / 3 - 200, 50}}, 
+        {{window_width_px / 3, window_height_px / 2 + 100}, {3 * window_width_px / 4, window_height_px - 450}}, // Platform positions
+        {{200, 10}, {480, 10}},  // Platform sizes
+		{2, 0}  // Smaller platform moves
     }
 };
 
@@ -148,9 +159,6 @@ GLFWwindow *WorldSystem::create_window()
 	city_music = Mix_LoadMUS(audio_path("city.wav").c_str());
 	desert_music = Mix_LoadMUS(audio_path("desert.wav").c_str());
 	mapselections_music = Mix_LoadMUS(audio_path("mapselection.wav").c_str());
-
-
-
 	end_music = Mix_LoadWAV(audio_path("end_music.wav").c_str());
 	hit_sound = Mix_LoadWAV(audio_path("hit_sound.wav").c_str());
 	shoot_sound = Mix_LoadWAV(audio_path("shoot.wav").c_str());
@@ -231,9 +239,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	// updating the timer for printing text.
 	toogle_life_timer -= elapsed_ms_since_last_update;
 	time_since_last_frame = elapsed_ms_since_last_update;
-
 	// std::cout << std::to_string(rounds) << std::endl;
-	std::cout << std::to_string(num_p1_wins) << std::endl;
+	// std::cout << std::to_string(num_p1_wins) << std::endl;
 
     if (total_time > 1000.0f) {
         fps = frame_count / (total_time / 1000.0f);
@@ -292,16 +299,27 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 
 
+    	// Check if 0.25 seconds have passed
+    	if (laserFireCounter >= 500.0f) {
+        	// Create the laser beam
+        	createLaserBeam({window_width_px / 2, 0}, target);
+			handleLaserCollisions();
+
+        	// Reset the counter and the firing flag
+        	laserFireCounter = 0.0f;
+        	isLaserFiring = false;
+    	}
+	}
+
 	if (!registry.intro && registry.stageSelection) {
 	
 	// Remove debug info from the last step
-	while (registry.debugComponents.entities.size() > 0)
-		registry.remove_all_components_of(registry.debugComponents.entities.back());
+	while (registry.debugComponents.entities.size() > 0) registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	// Removing out of screen entities
 	auto &motions_registry = registry.motions;
   
-   // Decrease cooldown timer each frame
+   	// Decrease cooldown timer each frame
     if (laserCoolDownTimer > 0) {
         laserCoolDownTimer -= elapsed_ms_since_last_update;
     }
@@ -326,6 +344,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
         }
     }
     }
+
+	for (Entity entity : registry.lightUps.entities) {
+		// progress timer
+		if (registry.lightUps.has(entity)) {
+			LightUp& counter = registry.lightUps.get(entity);
+			counter.counter_ms -= elapsed_ms_since_last_update;
+
+			// remove the light up effect once the timer expired
+			if (counter.counter_ms < 0) {
+				registry.lightUps.remove(entity);
+			}
+		} 
+	}
 
 	// Update player1's position and enforce boundaries
     Motion& motion1 = registry.motions.get(player1);
@@ -378,15 +409,30 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i)
 	{
 		Motion &motion = motions_registry.components[i];
+		Entity entity = motions_registry.entities[i];
 		if (motion.position.x + abs(motion.scale.x) < 0.f || motion.position.x - abs(motion.scale.x) > window_width_px)
 		{
-			if (!registry.players.has(motions_registry.entities[i])) {
-				if (registry.grenades.has(motions_registry.entities[i])) {
+			if (!registry.players.has(entity)) {
+				if (registry.grenades.has(entity)) {
 					createExplosion(motion.position);
 					Mix_PlayChannel(-1, explosion_sound, 0);
 				}
-				registry.remove_all_components_of(motions_registry.entities[i]);
+				registry.remove_all_components_of(entity);
 			}
+		}
+
+		if (motion.position.y - abs(motion.scale.y) > window_height_px)
+		{
+			if (registry.players.has(entity)) {
+				Player& player = registry.players.get(entity);
+				player.health = 0;
+				if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
+            	// end music
+            	Mix_PlayChannel(-1, end_music, 0);
+				movable = false;
+				// registry.remove_all_components_of(motions_registry.entities[i]);	
+			}
+
 		}
 	}
 
@@ -508,9 +554,27 @@ void WorldSystem::restart_game() {
 		Entity stageSelectionBackground = createBackground(renderer, window_width_px, window_height_px);
 
 		// Create stage button entities
-		Entity stageButton1 = createStageChoice(renderer, 10, window_height_px / 2, 400, 200, 1);
-		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2, 400, 200, 2);
-		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px / 4-100, window_height_px / 2, 400, 200, 3);
+		Entity stageButton1 = createStageChoice(renderer, 10, window_height_px / 2-100, 400, 200, 1);
+		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2-100, 400, 200, 2);
+		Entity stageButton3 = createStageChoice(renderer, 3*window_width_px/4-100, window_height_px / 2-100, 400, 200, 3);
+		Entity stageButton4 = createStageChoice(renderer, 10, window_height_px / 2+120, 400, 200, 4);
+		//Entity stageButton5 = createStageChoice(renderer, 3 * window_width_px / 4+100, window_height_px / 2, 300, 150, 5);
+		//Entity stageButton6 = createStageChoice(renderer, 3 * window_width_px / 4+100, window_height_px / 2, 300, 150, 6);
+
+	}
+
+	if (registry.stageSelection == 1) {
+		Mix_PlayMusic(city_music, -1); // Play city music
+		Mix_VolumeMusic(10);
+	} else if (registry.stageSelection == 2) {
+		Mix_PlayMusic(desert_music, -1); // Play desert music
+		Mix_VolumeMusic(10);
+	} else if (registry.stageSelection == 3) {
+		Mix_PlayMusic(snow_music, -1); // Play snow music
+			Mix_VolumeMusic(10);
+	} else if (registry.stageSelection == 0 && !registry.intro) {
+		Mix_PlayMusic(mapselections_music, -1);
+		Mix_VolumeMusic(15);
 	}
 
 	if (registry.stageSelection == 1) {
@@ -565,15 +629,22 @@ void WorldSystem::handle_collisions()
 		if (registry.players.has(entity) && registry.blocks.has(entity_other)) {
 			Motion& motion = registry.motions.get(entity);
 			Block& block = registry.blocks.get(entity_other);
+			Motion& motion_block = registry.motions.get(entity_other);
 			Player& player = registry.players.get(entity);
 			if (direction == 1) { // top collision
 				if (motion.velocity[1] >= 0.0f) {
 					motion.velocity[1] = 0.0f;
-					motion.position[1] = block.y - abs(motion.scale[1] / 2) + 1;
+					motion.position[1] = motion_block.position.y - (motion_block.scale.y / 2) +  - abs(motion.scale[1] / 2) + 1;
 					motion.position += block.travelled_dist;
 					player.jumpable = true;
 				}
-			}
+			} // else if (direction == 2) { // bot collision
+
+			// } else if (direction == 3) { // left collision
+
+			// } else if (direction == 4) { // right collision
+
+			// }
 		}
 
 		// add collision between blocks & bullets such that bullets should disappear when colliding with the block
@@ -614,39 +685,14 @@ void WorldSystem::handle_collisions()
 						}
 						// write something to handle the events where rounds == 0 & display the victory screen, victory conditions: over 9 rounds (has to play 9 rounds),
 						// the player won wins more rounds will be the victor: num_p2_wins = rounds - num_p1_wins;
-
 					}
 					registry.remove_all_components_of(entity_other);
 				}
 			}
 		}
 
-		if (registry.players.has(entity) && registry.portals.has(entity_other))
-		{
-			Player &player = registry.players.get(entity);
-			Portal &portal = registry.portals.get(entity_other);
-			Mix_PlayChannel(-1, portal_sound, 0);
-			// since there are just 2 portals
-			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
-			{
-				// teleport player to the pos of portal2
-				Motion &motion_portal2 = registry.motions.get(portal2);
-				Motion &motion_player = registry.motions.get(entity);
 
-				if (player.direction == 1) motion_player.position = {motion_portal2.position.x + 65, motion_portal2.position.y};
-				else motion_player.position = {motion_portal2.position.x - 65, motion_portal2.position.y};
-			}
-			else
-			{
-				Motion &motion_portal1 = registry.motions.get(portal1);
-				Motion &motion_player = registry.motions.get(entity);
-
-				if (player.direction == 1) motion_player.position =  {motion_portal1.position.x + 65, motion_portal1.position.y};
-				else motion_player.position =  {motion_portal1.position.x - 65, motion_portal1.position.y};
-			}
-			
-		}
-		if (registry.portals.has(entity) && (registry.bullets.has(entity_other) || registry.grenades.has(entity_other)))
+		if (registry.portals.has(entity) && (registry.bullets.has(entity_other) || registry.grenades.has(entity_other) || registry.players.has(entity_other)))
 		{
 			// updated behaviour such that bullets can be teleported too
 			Portal &portal = registry.portals.get(entity);
@@ -655,19 +701,26 @@ void WorldSystem::handle_collisions()
 			Motion &motion_portal2 = registry.motions.get(portal2);
 			float offset;
 			if (registry.bullets.has(entity_other)) offset = 35;
-			else offset = 50;
+			else if (registry.grenades.has(entity_other)) offset = 50;
+			else offset = 65;
 
 			// since there are just 2 portals
 			if (portal.x ==  registry.portals.get(portal1).x && portal.y == registry.portals.get(portal1).y)
 			{
 				// teleport player to the pos of portal2
-				if (motion_bullet.velocity.x >= 0) motion_bullet.position =  {motion_portal2.position.x + offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
+				if (motion_bullet.velocity.x >= 0) motion_bullet.position = {motion_portal2.position.x + offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
 				else motion_bullet.position =  {motion_portal2.position.x - offset, motion_portal2.position.y + (motion_bullet.position.y - motion_portal1.position.y)};
 			}
 			else
 			{
 				if (motion_bullet.velocity.x >= 0) motion_bullet.position = {motion_portal1.position.x + offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
 				else motion_bullet.position = {motion_portal1.position.x - offset, motion_portal1.position.y + (motion_bullet.position.y - motion_portal2.position.y)};
+			}
+
+			for(uint j = 0; j < registry.portals.size(); j++)
+			{
+				Entity entity_portal = registry.portals.entities[j];
+				registry.lightUps.emplace_with_duplicates(entity_portal);
 			}
 		}
 
@@ -776,10 +829,12 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 	{
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
-		registry.stageSelection =0;
+		registry.stageSelection = 0;
 		registry.winner = 0;
 		registry.stages.clear();
 		rounds = 9;
+		ScreenState &screen = registry.screenStates.components[0];
+		screen.darken_screen_factor = 0;
 		restart_game();
 	}
 
@@ -1333,16 +1388,20 @@ void WorldSystem::createStage(int currentStage) {
     const Stage& stage = stagesArray[currentStage];
     
     // Create players
-    player1 = createPlayer(renderer, 1, {200, stage.groundPosition.y}, 1);
+    player1 = createPlayer(renderer, 1, {200, stage.groundPositions[0].y}, 1);
     Motion& player1Motion = registry.motions.get(player1);
-    gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.groundPosition.y - 50});
+    gun1 = createGun(renderer, 1, {player1Motion.position.x - 200, stage.groundPositions[0].y - 50});
 
-    player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.groundPosition.y}, 0);
+    player2 = createPlayer(renderer, 2, {window_width_px - 200, stage.groundPositions[0].y}, 0);
     Motion& player2Motion = registry.motions.get(player2);
-    gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.groundPosition.y - 50});
+    gun2 = createGun(renderer, 2, {player2Motion.position.x - 150, stage.groundPositions[0].y - 50});
 
-    // Create ground
-    ground = createBlock1(renderer, stage.groundPosition.x, stage.groundPosition.y, stage.groundSize.x, stage.groundSize.y);
+    // Create grounds
+	for (size_t i = 0; i < stage.groundPositions.size(); i++) {
+        vec2 pos = stage.groundPositions[i];
+        vec2 size = stage.groundSizes[i];
+        createBlock1(renderer, pos.x, pos.y, size.x, size.y);
+    }
     
     // Create platforms
     for (size_t i = 0; i < stage.platformPositions.size(); i++) {
@@ -1357,6 +1416,9 @@ void WorldSystem::createStage(int currentStage) {
 	if (currentStage == 1) {
 		portal1Pos = stage.platformPositions[0];
 		portal2Pos = stage.platformPositions[2];
+	} else if (currentStage == 3) {
+		portal1Pos = {stage.platformPositions[1].x, stage.groundPositions[1].y};
+		portal2Pos = stage.platformPositions[1];
 	} else {
 		// Generate portal positions based on random numbers
     	std::random_device rd;

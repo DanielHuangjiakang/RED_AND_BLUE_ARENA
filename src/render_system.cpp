@@ -102,15 +102,30 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
 		{
-			// Light up?
 			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
-			assert(light_up_uloc >= 0);
 
-			// !!! TODO A1: set the light_up shader variable using glUniform1i,
-			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+			// assert(light_up_uloc >= 0);
+			glUniform1i(light_up_uloc, registry.lightUps.has(entity) ? 1 : 0);
 			gl_has_errors();
 		}
-	}
+	}else if (render_request.used_effect == EFFECT_ASSET_ID::LASER_BEAM) {
+    GLint in_position_loc = glGetAttribLocation(program, "in_position");
+    GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+    gl_has_errors();
+
+    glEnableVertexAttribArray(in_position_loc);
+    glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(TexturedVertex), (void *)0);
+
+    glEnableVertexAttribArray(in_texcoord_loc);
+    glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+                          (void *)sizeof(vec3));
+
+    // Pass the current time to the shader
+    GLint time_loc = glGetUniformLocation(program, "time");
+    glUniform1f(time_loc, glfwGetTime()); // Use glfwGetTime() to get elapsed time
+}
+
 	else
 	{
 		assert(false && "Type of render request not supported");

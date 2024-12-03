@@ -69,7 +69,8 @@ const std::array<std::string, texture_count> texture_paths = {
 			textures_path("icemountain.jpg"),
 			textures_path("icepad.png"),
 			textures_path("scifi.png"),
-			textures_path("crossHair.png")
+			textures_path("crossHair.png"),
+			textures_path("jungle.jpg")
 		};
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -79,7 +80,8 @@ const std::array<std::string, texture_count> texture_paths = {
 		shader_path("font"),
 		shader_path("salmon"),
 		shader_path("textured"),
-		shader_path("water") };
+		shader_path("water"),
+		shader_path("laser_beam")};
 
 		// font character structure
 struct Character {
