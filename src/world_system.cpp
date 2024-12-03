@@ -294,21 +294,15 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 		}
 	}
 	
-	
-	
+	// Check if 0.25 seconds have passed
+	if (laserFireCounter >= 500.0f) {
+		// Create the laser beam
+		createLaserBeam({window_width_px / 2, 0}, target);
+		handleLaserCollisions();
 
-
-
-    	// Check if 0.25 seconds have passed
-    	if (laserFireCounter >= 500.0f) {
-        	// Create the laser beam
-        	createLaserBeam({window_width_px / 2, 0}, target);
-			handleLaserCollisions();
-
-        	// Reset the counter and the firing flag
-        	laserFireCounter = 0.0f;
-        	isLaserFiring = false;
-    	}
+		// Reset the counter and the firing flag
+		laserFireCounter = 0.0f;
+		isLaserFiring = false;
 	}
 
 	if (!registry.intro && registry.stageSelection) {
