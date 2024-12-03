@@ -3,6 +3,7 @@
 #include "GLFW/glfw3.h"
 #include "SDL_mixer.h"
 #include "common.hpp"
+#include "components.hpp"
 #include "world_init.hpp"
 
 // stlib
@@ -220,12 +221,13 @@ GLFWwindow *WorldSystem::create_window()
 
 
 	// Adjust the volume for the sound effects
-	Mix_VolumeChunk(hit_sound, 30);
-	Mix_VolumeChunk(shoot_sound, 30);
-	Mix_VolumeChunk(buck_shot_sound, 30);
-	Mix_VolumeChunk(laser_sound, 30);
-	Mix_VolumeChunk(select_music, 50);
+	Mix_VolumeChunk(hit_sound, 10);
+	Mix_VolumeChunk(shoot_sound, 10);
+	Mix_VolumeChunk(buck_shot_sound, 10);
+	Mix_VolumeChunk(laser_sound, 10);
+	Mix_VolumeChunk(select_music, 20);
 	Mix_VolumeChunk(end_music, 10);
+	Mix_VolumeChunk(portal_sound, 10);
 
 	glfwSetMouseButtonCallback(window, [](GLFWwindow* wnd, int button, int action, int mods) {
 		((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_button(button, action, mods);
@@ -485,6 +487,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 				// registry.winner = player.side == 1 ? 2 : 1;
 				// createBackground(renderer, window_width_px, window_height_px);
 
+				if (rounds ==0) {
+            		registry.winner = (num_p1_wins > num_p2_wins) ?  1 : 2;
+              		createBackground(renderer, 	window_width_px, window_height_px);
+					if (registry.deathTimers.size() == 0) {
+						int w, h;
+						glfwGetWindowSize(window, &w, &h);
+						registry.stageSelection = 0;
+						registry.winner = 0;
+						registry.stages.clear();
+						rounds = 9;
+						ScreenState &screen = registry.screenStates.components[0];
+						screen.darken_screen_factor = 0;
+						num_p1_wins = 0;
+						num_p2_wins = 0;
+						restart_game();
+					}
+            	}
 				// registry.remove_all_components_of(motions_registry.entities[i]);	
 			}
 
@@ -619,22 +638,22 @@ void WorldSystem::restart_game() {
 
 	if (registry.stageSelection == 1) {
 		Mix_PlayMusic(city_music, -1); // Play city music
-		Mix_VolumeMusic(10);
+		Mix_VolumeMusic(4);
 	} else if (registry.stageSelection == 2) {
 		Mix_PlayMusic(desert_music, -1); // Play desert music
-		Mix_VolumeMusic(10);
+		Mix_VolumeMusic(4);
 	} else if (registry.stageSelection == 3) {
 		Mix_PlayMusic(snow_music, -1); // Play snow music
-			Mix_VolumeMusic(10);
+			Mix_VolumeMusic(4);
 	} else if (registry.stageSelection == 0 && !registry.intro) {
 		Mix_PlayMusic(mapselections_music, -1);
-		Mix_VolumeMusic(15);
+		Mix_VolumeMusic(4);
 	} else if (registry.stageSelection == 6) { // Tutorial Stage
     	Mix_PlayMusic(tutorial_music, -1); 
-    	Mix_VolumeMusic(15);
-	} else if (registry.stageSelection == 5 && registry.stageSelection == 4) {
+    	Mix_VolumeMusic(4);
+	} else if (registry.stageSelection == 5 || registry.stageSelection == 4) {
 		Mix_PlayMusic(city_music, -1); // Play city music
-		Mix_VolumeMusic(10);
+		Mix_VolumeMusic(4);
 	}
 
 	if (!registry.intro && registry.stageSelection) {
