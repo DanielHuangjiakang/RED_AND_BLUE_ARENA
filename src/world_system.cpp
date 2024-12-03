@@ -488,9 +488,13 @@ void WorldSystem::restart_game() {
 		Entity stageSelectionBackground = createBackground(renderer, window_width_px, window_height_px);
 
 		// Create stage button entities
-		Entity stageButton1 = createStageChoice(renderer, 10, window_height_px / 2, 400, 200, 1);
-		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2, 400, 200, 2);
-		Entity stageButton3 = createStageChoice(renderer, 3 * window_width_px / 4-100, window_height_px / 2, 400, 200, 3);
+		Entity stageButton1 = createStageChoice(renderer, 10, window_height_px / 2-100, 400, 200, 1);
+		Entity stageButton2 = createStageChoice(renderer, window_width_px / 2-200, window_height_px / 2-100, 400, 200, 2);
+		Entity stageButton3 = createStageChoice(renderer, 3*window_width_px/4-100, window_height_px / 2-100, 400, 200, 3);
+		Entity stageButton4 = createStageChoice(renderer, 10, window_height_px / 2+120, 400, 200, 4);
+		//Entity stageButton5 = createStageChoice(renderer, 3 * window_width_px / 4+100, window_height_px / 2, 300, 150, 5);
+		//Entity stageButton6 = createStageChoice(renderer, 3 * window_width_px / 4+100, window_height_px / 2, 300, 150, 6);
+
 	}
 
 	if (registry.stageSelection == 1) {
