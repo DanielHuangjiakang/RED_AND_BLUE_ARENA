@@ -739,6 +739,8 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		registry.stageSelection = 0;
 		registry.winner = 0;
 		registry.stages.clear();
+		ScreenState &screen = registry.screenStates.components[0];
+		screen.darken_screen_factor = 0;
 		restart_game();
 	}
 
