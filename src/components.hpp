@@ -94,11 +94,6 @@ struct Gravity {
 	bool drag = false;
 };
 
-struct LightUp
-{
-	float counter_ms = 100;
-};
-
 // Stucture to store collision information
 struct Collision
 {
@@ -130,7 +125,7 @@ struct DebugComponent
 // A timer that will be associated to dying salmon
 struct DeathTimer
 {
-	float counter_ms = 5000;
+	float counter_ms = 3000;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
@@ -157,8 +152,8 @@ struct Mesh
 };
 
 struct Stage {
-    std::vector<vec2> groundPositions;
-    std::vector<vec2> groundSizes;
+    vec2 groundPosition;
+    vec2 groundSize;
     std::vector<vec2> platformPositions;
     std::vector<vec2> platformSizes;
 	std::vector<int> moving;
@@ -217,15 +212,9 @@ enum class TEXTURE_ASSET_ID {
 	ICEPAD = ICEMOUNTAIN +1,
 	SCIFI = ICEPAD + 1,
 	LASER2 = SCIFI + 1,
-	JUNGLE = LASER2 + 1,
-
-	RAINBOW = JUNGLE +1,
-	SPACE= RAINBOW +1,
-	//GRASS = SPACE +1,
-	//TEXTURE_COUNT = GRASS + 1,
-	BLUEWIN = SPACE +1,
-	REDWIN = BLUEWIN +1,
-	TEXTURE_COUNT = REDWIN + 1
+	TUTORIAL = LASER2 + 1,
+	BLACK = TUTORIAL + 1,
+	TEXTURE_COUNT = BLACK + 1
 
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
@@ -237,8 +226,7 @@ enum class EFFECT_ASSET_ID {
 	SALMON = FONT + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
-	LASER_BEAM = WATER + 1,
-	EFFECT_COUNT = LASER_BEAM + 1
+	EFFECT_COUNT = WATER + 1
 };
 
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;

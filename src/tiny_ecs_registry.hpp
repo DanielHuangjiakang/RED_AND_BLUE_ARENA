@@ -39,7 +39,6 @@ public:
   	ComponentContainer<Laser> lasers;
 	ComponentContainer<Laser2> lasers2;
 	ComponentContainer<Lifetime> lifetimes;
-	ComponentContainer<LightUp> lightUps;
 
 	bool intro = true;
 	int winner = 0;
@@ -74,7 +73,7 @@ public:
     	registry_list.push_back(&lasers);
 		registry_list.push_back(&lasers2);
 		registry_list.push_back(&lifetimes);
-		registry_list.push_back(&lightUps);
+
 	}
 
 	void clear_all_components() {
