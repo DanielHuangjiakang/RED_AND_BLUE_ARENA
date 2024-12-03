@@ -19,7 +19,7 @@ Entity createGun(RenderSystem* renderer, int side, vec2 position);
 
 // stage blocks
 Entity createBlock1(RenderSystem* renderer, int x, int y, int width, int height);
-Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height);
+Entity createBlock2(RenderSystem* renderer, vec2 position, int width, int height, int moving);
 
 
 // Portals

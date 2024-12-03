@@ -102,12 +102,10 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
 		{
-			// Light up?
 			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
-			assert(light_up_uloc >= 0);
 
-			// !!! TODO A1: set the light_up shader variable using glUniform1i,
-			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+			// assert(light_up_uloc >= 0);
+			glUniform1i(light_up_uloc, registry.lightUps.has(entity) ? 1 : 0);
 			gl_has_errors();
 		}
 	}
@@ -352,7 +350,7 @@ void RenderSystem::draw()
 	}
 
 	if (!registry.stageSelection && !registry.intro) {
-		renderText("SELECT STAGE", window_width_px/2-200, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
+		renderText("SELECT STAGE", window_width_px/2-150, window_height_px/2 + 120.0f, 2.0f, {1.0, 1.0, 1.0}, glm::mat4(1.0f));
 	}
 
 	// Truely render to the screen
