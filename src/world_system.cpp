@@ -351,244 +351,261 @@ bool WorldSystem::step(float elapsed_ms_since_last_update)
 
 	if (!registry.intro && registry.stageSelection) {
 	
-	// Remove debug info from the last step
-	while (registry.debugComponents.entities.size() > 0) registry.remove_all_components_of(registry.debugComponents.entities.back());
+		// Remove debug info from the last step
+		while (registry.debugComponents.entities.size() > 0) registry.remove_all_components_of(registry.debugComponents.entities.back());
 
-	// Removing out of screen entities
-	auto &motions_registry = registry.motions;
-  
-   	// Decrease cooldown timer each frame
-    if (laserCoolDownTimer > 0) {
-        laserCoolDownTimer -= elapsed_ms_since_last_update;
-    }
-	if (rootNode) {
-        rootNode->execute();
-    }
+		// Removing out of screen entities
+		auto &motions_registry = registry.motions;
+	
+		// Decrease cooldown timer each frame
+		if (laserCoolDownTimer > 0) {
+			laserCoolDownTimer -= elapsed_ms_since_last_update;
+		}
+		if (rootNode) {
+			rootNode->execute();
+		}
 
-    // Laser updates and other game mechanics (e.g., enforcing boundaries, handling collisions)
-    for (Entity entity : registry.lasers.entities) {
+		// Laser updates and other game mechanics (e.g., enforcing boundaries, handling collisions)
+		for (Entity entity : registry.lasers.entities) {
 
-        // Reset coolDown timer after an attack
-        if (laserCoolDownTimer <= 0 && isPlayerInRange()) {
-            laserCoolDownTimer = 3000;  // 3-second coolDown after attacking
-        }
-		for (Entity entity : registry.lifetimes.entities) {
-        Lifetime& lifetime = registry.lifetimes.get(entity);
-        lifetime.counter_ms -= elapsed_ms_since_last_update;
-
-        // Remove the entity when its lifetime expires
-        if (lifetime.counter_ms <= 0) {
-            registry.remove_all_components_of(entity);
-        }
-    }
-    }
-
-	for (Entity entity : registry.lightUps.entities) {
-		// progress timer
-		if (registry.lightUps.has(entity)) {
-			LightUp& counter = registry.lightUps.get(entity);
-			counter.counter_ms -= elapsed_ms_since_last_update;
-
-			// remove the light up effect once the timer expired
-			if (counter.counter_ms < 0) {
-				registry.lightUps.remove(entity);
+			// Reset coolDown timer after an attack
+			if (laserCoolDownTimer <= 0 && isPlayerInRange()) {
+				laserCoolDownTimer = 3000;  // 3-second coolDown after attacking
 			}
-		} 
-	}
+			for (Entity entity : registry.lifetimes.entities) {
+			Lifetime& lifetime = registry.lifetimes.get(entity);
+			lifetime.counter_ms -= elapsed_ms_since_last_update;
 
-	// Update player1's position and enforce boundaries
-    Motion& motion1 = registry.motions.get(player1);
-	Motion& gunMotion1 = registry.motions.get(gun1);
-    // Make gun follow player1
-	int dir1 = motion1.scale.x > 0 ? 1 : -1;		
-    gunMotion1.position = motion1.position + vec2(35 * dir1, 0);
-    gunMotion1.scale.x = motion1.scale.x; // Match player direction
-    if (motion1.position.x < abs(motion1.scale[0]/2)) {
-        motion1.position.x = abs(motion1.scale.x/2); // Stop at left boundary
-		motion1.velocity.x = 0;
-		gunMotion1.velocity[0] = 0;
-    } else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
-        motion1.position.x = window_width_px - motion1.scale[0]/2; // Stop at right boundary
-		motion1.velocity[0] = 0;
-		gunMotion1.velocity[0] = 0;
-    }
-    if (motion1.position.y < motion1.scale[1]/2) {
-        motion1.position.y = motion1.scale[1]/2; // Stop at the top boundary
-		motion1.velocity[1] = 0;
-		gunMotion1.velocity[1] = 0;
-    }
-
-    // Update player2's position and enforce boundaries
-    Motion& motion2 = registry.motions.get(player2);
-	Motion& gunMotion2 = registry.motions.get(gun2);
-    // Make gun follow player2
-	int dir2 = motion2.scale.x > 0 ? 1 : -1;		
-    gunMotion2.position = motion2.position + vec2(35 * dir2, 0);
-    gunMotion2.scale.x = motion2.scale.x; // Match player direction
-    if (motion2.position.x < abs(motion2.scale[0]/2)) {
-        motion2.position.x = abs(motion2.scale[0]/2); // Stop at left boundary
-		motion2.velocity.x = 0;
-		gunMotion2.velocity[0] = 0;
-    } else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
-        motion2.position.x =  window_width_px - motion2.scale[0]/2; // Stop at right boundary
-		motion2.velocity[0] = 0;
-		gunMotion2.velocity[0] = 0;
-    }
-    if (motion2.position.y < motion2.scale[1]/2) {
-        motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
-		motion2.velocity[1] = 0;
-		gunMotion2.velocity[1] = 0;
-    }
-
-
-	// Remove entities that leave the screen on the left/right side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i)
-	{
-		Motion &motion = motions_registry.components[i];
-		Entity entity = motions_registry.entities[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f || motion.position.x - abs(motion.scale.x) > window_width_px)
-		{
-			if (!registry.players.has(entity)) {
-				if (registry.grenades.has(entity)) {
-					createExplosion(motion.position);
-					Mix_PlayChannel(-1, explosion_sound, 0);
-				}
+			// Remove the entity when its lifetime expires
+			if (lifetime.counter_ms <= 0) {
 				registry.remove_all_components_of(entity);
 			}
 		}
+		}
 
-		if (motion.position.y - abs(motion.scale.y) > window_height_px)
+		for (Entity entity : registry.lightUps.entities) {
+			// progress timer
+			if (registry.lightUps.has(entity)) {
+				LightUp& counter = registry.lightUps.get(entity);
+				counter.counter_ms -= elapsed_ms_since_last_update;
+
+				// remove the light up effect once the timer expired
+				if (counter.counter_ms < 0) {
+					registry.lightUps.remove(entity);
+				}
+			} 
+		}
+
+		// Update player1's position and enforce boundaries
+		Motion& motion1 = registry.motions.get(player1);
+		Motion& gunMotion1 = registry.motions.get(gun1);
+		// Make gun follow player1
+		int dir1 = motion1.scale.x > 0 ? 1 : -1;		
+		gunMotion1.position = motion1.position + vec2(35 * dir1, 0);
+		gunMotion1.scale.x = motion1.scale.x; // Match player direction
+		if (motion1.position.x < abs(motion1.scale[0]/2)) {
+			motion1.position.x = abs(motion1.scale.x/2); // Stop at left boundary
+			motion1.velocity.x = 0;
+			gunMotion1.velocity[0] = 0;
+		} else if (motion1.position.x + motion1.scale.x > window_width_px + motion1.scale[0]/2) {
+			motion1.position.x = window_width_px - motion1.scale[0]/2; // Stop at right boundary
+			motion1.velocity[0] = 0;
+			gunMotion1.velocity[0] = 0;
+		}
+		if (motion1.position.y < motion1.scale[1]/2) {
+			motion1.position.y = motion1.scale[1]/2; // Stop at the top boundary
+			motion1.velocity[1] = 0;
+			gunMotion1.velocity[1] = 0;
+		}
+
+		// Update player2's position and enforce boundaries
+		Motion& motion2 = registry.motions.get(player2);
+		Motion& gunMotion2 = registry.motions.get(gun2);
+		// Make gun follow player2
+		int dir2 = motion2.scale.x > 0 ? 1 : -1;		
+		gunMotion2.position = motion2.position + vec2(35 * dir2, 0);
+		gunMotion2.scale.x = motion2.scale.x; // Match player direction
+		if (motion2.position.x < abs(motion2.scale[0]/2)) {
+			motion2.position.x = abs(motion2.scale[0]/2); // Stop at left boundary
+			motion2.velocity.x = 0;
+			gunMotion2.velocity[0] = 0;
+		} else if (motion2.position.x + motion2.scale.x > window_width_px + motion2.scale[0]/2) {
+			motion2.position.x =  window_width_px - motion2.scale[0]/2; // Stop at right boundary
+			motion2.velocity[0] = 0;
+			gunMotion2.velocity[0] = 0;
+		}
+		if (motion2.position.y < motion2.scale[1]/2) {
+			motion2.position.y = motion2.scale[1]/2; // Stop at the top boundary
+			motion2.velocity[1] = 0;
+			gunMotion2.velocity[1] = 0;
+		}
+
+
+		// Remove entities that leave the screen on the left/right side
+		// Iterate backwards to be able to remove without unterfering with the next object to visit
+		// (the containers exchange the last element with the current)
+		for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i)
 		{
-			if (registry.players.has(entity)) {
-				Player& player = registry.players.get(entity);
-				if (player.side == 1 && !player1_fall) {
-					player.health = 0;
-					if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
-					// end music
-					Mix_PlayChannel(-1, end_music, 0);
-					movable = false;
-					rounds--;
-					num_p2_wins++;
-					player1_fall = true;
-				}
-
-				if (player.side == 2 && !player2_fall) {
-					player.health = 0;
-					if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
-					// end music
-					Mix_PlayChannel(-1, end_music, 0);
-					movable = false;
-					rounds--;
-					num_p1_wins++;
-					player2_fall = true;
-				}
-				// registry.winner = player.side == 1 ? 2 : 1;
-				// createBackground(renderer, window_width_px, window_height_px);
-
-				if (rounds ==0) {
-            		registry.winner = (num_p1_wins > num_p2_wins) ?  1 : 2;
-              		createBackground(renderer, 	window_width_px, window_height_px);
-					if (registry.deathTimers.size() == 0) {
-						int w, h;
-						glfwGetWindowSize(window, &w, &h);
-						registry.stageSelection = 0;
-						registry.winner = 0;
-						registry.stages.clear();
-						rounds = 9;
-						ScreenState &screen = registry.screenStates.components[0];
-						screen.darken_screen_factor = 0;
-						num_p1_wins = 0;
-						num_p2_wins = 0;
-						restart_game();
+			Motion &motion = motions_registry.components[i];
+			Entity entity = motions_registry.entities[i];
+			if (motion.position.x + abs(motion.scale.x) < 0.f || motion.position.x - abs(motion.scale.x) > window_width_px)
+			{
+				if (!registry.players.has(entity)) {
+					if (registry.grenades.has(entity)) {
+						createExplosion(motion.position);
+						Mix_PlayChannel(-1, explosion_sound, 0);
 					}
-            	}
-				// registry.remove_all_components_of(motions_registry.entities[i]);	
-			}
-
-		}
-	}
-
-	
-
-	next_item_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.items.components.size() < MAX_NUM_ITEMS && next_item_spawn < 0.f && registry.stageSelection != 6 && item_toogle == true) {
-		next_item_spawn = (3 * ITEM_SPAWN_DELAY_MS / 4) + uniform_dist(rng) * (ITEM_SPAWN_DELAY_MS / 4);
-
-		// do rejection sampling on a circle with a hole in the center
-		bool restart_flag = true;
-		while (restart_flag) {
-			float r = (1 + 3 * uniform_dist(rng)) / 4 * (std::min(window_height_px, window_width_px) / 2);
-			float theta = uniform_dist(rng) * 2 * M_PI;
-
-			Motion item_motion;
-			item_motion.position = {(r * cos(theta)) + (window_width_px / 2), (r * sin(theta)) + (window_height_px / 2)};
-			item_motion.scale = {30, 45};
-
-			restart_flag = false;
-			for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
-				Motion &motion = motions_registry.components[i];
-				if (collides(item_motion, motion) && !registry.bullets.has(motions_registry.entities[i]) && !registry.backgrounds.has(motions_registry.entities[i])) {
-					restart_flag = true;
-					break;
+					registry.remove_all_components_of(entity);
 				}
 			}
 
-			if (!restart_flag) createRandomItem(renderer, item_motion);
+			if (motion.position.y - abs(motion.scale.y) > window_height_px)
+			{
+				if (registry.players.has(entity)) {
+					Player& player = registry.players.get(entity);
+					if (player.side == 1 && !player1_fall) {
+						player.health = 0;
+						if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
+						// end music
+						Mix_PlayChannel(-1, end_music, 0);
+						movable = false;
+						rounds--;
+						num_p2_wins++;
+						player1_fall = true;
+					}
+
+					if (player.side == 2 && !player2_fall) {
+						player.health = 0;
+						if (!registry.deathTimers.has(entity)) registry.deathTimers.emplace(entity);
+						// end music
+						Mix_PlayChannel(-1, end_music, 0);
+						movable = false;
+						rounds--;
+						num_p1_wins++;
+						player2_fall = true;
+					}
+					// registry.winner = player.side == 1 ? 2 : 1;
+					// createBackground(renderer, window_width_px, window_height_px);
+
+					if (rounds ==0) {
+						registry.winner = (num_p1_wins > num_p2_wins) ?  1 : 2;
+						createBackground(renderer, 	window_width_px, window_height_px);
+						if (registry.deathTimers.size() == 0) {
+							int w, h;
+							glfwGetWindowSize(window, &w, &h);
+							registry.stageSelection = 0;
+							registry.winner = 0;
+							registry.stages.clear();
+							rounds = 9;
+							ScreenState &screen = registry.screenStates.components[0];
+							screen.darken_screen_factor = 0;
+							num_p1_wins = 0;
+							num_p2_wins = 0;
+							item_toogle = false;
+							restart_game();
+						}
+					}
+					// registry.remove_all_components_of(motions_registry.entities[i]);	
+				}
+
+			}
 		}
+
+		
+
+		next_item_spawn -= elapsed_ms_since_last_update * current_speed;
+		if (registry.items.components.size() < MAX_NUM_ITEMS && next_item_spawn < 0.f && registry.stageSelection != 6 && item_toogle == true) {
+			next_item_spawn = (3 * ITEM_SPAWN_DELAY_MS / 4) + uniform_dist(rng) * (ITEM_SPAWN_DELAY_MS / 4);
+
+			// do rejection sampling on a circle with a hole in the center
+			bool restart_flag = true;
+			while (restart_flag) {
+				float r = (1 + 3 * uniform_dist(rng)) / 4 * (std::min(window_height_px, window_width_px) / 2);
+				float theta = uniform_dist(rng) * 2 * M_PI;
+
+				Motion item_motion;
+				item_motion.position = {(r * cos(theta)) + (window_width_px / 2), (r * sin(theta)) + (window_height_px / 2)};
+				item_motion.scale = {30, 45};
+
+				restart_flag = false;
+				for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
+					Motion &motion = motions_registry.components[i];
+					if (collides(item_motion, motion) && !registry.bullets.has(motions_registry.entities[i]) && !registry.backgrounds.has(motions_registry.entities[i])) {
+						restart_flag = true;
+						break;
+					}
+				}
+
+				if (!restart_flag) createRandomItem(renderer, item_motion);
+			}
+		}
+
+		// Processing the salmon state
+		assert(registry.screenStates.components.size() <= 1);
+		ScreenState &screen = registry.screenStates.components[0];
+
+		float min_counter_ms = 3000.f;
+		for (Entity entity : registry.deathTimers.entities)
+		{
+			// progress timer
+			DeathTimer &counter = registry.deathTimers.get(entity);
+			counter.counter_ms -= elapsed_ms_since_last_update;
+			if (counter.counter_ms < min_counter_ms)
+			{
+				min_counter_ms = counter.counter_ms;
+			}
+
+			// restart the game once the death timer expired
+			if (counter.counter_ms < 0)
+			{
+				int side = registry.players.get(entity).side;
+				if (side == 2)
+					std::cout << "Red Player Wins" << std::endl; // Red Wins
+				else
+					std::cout << "Blue Player Wins" << std::endl; // Blue Wins
+
+				recordMatchResult();
+
+				registry.deathTimers.remove(entity);
+				screen.darken_screen_factor = 0;
+				registry.winner =0;
+				restart_game();
+				return true;
+			}
+		}
+		// reduce window brightness if the salmon is dying
+		screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+
+		for (Entity entity : registry.gunTimers.entities)
+		{
+			GunTimer &counter = registry.gunTimers.get(entity);
+			counter.counter_ms -= elapsed_ms_since_last_update;
+			if (counter.counter_ms < 0)
+			{
+				registry.gunTimers.remove(entity);
+			}
+		}
+
+		on_shoot();
+
+		// Update animations
+		animation_system.step(elapsed_ms_since_last_update);
 	}
 
-	// Processing the salmon state
-	assert(registry.screenStates.components.size() <= 1);
-	ScreenState &screen = registry.screenStates.components[0];
-
-	float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities)
+	if (rounds == 0 && registry.deathTimers.size() <= 0)
 	{
-		// progress timer
-		DeathTimer &counter = registry.deathTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms)
-		{
-			min_counter_ms = counter.counter_ms;
-		}
-
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0)
-		{
-			int side = registry.players.get(entity).side;
-			if (side == 2)
-				std::cout << "Red Player Wins" << std::endl; // Red Wins
-			else
-				std::cout << "Blue Player Wins" << std::endl; // Blue Wins
-
-			recordMatchResult();
-
-			registry.deathTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-			registry.winner =0;
-			restart_game();
-			return true;
-		}
-	}
-	// reduce window brightness if the salmon is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
-
-	for (Entity entity : registry.gunTimers.entities)
-	{
-		GunTimer &counter = registry.gunTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < 0)
-		{
-			registry.gunTimers.remove(entity);
-		}
-	}
-
-	on_shoot();
-
-	// Update animations
-	animation_system.step(elapsed_ms_since_last_update);
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+		registry.stageSelection = 0;
+		registry.winner = 0;
+		registry.stages.clear();
+		rounds = 9;
+		ScreenState &screen = registry.screenStates.components[0];
+		screen.darken_screen_factor = 0;
+		num_p1_wins = 0;
+		num_p2_wins = 0;
+		item_toogle = false;
+		restart_game();
 	}
 
 	return true;
@@ -753,7 +770,6 @@ void WorldSystem::handle_collisions()
             if (rounds ==0) {
             	registry.winner = (num_p1_wins > num_p2_wins) ?  1 : 2;
               createBackground(renderer, 	window_width_px, window_height_px);
-          
             }
 						// write something to handle the events where rounds == 0 & display the victory screen, victory conditions: over 9 rounds (has to play 9 rounds),
 						// the player won wins more rounds will be the victor: num_p2_wins = rounds - num_p1_wins;
@@ -876,7 +892,12 @@ void WorldSystem::handle_collisions()
                     motion.angle = M_PI / 2;
                     motion.scale.y = motion.scale.y / 2;
                     movable = false;
+					if (side == 1) {
+						num_p2_wins++;
 
+					} else if (side == 2) {
+						num_p1_wins++;
+					}
                 }
 				if (side == 1) explosion.damagable1 = false;
 				else explosion.damagable2 = false;
@@ -905,6 +926,12 @@ void WorldSystem::handle_collisions()
                     motion.angle = M_PI / 2;
                     motion.scale.y = motion.scale.y / 2;
                     movable = false;
+					if (player.side == 1) {
+						num_p2_wins++;
+
+					} else if (player.side == 2) {
+						num_p1_wins++;
+					}
                 }
 				
                 laser2.damagable = false;
@@ -939,6 +966,7 @@ void WorldSystem::on_key(int key, int, int action, int mod)
 		screen.darken_screen_factor = 0;
 		num_p1_wins = 0;
 		num_p2_wins = 0;
+		item_toogle = false;
 		restart_game();
 	}
 
