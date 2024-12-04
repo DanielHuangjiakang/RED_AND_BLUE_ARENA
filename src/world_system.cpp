@@ -898,6 +898,7 @@ void WorldSystem::handle_collisions()
 					} else if (side == 2) {
 						num_p1_wins++;
 					}
+					rounds++;
                 }
 				if (side == 1) explosion.damagable1 = false;
 				else explosion.damagable2 = false;
@@ -932,6 +933,7 @@ void WorldSystem::handle_collisions()
 					} else if (player.side == 2) {
 						num_p1_wins++;
 					}
+					rounds++;
                 }
 				
                 laser2.damagable = false;
