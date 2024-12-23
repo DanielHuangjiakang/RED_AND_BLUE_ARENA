@@ -6,15 +6,15 @@ Red vs Blue Arena is a real-time 2D game framework developed using C++, OpenGL, 
 ## Explore Game Highlights
 
 <p align="center">
-  <img src="img/rb_intro.png" alt="Intro" width="33%">
-  <img src="img/rb_map_selection.png" alt="Map Selection" width="33%">
-  <img src="img/rb_tutorial.png" alt="Tutorial" width="33%">
+  <img src="img/rb_intro.png" alt="Intro" width="30%">
+  <img src="img/rb_map_selection.png" alt="Map Selection" width="30%">
+  <img src="img/rb_tutorial.png" alt="Tutorial" width="30%">
 </p>
 
 <p align="center">
-  <img src="img/rb_map1.png" alt="Map 1" width="33%">
-  <img src="img/rb_map2.png" alt="Map 2" width="33%">
-  <img src="img/rb_mp3.png" alt="Map 3" width="33%">
+  <img src="img/rb_map1.png" alt="Map 1" width="30%">
+  <img src="img/rb_map2.png" alt="Map 2" width="30%">
+  <img src="img/rb_mp3.png" alt="Map 3" width="30%">
 </p>
 
 
